@@ -1,6 +1,8 @@
 {
     "files.associations": {
         "*.c": "c",
-        "*.s": "c"
-    }
+        "*.h": "c",
+        "*.s": "iar"
+    },
+    "cortex-debug.variableUseNaturalFormat": false
 }
