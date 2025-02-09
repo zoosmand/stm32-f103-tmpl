@@ -3,11 +3,11 @@
         {
             "name": "MacOS",
             "includePath": [
-                "${env:VSARM}/arm-gcc/arm-none-eabi/include/c++/10.3.1",
-                "${env:VSARM}/arm-gcc/arm-none-eabi/include/c++/10.3.1/arm-none-eabi",
-                "${env:VSARM}/arm-gcc/arm-none-eabi/include/c++/10.3.1/backward",
-                "${env:VSARM}/arm-gcc/lib/gcc/arm-none-eabi/10.3.1/include",
-                "${env:VSARM}/arm-gcc/lib/gcc/arm-none-eabi/10.3.1/include-fixed",
+                "${env:VSARM}/arm-gcc/arm-none-eabi/include/c++/14.2.1",
+                "${env:VSARM}/arm-gcc/arm-none-eabi/include/c++/14.2.1/arm-none-eabi",
+                "${env:VSARM}/arm-gcc/arm-none-eabi/include/c++/14.2.1/backward",
+                "${env:VSARM}/arm-gcc/lib/gcc/arm-none-eabi/14.2.1/include",
+                "${env:VSARM}/arm-gcc/lib/gcc/arm-none-eabi/14.2.1/include-fixed",
                 "${env:VSARM}/arm-gcc/arm-none-eabi/include",
                 "${workspaceRoot}/Drivers/CMSIS/Include",
                 "${workspaceRoot}/Drivers/CMSIS/Device/ST/STM32F1xx/Include",
