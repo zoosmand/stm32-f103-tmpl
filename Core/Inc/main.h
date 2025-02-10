@@ -25,7 +25,13 @@ extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
-#include <stm32f103xb.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <time.h>
+
+#include "stm32f1xx.h"
+#include "stm32f103xb.h"
 
 #if defined(USE_FULL_ASSERT)
 #include "stm32_assert.h"
