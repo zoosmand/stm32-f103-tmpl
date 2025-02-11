@@ -29,7 +29,7 @@
                 "PREFETCH_ENABLE=1",
                 "INSTRUCTION_CACHE_ENABLE=1",
                 "DATA_CACHE_ENABLE=1",
-                "STM32F103C8Tx"
+                "STM32F103xB"
             ],
             "intelliSenseMode": "macos-clang-arm64",
             "cStandard": "c11",
@@ -73,7 +73,7 @@
                 "PREFETCH_ENABLE=1",
                 "INSTRUCTION_CACHE_ENABLE=1",
                 "DATA_CACHE_ENABLE=1",
-                "STM32F103C8Tx"
+                "STM32F103xB"
             ],
             "intelliSenseMode": "linux-gcc-x64",
             "cStandard": "c11",

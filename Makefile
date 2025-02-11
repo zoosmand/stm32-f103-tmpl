@@ -31,17 +31,16 @@ BUILD_DIR = build
 ######################################
 # C sources
 C_SOURCES =  \
-Core/Src/main.c \
-Core/Src/system_stm32f1xx.c \
-Core/Src/sysmem.c \
-Core/Src/syscalls.c
+$(wildcard Core/Src/*.c)
 
 # ASM sources
 ASM_SOURCES =  \
-startup_stm32f103xb.s
+startup_stm32f103xb.s \
+$(wildcard Core/Src/*.s)
 
 # ASM sources
-ASMM_SOURCES = 
+ASMM_SOURCES = \
+$(wildcard Core/Src/*.S)
 
 
 #######################################
@@ -81,7 +80,18 @@ MCU = $(CPU) -mthumb $(FPU) $(FLOAT-ABI)
 
 # macros for gcc
 # AS defines
-AS_DEFS = 
+AS_DEFS = \
+-DUSE_FULL_LL_DRIVER \
+-DHSE_VALUE=8000000 \
+-DHSE_STARTUP_TIMEOUT=100 \
+-DLSE_STARTUP_TIMEOUT=5000 \
+-DLSE_VALUE=32768 \
+-DHSI_VALUE=8000000 \
+-DLSI_VALUE=40000 \
+-DVDD_VALUE=3300 \
+-DPREFETCH_ENABLE=1 \
+-DSTM32F103xB \
+-D__ASSEMBLER__
 
 # C defines
 C_DEFS =  \
@@ -98,12 +108,13 @@ C_DEFS =  \
 
 
 # AS includes
-AS_INCLUDES = 
+AS_INCLUDES = \
+-ICore/Inc \
+-IDrivers/CMSIS/Device/ST/STM32F1xx/Include
 
 # C includes
 C_INCLUDES =  \
 -ICore/Inc \
--IDrivers/STM32F1xx_HAL_Driver/Inc \
 -IDrivers/CMSIS/Device/ST/STM32F1xx/Include \
 -IDrivers/CMSIS/Include
 
@@ -115,11 +126,14 @@ CFLAGS += $(MCU) $(C_DEFS) $(C_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction
 
 ifeq ($(DEBUG), 1)
 CFLAGS += -g -gdwarf-2
+ASFLAGS += -g -gdwarf-2
 endif
 
 
 # Generate dependency information
 CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)"
+
+ASFLAGS += -MMD -MP -MF"$(@:%.O=%.d)"
 
 
 #######################################
@@ -146,7 +160,7 @@ vpath %.c $(sort $(dir $(C_SOURCES)))
 # list of ASM program objects
 OBJECTS += $(addprefix $(BUILD_DIR)/,$(notdir $(ASM_SOURCES:.s=.o)))
 vpath %.s $(sort $(dir $(ASM_SOURCES)))
-OBJECTS += $(addprefix $(BUILD_DIR)/,$(notdir $(ASMM_SOURCES:.S=.o)))
+OBJECTS += $(addprefix $(BUILD_DIR)/,$(notdir $(ASMM_SOURCES:.S=.O)))
 vpath %.S $(sort $(dir $(ASMM_SOURCES)))
 
 $(BUILD_DIR)/%.o: %.c Makefile | $(BUILD_DIR) 
@@ -154,8 +168,11 @@ $(BUILD_DIR)/%.o: %.c Makefile | $(BUILD_DIR)
 
 $(BUILD_DIR)/%.o: %.s Makefile | $(BUILD_DIR)
 	$(AS) -c $(CFLAGS) $< -o $@
-$(BUILD_DIR)/%.o: %.S Makefile | $(BUILD_DIR)
-	$(AS) -c $(CFLAGS) $< -o $@
+
+$(BUILD_DIR)/%.O: %.S Makefile | $(BUILD_DIR)
+	$(AS) -c $(ASFLAGS) -E $< -o $@
+	$(AS) -c $(ASFLAGS) $@ -o $@.o
+	mv $@.o $@
 
 $(BUILD_DIR)/$(TARGET).elf: $(OBJECTS) Makefile
 	$(CC) $(OBJECTS) $(LDFLAGS) -o $@

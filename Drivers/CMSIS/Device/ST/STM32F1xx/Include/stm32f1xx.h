@@ -52,6 +52,8 @@
 #define STM32F1
 #endif /* STM32F1 */
 
+#ifndef __ASSEMBLER__
+
 /* Uncomment the line below according to the target STM32L device used in your 
    application 
   */
@@ -269,5 +271,5 @@ typedef enum
   */
   
 
-
+#endif /*__ASSEMBLER__*/
 

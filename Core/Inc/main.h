@@ -31,7 +31,6 @@ extern "C" {
 #include <time.h>
 
 #include "stm32f1xx.h"
-#include "stm32f103xb.h"
 
 #if defined(USE_FULL_ASSERT)
 #include "stm32_assert.h"
