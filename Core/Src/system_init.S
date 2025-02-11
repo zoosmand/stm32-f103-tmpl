@@ -17,6 +17,7 @@
   .type SystemInit, %function
 
 SystemInit:
+  push {lr}
   STRW \
       RCC_APB1ENR_PWREN \
     , RCC_APB1ENR
@@ -28,7 +29,7 @@ SystemInit:
 
   bl ClockInit
   bl PeripheralInit
-  bx lr
+  pop {pc}
   .size SystemInit, .-SystemInit
 
 
@@ -36,21 +37,17 @@ SystemInit:
   * Clock initialization.
   *
   */
-  .section .text.ClockInit
-  .global ClockInit
-
 ClockInit:
+  push {lr}
   nop
-  bx lr
+  pop {pc}
 
 
 /**
   * Peripheral initialization.
   *
   */
-  .section .text.PeripheralInit
-  .global PeripheralInit
-
 PeripheralInit:
+  push {lr}
   STRW RCC_APB2ENR_IOPCEN, RCC_APB2ENR
-  bx lr
+  pop {pc}
