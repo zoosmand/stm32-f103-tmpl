@@ -130,6 +130,15 @@ SECTIONS
     PROVIDE_HIDDEN (__fini_array_end = .);
   } >FLASH
 
+
+  /* Initialized data sections goes into RAM, load LMA copy after code */
+  .system : 
+  {
+    . = ALIGN(4);
+    *(.system)           /* .system sections */
+    *(.system*)          /* .system* sections */
+  } >RAM AT> FLASH
+
   /* used by the startup to initialize data */
   _sidata = LOADADDR(.data);
 
@@ -137,12 +146,12 @@ SECTIONS
   .data : 
   {
     . = ALIGN(4);
-    _sdata = .;        /* create a global symbol at data start */
+    _sdata = . + 128;        /* create a global symbol at data start */
     *(.data)           /* .data sections */
     *(.data*)          /* .data* sections */
 
     . = ALIGN(4);
-    _edata = .;        /* define a global symbol at data end */
+    _edata = . +128;        /* define a global symbol at data end */
   } >RAM AT> FLASH
 
   
@@ -151,14 +160,14 @@ SECTIONS
   .bss :
   {
     /* This is used by the startup in order to initialize the .bss secion */
-    _sbss = .;         /* define a global symbol at bss start */
+    _sbss = . + 128;         /* define a global symbol at bss start */
     __bss_start__ = _sbss;
     *(.bss)
     *(.bss*)
     *(COMMON)
 
     . = ALIGN(4);
-    _ebss = .;         /* define a global symbol at bss end */
+    _ebss = . + 128;         /* define a global symbol at bss end */
     __bss_end__ = _ebss;
   } >RAM
 

@@ -1,21 +1,9 @@
 /**
-  * Macroses and local definitions.
+  * Macroses.
   *
   */
 
-
-/**
-  * @brief Register definitions.
-  *
-  */
-tmpa    .req R0
-tmpd    .req R1
-zero    .req R10
-one     .req R11
-_OFF_   .req R10
-_ON_    .req R11
-tmp     .req R12
-
+.include "local.inc"
 
 /** ------------------------------------------------------------------------- */
 /** WORD operations. */
@@ -35,7 +23,7 @@ tmp     .req R12
   */
 .macro STRLHW value, addr, offset=0
 	ldr tmpa, =\addr
-	mov tmpd, #\value
+	mov tmpd, \value
 	str tmpd, [tmpa, #\offset]
 .endm
 
@@ -45,7 +33,7 @@ tmp     .req R12
   */
 .macro STRHHW value, addr, offset=0
 	ldr tmpa, =\addr
-	movt tmpd, #\value
+	movt tmpd, \value
 	str tmpd, [tmpa, #\offset]
 .endm
 
@@ -55,7 +43,7 @@ tmp     .req R12
   */
 .macro STRBW value, addr, offset=0
 	ldr tmpa, =\addr
-	mov tmpd, #\value
+	mov tmpd, \value
 	strb tmpd, [tmpa, #\offset]
 .endm
 
@@ -154,9 +142,9 @@ tmp     .req R12
   */
 .macro MOVVG srcaddr, srcoffset, dstaddr, dstoffset
 	ldr tmpa, =\srcaddr
-	ldr tmpd, [tmpa, \srcoffset]
+	ldr tmpd, [tmpa, #\srcoffset]
 	ldr tmpa, =\dstaddr
-	str tmpd, [tmpa, \dstoffset]
+	str tmpd, [tmpa, #\dstoffset]
 .endm
 
 
@@ -181,9 +169,9 @@ tmp     .req R12
   */
 .macro MOVVBG srcaddr, srcoffset, dstaddr, dstoffset
 	ldr tmpa, =\srcaddr
-	ldrb tmpd, [tmpa, \srcoffset]
+	ldrb tmpd, [tmpa, #\srcoffset]
 	ldr tmpa, =\dstaddr
-	strb tmpd, [tmpa, \dstoffset]
+	strb tmpd, [tmpa, #\dstoffset]
 .endm
 
 
@@ -195,7 +183,7 @@ tmp     .req R12
   * @brief Loads the given peripheral bit address into "tmpa" (temporary address) register.
   */
 .macro MOVP paddr
-	ldr tmpa, =((\paddr & 0x00ffffff) * 0x20 + PERIPH_BB_BASE)
+	ldr tmpa, =((\paddr & 0x00ffffff) * 0x20 + PERIPH_BB)
 .endm
 
 
@@ -224,7 +212,7 @@ tmp     .req R12
   *
   */
 .macro LDRPB value, paddr, offset=0
-  ldr tmpa, =((\paddr & 0x00ffffff) * 0x20 + PERIPH_BB_BASE)
+  ldr tmpa, =((\paddr & 0x00ffffff) * 0x20 + PERIPH_BB)
   ldr \value, [tmpa, #(\offset * 4)] 
 .endm
 
@@ -235,7 +223,7 @@ tmp     .req R12
   *
   */
 .macro STRPB value, paddr, offset=0
-  ldr tmpa, =((\paddr & 0x00ffffff) * 0x20 + PERIPH_BB_BASE)
+  ldr tmpa, =((\paddr & 0x00ffffff) * 0x20 + PERIPH_BB)
   str \value, [tmpa, #(\offset * 4)] 
 .endm
 
@@ -249,7 +237,7 @@ tmp     .req R12
   *
   */
 .macro MOVR addr
-  ldr tmpa, =((\addr & 0x0000ffff) * 0x20 + SRAM_BB_BASE)
+  ldr tmpa, =((\addr & 0x0000ffff) * 0x20 + SRAM_BB)
 .endm
 
 
@@ -258,7 +246,7 @@ tmp     .req R12
   *
   */
 .macro LDRR value, offset=0
-	ldr \value, [tmpa, #\(offset * 4)] 
+	ldr \value, [tmpa, #(\offset * 4)] 
 .endm
 
 
@@ -267,7 +255,7 @@ tmp     .req R12
   *
   */
 .macro STRR value, offset=0
-	str \value, [tmpa, #\(offset * 4)] 
+	str \value, [tmpa, #(\offset * 4)] 
 .endm
 
 
@@ -275,8 +263,8 @@ tmp     .req R12
   * @brief Loads the value bit from the given SRAM address.
   *
   */
-.macro LDRRB value, addr, offset
-	ldr tmpa, =((\addr & 0x0000ffff) * 0x20 + SRAM_BB_BASE)
+.macro LDRRB value, addr, offset=0
+	ldr tmpa, =((\addr & 0x0000ffff) * 0x20 + SRAM_BB)
 	ldr \value, [tmpa, #(\offset * 4)] 
 .endm
 
@@ -285,7 +273,7 @@ tmp     .req R12
   * @brief Stores the value bit from the given SRAM address.
   *
   */
-.macro STRRB value, addr, offset
+.macro STRRB value, addr, offset=0
 	ldr tmpa, =((\addr & 0x0000ffff) * 0x20 + SRAM_BB)
 	str \value, [tmpa, #(\offset * 4)] 
 .endm
@@ -301,17 +289,17 @@ tmp     .req R12
   */
 .macro MOVVA srcaddr, dstaddr, nw 
 	push {r0-r2, r12}
-	ldr tmpa, =(\dstaddr - 4)
-	ldr tmpd, =(\srcaddr - 4)
+	ldr tmpa, =(\dstaddr)
+	ldr tmpd, =(\srcaddr)
 	ldr r2, =\nw
 
-GCNT SETA GCNT + 1
+.set GCNT = GCNT + 1
 	
-_LOAD_MOVVA_cycleGCNT	
+_LOAD_MOVVA_cycleGCNT:
 	ldrne tmp, [tmpd, #4]!
 	strne tmp, [tmpa, #4]!
-	sub r2, #1
-	teq r2, #0
+	sub r2, 1
+	teq r2, 0
 	bne _LOAD_MOVVA_cycleGCNT
 
 	pop {r0-r2, r12}
@@ -326,11 +314,11 @@ _LOAD_MOVVA_cycleGCNT
   push {r0-r2, r12}
 	ldr tmpa, =(\dstaddr - 4)
 	ldr tmpd, =(\srcaddr - 4)
-	add R2, \nw, #1
+	add R2, \nw, 1
 
-GCNT SETA GCNT + 1
+.set GCNT = GCNT + 1
 	
-_LOAD_MOVVAG_cycleGCNT	
+_LOAD_MOVVAG_cycleGCNT:
 	ldrne tmp, [tmpd, #4]!
 	strne tmp, [tmpa, #4]!
 	sub r2, #1
@@ -351,7 +339,7 @@ _LOAD_MOVVAG_cycleGCNT
   */
 .macro TSTPB peripheral, offset=0
   LDRPB tmpd, \peripheral, \offset
-	tst tmpd, #1
+	tst tmpd, 1
 .endm
 
 
@@ -361,7 +349,7 @@ _LOAD_MOVVAG_cycleGCNT
   */
 .macro TSTRB addr, offset=0
   LDRRB tmpd, \addr, \offset
-	tst tmpd, #1
+	tst tmpd, 1
 .endm
 
 
@@ -434,7 +422,7 @@ _LOAD_MOVVAG_cycleGCNT
 .macro APSRC flag
 	push {tmp}
 	mrs tmp, APSR
-	bic tmp, tmp, #(1<<\flag)
+	bic tmp, tmp, (1<<\flag)
 	msr APSR_nzcvq, tmp
 	pop {tmp}
 .endm

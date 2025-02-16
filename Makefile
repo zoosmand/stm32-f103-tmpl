@@ -110,7 +110,8 @@ C_DEFS =  \
 # AS includes
 AS_INCLUDES = \
 -ICore/Inc \
--IDrivers/CMSIS/Device/ST/STM32F1xx/Include
+-IDrivers/CMSIS/Device/ST/STM32F1xx/Include \
+-IDrivers/CMSIS/Include
 
 # C includes
 C_INCLUDES =  \

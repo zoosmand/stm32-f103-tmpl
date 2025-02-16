@@ -22,6 +22,9 @@
  * limitations under the License.
  */
 
+#ifndef __ASSEMBLER__
+
+
 #if   defined ( __ICCARM__ )
   #pragma system_include         /* treat file as system include file for MISRA check */
 #elif defined (__clang__)
@@ -36,6 +39,7 @@
 #ifdef __cplusplus
  extern "C" {
 #endif
+
 
 /**
   \page CMSIS_MISRA_Exceptions  MISRA-C:2004 Compliance Exceptions
@@ -217,6 +221,9 @@ typedef union
   uint32_t w;                            /*!< Type      used for word access */
 } APSR_Type;
 
+
+#endif /*__ASSEMBLER__*/
+
 /* APSR Register Definitions */
 #define APSR_N_Pos                         31U                                            /*!< APSR: N Position */
 #define APSR_N_Msk                         (1UL << APSR_N_Pos)                            /*!< APSR: N Mask */
@@ -233,6 +240,8 @@ typedef union
 #define APSR_Q_Pos                         27U                                            /*!< APSR: Q Position */
 #define APSR_Q_Msk                         (1UL << APSR_Q_Pos)                            /*!< APSR: Q Mask */
 
+
+#ifndef __ASSEMBLER__
 
 /**
   \brief  Union type to access the Interrupt Program Status Register (IPSR).
@@ -274,6 +283,9 @@ typedef union
   uint32_t w;                            /*!< Type      used for word access */
 } xPSR_Type;
 
+
+#endif /*__ASSEMBLER__*/
+
 /* xPSR Register Definitions */
 #define xPSR_N_Pos                         31U                                            /*!< xPSR: N Position */
 #define xPSR_N_Msk                         (1UL << xPSR_N_Pos)                            /*!< xPSR: N Mask */
@@ -303,6 +315,8 @@ typedef union
 #define xPSR_ISR_Msk                       (0x1FFUL /*<< xPSR_ISR_Pos*/)                  /*!< xPSR: ISR Mask */
 
 
+#ifndef __ASSEMBLER__
+
 /**
   \brief  Union type to access the Control Registers (CONTROL).
  */
@@ -317,6 +331,8 @@ typedef union
   uint32_t w;                            /*!< Type      used for word access */
 } CONTROL_Type;
 
+#endif /*__ASSEMBLER__*/
+
 /* CONTROL Register Definitions */
 #define CONTROL_SPSEL_Pos                   1U                                            /*!< CONTROL: SPSEL Position */
 #define CONTROL_SPSEL_Msk                  (1UL << CONTROL_SPSEL_Pos)                     /*!< CONTROL: SPSEL Mask */
@@ -326,6 +342,8 @@ typedef union
 
 /*@} end of group CMSIS_CORE */
 
+
+#ifndef __ASSEMBLER__
 
 /**
   \ingroup    CMSIS_core_register
@@ -354,12 +372,15 @@ typedef struct
   __OM  uint32_t STIR;                   /*!< Offset: 0xE00 ( /W)  Software Trigger Interrupt Register */
 }  NVIC_Type;
 
+#endif /*__ASSEMBLER__*/
+
 /* Software Triggered Interrupt Register Definitions */
 #define NVIC_STIR_INTID_Pos                 0U                                         /*!< STIR: INTLINESNUM Position */
 #define NVIC_STIR_INTID_Msk                (0x1FFUL /*<< NVIC_STIR_INTID_Pos*/)        /*!< STIR: INTLINESNUM Mask */
 
 /*@} end of group CMSIS_NVIC */
 
+#ifndef __ASSEMBLER__
 
 /**
   \ingroup  CMSIS_core_register
@@ -395,6 +416,9 @@ typedef struct
         uint32_t RESERVED0[5U];
   __IOM uint32_t CPACR;                  /*!< Offset: 0x088 (R/W)  Coprocessor Access Control Register */
 } SCB_Type;
+
+#endif /*__ASSEMBLER__*/
+
 
 /* SCB CPUID Register Definitions */
 #define SCB_CPUID_IMPLEMENTER_Pos          24U                                            /*!< SCB CPUID: IMPLEMENTER Position */
@@ -642,6 +666,8 @@ typedef struct
 /*@} end of group CMSIS_SCB */
 
 
+#ifndef __ASSEMBLER__
+
 /**
   \ingroup  CMSIS_core_register
   \defgroup CMSIS_SCnSCB System Controls not in SCB (SCnSCB)
@@ -663,6 +689,8 @@ typedef struct
 #endif
 } SCnSCB_Type;
 
+#endif /*__ASSEMBLER__*/
+
 /* Interrupt Controller Type Register Definitions */
 #define SCnSCB_ICTR_INTLINESNUM_Pos         0U                                         /*!< ICTR: INTLINESNUM Position */
 #define SCnSCB_ICTR_INTLINESNUM_Msk        (0xFUL /*<< SCnSCB_ICTR_INTLINESNUM_Pos*/)  /*!< ICTR: INTLINESNUM Mask */
@@ -681,6 +709,8 @@ typedef struct
 /*@} end of group CMSIS_SCnotSCB */
 
 
+#ifndef __ASSEMBLER__
+
 /**
   \ingroup  CMSIS_core_register
   \defgroup CMSIS_SysTick     System Tick Timer (SysTick)
@@ -698,6 +728,8 @@ typedef struct
   __IOM uint32_t VAL;                    /*!< Offset: 0x008 (R/W)  SysTick Current Value Register */
   __IM  uint32_t CALIB;                  /*!< Offset: 0x00C (R/ )  SysTick Calibration Register */
 } SysTick_Type;
+
+#endif /*__ASSEMBLER__*/
 
 /* SysTick Control / Status Register Definitions */
 #define SysTick_CTRL_COUNTFLAG_Pos         16U                                            /*!< SysTick CTRL: COUNTFLAG Position */
@@ -732,6 +764,8 @@ typedef struct
 
 /*@} end of group CMSIS_SysTick */
 
+
+#ifndef __ASSEMBLER__
 
 /**
   \ingroup  CMSIS_core_register
@@ -778,6 +812,9 @@ typedef struct
   __IM  uint32_t CID2;                   /*!< Offset: 0xFF8 (R/ )  ITM Component  Identification Register #2 */
   __IM  uint32_t CID3;                   /*!< Offset: 0xFFC (R/ )  ITM Component  Identification Register #3 */
 } ITM_Type;
+
+
+#endif /*__ASSEMBLER__*/
 
 /* ITM Trace Privilege Register Definitions */
 #define ITM_TPR_PRIVMASK_Pos                0U                                            /*!< ITM TPR: PRIVMASK Position */
@@ -836,6 +873,8 @@ typedef struct
 /*@}*/ /* end of group CMSIS_ITM */
 
 
+#ifndef __ASSEMBLER__
+
 /**
   \ingroup  CMSIS_core_register
   \defgroup CMSIS_DWT     Data Watchpoint and Trace (DWT)
@@ -872,6 +911,9 @@ typedef struct
   __IOM uint32_t MASK3;                  /*!< Offset: 0x054 (R/W)  Mask Register 3 */
   __IOM uint32_t FUNCTION3;              /*!< Offset: 0x058 (R/W)  Function Register 3 */
 } DWT_Type;
+
+
+#endif /*__ASSEMBLER__*/
 
 /* DWT Control Register Definitions */
 #define DWT_CTRL_NUMCOMP_Pos               28U                                         /*!< DWT CTRL: NUMCOMP Position */
@@ -983,6 +1025,8 @@ typedef struct
 /*@}*/ /* end of group CMSIS_DWT */
 
 
+#ifndef __ASSEMBLER__
+
 /**
   \ingroup  CMSIS_core_register
   \defgroup CMSIS_TPI     Trace Port Interface (TPI)
@@ -1020,6 +1064,8 @@ typedef struct
   __IM  uint32_t DEVID;                  /*!< Offset: 0xFC8 (R/ )  TPIU_DEVID */
   __IM  uint32_t DEVTYPE;                /*!< Offset: 0xFCC (R/ )  TPIU_DEVTYPE */
 } TPI_Type;
+
+#endif /*__ASSEMBLER*/
 
 /* TPI Asynchronous Clock Prescaler Register Definitions */
 #define TPI_ACPR_PRESCALER_Pos              0U                                         /*!< TPI ACPR: PRESCALER Position */
@@ -1144,6 +1190,8 @@ typedef struct
 /*@}*/ /* end of group CMSIS_TPI */
 
 
+#ifndef __ASSEMBLER__
+
 #if defined (__MPU_PRESENT) && (__MPU_PRESENT == 1U)
 /**
   \ingroup  CMSIS_core_register
@@ -1259,6 +1307,8 @@ typedef struct
   __IOM uint32_t DEMCR;                  /*!< Offset: 0x00C (R/W)  Debug Exception and Monitor Control Register */
 } CoreDebug_Type;
 
+#endif /*__ASSEMBLER*/
+
 /* Debug Halting Control and Status Register Definitions */
 #define CoreDebug_DHCSR_DBGKEY_Pos         16U                                            /*!< CoreDebug DHCSR: DBGKEY Position */
 #define CoreDebug_DHCSR_DBGKEY_Msk         (0xFFFFUL << CoreDebug_DHCSR_DBGKEY_Pos)       /*!< CoreDebug DHCSR: DBGKEY Mask */
@@ -1346,6 +1396,8 @@ typedef struct
 /*@} end of group CMSIS_CoreDebug */
 
 
+#ifndef __ASSEMBLER__
+
 /**
   \ingroup    CMSIS_core_register
   \defgroup   CMSIS_core_bitfield     Core register bit field macros
@@ -1379,7 +1431,9 @@ typedef struct
   @{
  */
 
-/* Memory mapping of Core Hardware */
+#endif /*__ASSEMBLER*/
+
+ /* Memory mapping of Core Hardware */
 #define SCS_BASE            (0xE000E000UL)                            /*!< System Control Space Base Address */
 #define ITM_BASE            (0xE0000000UL)                            /*!< ITM Base Address */
 #define DWT_BASE            (0xE0001000UL)                            /*!< DWT Base Address */
@@ -1405,6 +1459,8 @@ typedef struct
 
 /*@} */
 
+
+#ifndef __ASSEMBLER__
 
 
 /*******************************************************************************
@@ -1459,6 +1515,9 @@ typedef struct
   #define NVIC_GetVector              __NVIC_GetVector
 #endif  /* (CMSIS_VECTAB_VIRTUAL) */
 
+
+#endif /*__ASSEMBLER__*/
+
 #define NVIC_USER_IRQ_OFFSET          16
 
 
@@ -1467,6 +1526,8 @@ typedef struct
 #define EXC_RETURN_THREAD_MSP      (0xFFFFFFF9UL)     /* return to Thread mode, uses MSP after return                                */
 #define EXC_RETURN_THREAD_PSP      (0xFFFFFFFDUL)     /* return to Thread mode, uses PSP after return                                */
 
+
+#ifndef __ASSEMBLER__
 
 /**
   \brief   Set Priority Grouping
@@ -1931,7 +1992,6 @@ __STATIC_INLINE int32_t ITM_CheckChar (void)
 
 
 
-
 #ifdef __cplusplus
 }
 #endif
@@ -1939,3 +1999,6 @@ __STATIC_INLINE int32_t ITM_CheckChar (void)
 #endif /* __CORE_CM3_H_DEPENDANT */
 
 #endif /* __CMSIS_GENERIC */
+
+
+#endif /*__ASSEMBLER__*/

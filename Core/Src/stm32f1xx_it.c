@@ -102,7 +102,7 @@ void PendSV_Handler(void) {
 /**
   * @brief This function handles System tick timer.
   */
-void SysTick_Handler(void) {
+void __attribute((__weak__)) SysTick_Handler(void) {
 
 }
 

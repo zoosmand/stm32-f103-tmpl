@@ -634,7 +634,7 @@
 .equ CPUIDBR,           0xE000ED00
 .equ ICSR,              0xE000ED04
 .equ VTOR,              0xE000ED08
-.equ AITCR,             0xE000ED0C
+.equ AIRCR,             0xE000ED0C
 .equ SCR,               0xE000ED10
 .equ CCR,               0xE000ED14
 .equ SHPR0,             0xE000ED18
