@@ -3,6 +3,7 @@
         "*.c": "c",
         "*.h": "c",
         "*.s": "iar",
+        "*.S": "iar",
         "*.inc": "iar"
     },
     "cortex-debug.variableUseNaturalFormat": false
