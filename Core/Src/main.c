@@ -27,6 +27,7 @@
 /* Private macro -------------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
+static __IO uint32_t aaa = 1;
 
 /* Private function prototypes -----------------------------------------------*/
 
@@ -34,13 +35,13 @@
 
 
 /**
-  * @brief  The application entry point.
-  * @retval int
-  */
+ * @brief  The application entry point.
+ * @retval int
+ */
 int main(void) {
-
-  while (1) {
-    
+  
+  if (CronSec) {
+    aaa++;
   }
 
 }

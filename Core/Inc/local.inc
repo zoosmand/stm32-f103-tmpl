@@ -16,6 +16,9 @@ _OFF_   .req r10
 _ON_    .req r11
 tmp     .req r12
 
+/* ------------------------------------------------------------------------- */
+/*                Definitions that are not exist in headers                  */
+/* ------------------------------------------------------------------------- */
 .equ PERIPH_BB,               0x42000000
 .equ SRAM_BB,                 0x22000000
 .equ SRAM_BASE,               0x20000000
@@ -27,10 +30,13 @@ tmp     .req r12
 /* ------------------------------------------------------------------------- */
 /** Global system variables */
 .equ _GEREG_,                 SRAM_BASE
-.equ sysQuantCnt,             SRAM_BASE + 4
+.equ sysQuantCnt,             SRAM_BASE + 0x04
+.equ secCnt,                  SRAM_BASE + 0x08
+.equ secCntCache,             SRAM_BASE + 0x0c
 
 /** Global Events Register Flags */
 .equ _SYSTICKF_,              0 @ SysTick Interval Flag
+.equ _SYSSECF_,               1 @ SysTick Interval Flag
 
 
 /* ------------------------------------------------------------------------- */

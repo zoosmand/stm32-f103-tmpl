@@ -600,7 +600,7 @@
 .equ DAC_DOR2,          0x40007430
 .equ DBGMCU_IDCODE,     0xE0042000
 .equ DBGMCU_CR,         0xE0042004
-.equ NVIC_,             0xE000E004
+.equ NVIC,              0xE000E004
 .equ SYSTICKCSR,        0xE000E010
 .equ SYSTICKRVR,        0xE000E014
 .equ SYSTICKCVR,        0xE000E018

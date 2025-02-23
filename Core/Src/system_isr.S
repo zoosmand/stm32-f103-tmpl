@@ -23,10 +23,6 @@
 SysTick_Handler:
   push {lr}
 
-  ldr tmpa, =sysQuantCnt
-  ldr tmpd, [tmpa]
-  add tmpd, tmpd, #1 
-  str tmpd, [tmpa]
   FLS _GEREG_, _SYSTICKF_
 
   pop {pc}

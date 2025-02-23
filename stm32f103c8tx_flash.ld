@@ -61,7 +61,7 @@ _Min_Stack_Size = 0x400; /* required amount of stack */
 /* Specify the memory areas */
 MEMORY
 {
-RAM (xrw)      : ORIGIN = 0x20000000, LENGTH = 20K
+RAM (xrw)      : ORIGIN = 0x20000080, LENGTH = 20K - 128
 FLASH (rx)      : ORIGIN = 0x8000000, LENGTH = 64K
 }
 
@@ -146,12 +146,12 @@ SECTIONS
   .data : 
   {
     . = ALIGN(4);
-    _sdata = . + 128;        /* create a global symbol at data start */
+    _sdata = .;        /* create a global symbol at data start */
     *(.data)           /* .data sections */
     *(.data*)          /* .data* sections */
 
     . = ALIGN(4);
-    _edata = . +128;        /* define a global symbol at data end */
+    _edata = .;        /* define a global symbol at data end */
   } >RAM AT> FLASH
 
   
@@ -160,14 +160,14 @@ SECTIONS
   .bss :
   {
     /* This is used by the startup in order to initialize the .bss secion */
-    _sbss = . + 128;         /* define a global symbol at bss start */
+    _sbss = .;         /* define a global symbol at bss start */
     __bss_start__ = _sbss;
     *(.bss)
     *(.bss*)
     *(COMMON)
 
     . = ALIGN(4);
-    _ebss = . + 128;         /* define a global symbol at bss end */
+    _ebss = .;         /* define a global symbol at bss end */
     __bss_end__ = _ebss;
   } >RAM
 

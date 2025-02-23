@@ -7,9 +7,10 @@
 
 #include <stm32f103xb.h>
 #include <core_cm3.h>
-#include <main.h>
 .include "stm32f1xx.inc"
 .include "macroses.inc"
+.include "local.inc"
+
 
 .global SystemInit
 @.global SystemCoreClockUpdate
@@ -27,13 +28,19 @@ SystemInit:
   mov one, 1
   
   /** Clear system stack */    
-  ldr tmpa, =(_System_ - 4)
+  ldr tmpa, =(SRAM_BASE - 4)
   mov r2, (_SystemStackSize_ / 4)
 _ClearSystemStack:
 	str zero, [tmpa, #4]!
 	sub r2, 1
 	teq r2, 0
 	bne _ClearSystemStack
+
+  /** Init second cache with 1000 value */
+  ldr tmpa, =secCntCache
+  ldr tmpd, [tmpa]
+  add tmpd, tmpd, #0x03e8
+  str tmpd, [tmpa]
 
   /** Switch on MCU power */
   STRW \
