@@ -42,6 +42,7 @@ int main(void) {
   
   if (CronSec) {
     aaa++;
+    LedToggle();
   }
 
 }

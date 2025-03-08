@@ -56,6 +56,7 @@ _ClearSystemStack:
   bl ClockInit
   bl SysTickInit
   bl PeripheralInit
+  bl LedInit
 
   pop {pc}
   .size SystemInit, .-SystemInit
@@ -132,12 +133,27 @@ SysTickInit:
 PeripheralInit:
   push {lr}
   STRW \
-    RCC_APB2ENR_IOPCEN \
+    RCC_APB2ENR_AFIOEN \
+  | RCC_APB2ENR_IOPBEN \
+  | RCC_APB2ENR_IOPCEN \
   , RCC_APB2ENR
   
   pop {pc}
 
 
+
+LedInit:
+  push {lr}
+  @ PC13 Output LED, max 2 MHz, push-pull
+  MOVP GPIOB_CRH
+  STRP zero, GPIO_MODE13_0
+  STRP one,  GPIO_MODE13_1
+  STRP zero, GPIO_CNF13_0
+  STRP zero, GPIO_CNF13_1
+
+	@ PC13 Input pull-up
+	STRPB one, GPIOB_BSRR, 13
+  pop {pc}
 
 
 
