@@ -36,11 +36,13 @@ $(wildcard Core/Src/*.c)
 # ASM sources
 ASM_SOURCES =  \
 startup_stm32f103xb.s \
-$(wildcard Core/Src/*.s)
+$(wildcard Core/Src/*.s) \
+$(wildcard Periph/*.s)
 
 # ASM sources
 ASMM_SOURCES = \
-$(wildcard Core/Src/*.S)
+$(wildcard Core/Src/*.S) \
+$(wildcard Periph/*.S)
 
 
 #######################################

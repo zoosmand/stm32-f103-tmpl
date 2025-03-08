@@ -60,6 +60,7 @@ extern "C" {
 
 /* Exported functions prototypes ---------------------------------------------*/
 void Error_Handler(void);
+void LedToggle(void); // localted in ./Periph/led.S
 
 
 /* Private definitions ---------------------------------------------------------*/
