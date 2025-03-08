@@ -28,4 +28,16 @@ SysTick_Handler:
   pop {pc}
 
 
+/**
+  * Window Watchdog interrupt handler.
+  *
+  */
+  .section .text.WWDG_IRQHandler
+  .global WWDG_IRQHandler
+  .type WWDG_IRQHandler, %function
+WWDG_IRQHandler:
+  push {lr}
+
+  pop {pc}
+
   .end

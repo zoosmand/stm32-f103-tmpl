@@ -43,6 +43,7 @@ int main(void) {
   if (CronSec) {
     aaa++;
     LedToggle();
+    // WRITE_REG(IWDG->KR, 0x0000aaaa);
   }
 
 }

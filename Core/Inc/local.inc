@@ -253,3 +253,11 @@ tmp     .req r12
 .equ GPIO_LCKR14,             14
 .equ GPIO_LCKR15,             15
 .equ GPIO_LCKR_KEY,           0x00010000
+
+
+/** Independent watchdog definitions */
+.equ IWDG_KEY_RELOAD,         0x0000aaaa
+.equ IWDG_KEY_ENABLE,         0x0000cccc
+.equ IWDG_KEY_ACCESS,         0x00005555
+.equ IWDG_RELOAD_COUNTER,     0x00000fff /* 4095 */
+

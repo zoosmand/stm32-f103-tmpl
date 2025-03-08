@@ -55,6 +55,8 @@ _ClearSystemStack:
 
   bl ClockInit
   bl SysTickInit
+  bl IWatchdogInit
+  bl WWatchdogInit
   bl PeripheralInit
   bl LedInit
 
@@ -142,6 +144,61 @@ PeripheralInit:
 
 
 
+/**
+  * Independent watchdog (IWDG) initialization.
+  *
+  */
+IWatchdogInit:
+  push {lr}
+  mov one, 1
+  MOVP RCC_CSR
+  /** Enable internal Low Speed clock. */
+	STRP one, RCC_CSR_LSION_Pos
+
+_IWatchdogInit_wake_up:
+	LDRP tmpd, RCC_CSR_LSIRDY_Pos
+	lsrs tmpd, tmpd, 1
+	bcc _IWatchdogInit_wake_up
+
+  /** Enable IWDG */
+  STRW IWDG_KEY_ENABLE, IWDG_KR
+  /** Enable IWDG write access */
+  STRW IWDG_KEY_ACCESS, IWDG_KR
+  /** Set IWDG prescaler: 64 */
+  STRPB one, IWDG_PR, 3
+  /** Set IWDG reload counter */
+  STRW IWDG_RELOAD_COUNTER, IWDG_RLR
+
+  MOVP IWDG_SR
+_IWatchdogInit_SR_wake_up:
+	LDRP tmpd, IWDG_SR_RVU_Pos
+	lsrs tmpd, tmpd, 1
+	bcc _IWatchdogInit_SR_wake_up
+	LDRP tmpd, IWDG_SR_PVU_Pos
+	lsrs tmpd, tmpd, 1
+	bcc _IWatchdogInit_SR_wake_up
+
+  /** Reload IWDG key */
+  STRW IWDG_KEY_RELOAD, IWDG_KR
+  pop {pc}
+
+
+
+/**
+  * Window watchdog (WWDG) initialization.
+  *
+  */
+WWatchdogInit:
+  push {lr}
+  
+  pop {pc}
+
+
+
+/**
+  * LED GPIO initialization.
+  *
+  */
 LedInit:
   push {lr}
   @ PC13 Output LED, max 2 MHz, push-pull

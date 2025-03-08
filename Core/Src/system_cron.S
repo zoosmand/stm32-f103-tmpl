@@ -21,6 +21,8 @@
   .type Cron_Handler, %function
 
 Cron_Handler:
+  /* Stop interrupts globally */
+  cpsid i
 
   /* Increase 1ms System tick. */
   FLT _GEREG_, _SYSTICKF_
@@ -54,8 +56,14 @@ _CronCheckSecFlag_Handler:
   FLT _GEREG_, _SYSSECF_
 	cbz tmpd, _Cron_Handler_Exit
   FLC _GEREG_, _SYSSECF_
+  /** Reload IWDG key secondly */
+  STRW IWDG_KEY_RELOAD, IWDG_KR
 
 _Cron_Handler_Exit:
+  /* Start interrupts globally */
+  cpsie i
+  
+  /* Branch to the main */
   bl main
   b Cron_Handler
 

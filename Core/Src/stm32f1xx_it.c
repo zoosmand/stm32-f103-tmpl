@@ -114,6 +114,14 @@ void __attribute((__weak__)) SysTick_Handler(void) {
 /******************************************************************************/
 
 /**
+  * @brief This function handles Window Watchdog.
+  */
+ void __attribute((__weak__)) WWDG_IRQHandler(void) {
+
+ }
+ 
+ 
+/**
   * @brief This function handles DMA1 channel2 global interrupt.
   */
 void DMA1_Channel2_IRQHandler(void) {
