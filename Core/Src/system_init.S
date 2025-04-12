@@ -55,7 +55,7 @@ _ClearSystemStack:
 
   bl ClockInit
   bl SysTickInit
-  bl IWatchdogInit
+  @ bl IWatchdogInit
   bl WWatchdogInit
   bl PeripheralInit
   bl LedInit
