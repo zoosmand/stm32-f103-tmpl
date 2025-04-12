@@ -55,7 +55,7 @@ _ClearSystemStack:
 
   bl ClockInit
   bl SysTickInit
-  @ bl IWatchdogInit
+  bl IWatchdogInit
   bl WWatchdogInit
   bl PeripheralInit
   bl LedInit
@@ -165,7 +165,7 @@ _IWatchdogInit_wake_up:
   /** Enable IWDG write access */
   STRW IWDG_KEY_ACCESS, IWDG_KR
   /** Set IWDG prescaler: 64 */
-  STRPB one, IWDG_PR, 3
+  STRLHW 3, IWDG_PR
   /** Set IWDG reload counter */
   STRW IWDG_RELOAD_COUNTER, IWDG_RLR
 
