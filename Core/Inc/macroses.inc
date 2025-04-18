@@ -212,8 +212,10 @@
   *
   */
 .macro LDRPB value, paddr, offset=0
-  ldr tmpa, =((\paddr & 0x00ffffff) * 0x20 + PERIPH_BB)
-  ldr \value, [tmpa, #(\offset * 4)] 
+  MOVP \paddr
+  LDRP \value, \offset
+  @ ldr tmpa, =((\paddr & 0x00ffffff) * 0x20 + PERIPH_BB)
+  @ ldr \value, [tmpa, #(\offset * 4)] 
 .endm
 
 
@@ -223,8 +225,10 @@
   *
   */
 .macro STRPB value, paddr, offset=0
-  ldr tmpa, =((\paddr & 0x00ffffff) * 0x20 + PERIPH_BB)
-  str \value, [tmpa, #(\offset * 4)] 
+  MOVP \paddr
+  STRP \value, \offset
+  @ ldr tmpa, =((\paddr & 0x00ffffff) * 0x20 + PERIPH_BB)
+  @ str \value, [tmpa, #(\offset * 4)] 
 .endm
 
 
@@ -264,8 +268,10 @@
   *
   */
 .macro LDRRB value, addr, offset=0
-	ldr tmpa, =((\addr & 0x0000ffff) * 0x20 + SRAM_BB)
-	ldr \value, [tmpa, #(\offset * 4)] 
+  MOVR \addr
+  LDRR \value, \offset
+	@ ldr tmpa, =((\addr & 0x0000ffff) * 0x20 + SRAM_BB)
+	@ ldr \value, [tmpa, #(\offset * 4)] 
 .endm
 
 
@@ -274,8 +280,10 @@
   *
   */
 .macro STRRB value, addr, offset=0
-	ldr tmpa, =((\addr & 0x0000ffff) * 0x20 + SRAM_BB)
-	str \value, [tmpa, #(\offset * 4)] 
+  MOVR \addr
+  STRR \value, \offset
+	@ ldr tmpa, =((\addr & 0x0000ffff) * 0x20 + SRAM_BB)
+	@ str \value, [tmpa, #(\offset * 4)] 
 .endm
 
 

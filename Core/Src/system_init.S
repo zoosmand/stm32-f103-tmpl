@@ -134,6 +134,7 @@ SysTickInit:
   */
 PeripheralInit:
   push {lr}
+
   STRW \
     RCC_APB2ENR_AFIOEN \
   | RCC_APB2ENR_IOPBEN \
@@ -154,6 +155,7 @@ PeripheralInit:
   */
 IWatchdogInit:
   push {lr}
+
   mov one, 1
   MOVP RCC_CSR
   /** Enable internal Low Speed clock. */
@@ -184,6 +186,7 @@ _IWatchdogInit_SR_wake_up:
 
   /** Reload IWDG key */
   STRW IWDG_KEY_RELOAD, IWDG_KR
+
   pop {pc}
 
 
@@ -194,34 +197,27 @@ _IWatchdogInit_SR_wake_up:
   */
 WWatchdogInit:
   push {lr}
-  @ mov one, 1
-  @ MOVP WWDG_CR
-	@ STRP one, WWDG_CR_WDGA_Pos
 
-  @ MOVP WWDG_CFR
-	@ STRP one, WWDG_CFR_EWI_Pos
+  MOVP WWDG_CR
+	STRP one, WWDG_CR_WDGA_Pos
 
-
+  MOVP WWDG_CFR
+	STRP one, WWDG_CFR_EWI_Pos
 
   STRLHW \
-    WWDG_CFR_EWI \
-  | WWDG_CFR_WDGTB_0 \
+    WWDG_CFR_WDGTB_0 \
   | WWDG_CFR_WDGTB_1 \
   | 0x7f \
   , WWDG_CFR
 
+  MOVP WWDG_SR
+  STRP zero, WWDG_SR_EWIF_Pos
+  STRW 0, WWDG_SR
 
-
-  @ STRLHW 0x7f, WWDG_CR
-  @ STRW 0xff, WWDG_CR
-
-  @ MOVP WWDG_SR
-  @ STRP zero, WWDG_SR_EWIF_Pos
-  @ STRW 0, WWDG_SR
+  STRLHW 0x7f, WWDG_CR
 
   MOVP WWDG_CR
   STRP one, WWDG_CR_WDGA_Pos
-
 
   pop {pc}
 
@@ -242,6 +238,33 @@ LedInit:
 
 	/** PB13 Input pull-up */
 	STRPB one, GPIOB_BSRR, 13
+  pop {pc}
+
+
+
+
+/**
+  * USART1 initialization.
+  *
+  */
+Usart1Init:
+  push {lr}
+  
+  MOVP GPIOA_CRH
+  /** PA9 TX, max 50 MHz, alternative */
+  STRP one, GPIO_MODE9_0
+  STRP one,  GPIO_MODE9_1
+  STRP zero, GPIO_CNF9_0
+  STRP zero, GPIO_CNF9_1
+
+  /** PA10 RX, max 50 MHz, alternative */
+  STRP one, GPIO_MODE10_0
+  STRP one,  GPIO_MODE10_1
+  STRP zero, GPIO_CNF10_0
+  STRP zero, GPIO_CNF10_1
+
+	@ /** PB13 Input pull-up */
+	@ STRPB one, GPIOB_BSRR, 13
   pop {pc}
 
 
