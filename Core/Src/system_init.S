@@ -143,7 +143,7 @@ PeripheralInit:
   STRW \
     RCC_APB1ENR_WWDGEN \
   , RCC_APB1ENR
-  
+
   pop {pc}
 
 
@@ -207,11 +207,22 @@ WWatchdogInit:
     WWDG_CFR_EWI \
   | WWDG_CFR_WDGTB_0 \
   | WWDG_CFR_WDGTB_1 \
-  | 0x5f \
+  | 0x7f \
   , WWDG_CFR
-  
 
-  STRLHW 0xff, WWDG_CR
+
+
+  @ STRLHW 0x7f, WWDG_CR
+  @ STRW 0xff, WWDG_CR
+
+  @ MOVP WWDG_SR
+  @ STRP zero, WWDG_SR_EWIF_Pos
+  @ STRW 0, WWDG_SR
+
+  MOVP WWDG_CR
+  STRP one, WWDG_CR_WDGA_Pos
+
+
   pop {pc}
 
 
