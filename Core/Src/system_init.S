@@ -55,9 +55,9 @@ _ClearSystemStack:
 
   bl ClockInit
   bl SysTickInit
-  bl IWatchdogInit
-  bl WWatchdogInit
+  @ bl IWatchdogInit
   bl PeripheralInit
+  @ bl WWatchdogInit
   bl LedInit
 
   pop {pc}
@@ -140,6 +140,10 @@ PeripheralInit:
   | RCC_APB2ENR_IOPCEN \
   , RCC_APB2ENR
   
+  STRW \
+    RCC_APB1ENR_WWDGEN \
+  , RCC_APB1ENR
+  
   pop {pc}
 
 
@@ -190,7 +194,24 @@ _IWatchdogInit_SR_wake_up:
   */
 WWatchdogInit:
   push {lr}
+  @ mov one, 1
+  @ MOVP WWDG_CR
+	@ STRP one, WWDG_CR_WDGA_Pos
+
+  @ MOVP WWDG_CFR
+	@ STRP one, WWDG_CFR_EWI_Pos
+
+
+
+  STRLHW \
+    WWDG_CFR_EWI \
+  | WWDG_CFR_WDGTB_0 \
+  | WWDG_CFR_WDGTB_1 \
+  | 0x5f \
+  , WWDG_CFR
   
+
+  STRLHW 0xff, WWDG_CR
   pop {pc}
 
 
@@ -201,14 +222,14 @@ WWatchdogInit:
   */
 LedInit:
   push {lr}
-  @ PC13 Output LED, max 2 MHz, push-pull
+  /** PB13 Output LED, max 2 MHz, push-pull */
   MOVP GPIOB_CRH
   STRP zero, GPIO_MODE13_0
   STRP one,  GPIO_MODE13_1
   STRP zero, GPIO_CNF13_0
   STRP zero, GPIO_CNF13_1
 
-	@ PC13 Input pull-up
+	/** PB13 Input pull-up */
 	STRPB one, GPIOB_BSRR, 13
   pop {pc}
 

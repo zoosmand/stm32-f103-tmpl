@@ -37,6 +37,8 @@ SysTick_Handler:
   .type WWDG_IRQHandler, %function
 WWDG_IRQHandler:
   push {lr}
+  STRBW 0, WWDG_SR
+  STRLHW 0xff, WWDG_CR
 
   pop {pc}
 
