@@ -600,36 +600,36 @@
 .equ DAC_DOR2,          0x40007430
 .equ DBGMCU_IDCODE,     0xE0042000
 .equ DBGMCU_CR,         0xE0042004
-.equ NVIC,              0xE000E004
+@ .equ NVIC,              0xE000E004
 .equ SYSTICKCSR,        0xE000E010
 .equ SYSTICKRVR,        0xE000E014
 .equ SYSTICKCVR,        0xE000E018
 .equ SYSTICKCALVR,      0xE000E01C
-.equ SETENA0,           0xE000E100
-.equ SETENA1,           0xE000E104
-.equ CLRENA0,           0xE000E180
-.equ CLRENA1,           0xE000E184
-.equ SETPEND0,          0xE000E200
-.equ SETPEND1,          0xE000E204
-.equ CLRPEND0,          0xE000E280
-.equ CLRPEND1,          0xE000E284
-.equ ACTIVE0,           0xE000E300
-.equ ACTIVE1,           0xE000E304
-.equ IP0,               0xE000E400
-.equ IP1,               0xE000E404
-.equ IP2,               0xE000E408
-.equ IP3,               0xE000E40C
-.equ IP4,               0xE000E410
-.equ IP5,               0xE000E414
-.equ IP6,               0xE000E418
-.equ IP7,               0xE000E41C
-.equ IP8,               0xE000E420
-.equ IP9,               0xE000E424
-.equ IP10,              0xE000E428
-.equ IP11,              0xE000E42C
-.equ IP12,              0xE000E430
-.equ IP13,              0xE000E434
-.equ IP14,              0xE000E438
+@ .equ SETENA0,           0xE000E100
+@ .equ SETENA1,           0xE000E104
+@ .equ CLRENA0,           0xE000E180
+@ .equ CLRENA1,           0xE000E184
+@ .equ SETPEND0,          0xE000E200
+@ .equ SETPEND1,          0xE000E204
+@ .equ CLRPEND0,          0xE000E280
+@ .equ CLRPEND1,          0xE000E284
+@ .equ ACTIVE0,           0xE000E300
+@ .equ ACTIVE1,           0xE000E304
+@ .equ IP0,               0xE000E400
+@ .equ IP1,               0xE000E404
+@ .equ IP2,               0xE000E408
+@ .equ IP3,               0xE000E40C
+@ .equ IP4,               0xE000E410
+@ .equ IP5,               0xE000E414
+@ .equ IP6,               0xE000E418
+@ .equ IP7,               0xE000E41C
+@ .equ IP8,               0xE000E420
+@ .equ IP9,               0xE000E424
+@ .equ IP10,              0xE000E428
+@ .equ IP11,              0xE000E42C
+@ .equ IP12,              0xE000E430
+@ .equ IP13,              0xE000E434
+@ .equ IP14,              0xE000E438
 .equ IP15,              0xE000E43C
 .equ CPUIDBR,           0xE000ED00
 .equ ICSR,              0xE000ED04
@@ -655,3 +655,35 @@
 .equ FLASH_AR,          0x40022014
 .equ FLASH_OBR,         0x4002201C
 .equ FLASH_WRPR,        0x40022020
+
+
+
+/** Nested Vector Interrupt Controller */
+.equ NVIC,              0xe000e000
+.equ NVIC_ICTR,          NVIC + 0x0000
+.equ NVIC_ISER0,         NVIC + 0x0100
+.equ NVIC_ISER1,         NVIC + 0x0104
+.equ NVIC_ICER0,         NVIC + 0x0180
+.equ NVIC_ICER1,         NVIC + 0x0184
+.equ NVIC_ISPR0,         NVIC + 0x0200
+.equ NVIC_ISPR1,         NVIC + 0x0204
+.equ NVIC_ICPR0,         NVIC + 0x0280
+.equ NVIC_ICPR1,         NVIC + 0x0284
+.equ NVIC_IABR0,         NVIC + 0x0300
+.equ NVIC_IABR1,         NVIC + 0x0304
+.equ NVIC_IPR0,          NVIC + 0x0400
+.equ NVIC_IPR1,          NVIC + 0x0404
+.equ NVIC_IPR2,          NVIC + 0x0408
+.equ NVIC_IPR3,          NVIC + 0x040c
+.equ NVIC_IPR4,          NVIC + 0x0410
+.equ NVIC_IPR5,          NVIC + 0x0414
+.equ NVIC_IPR6,          NVIC + 0x0418
+.equ NVIC_IPR7,          NVIC + 0x041c
+.equ NVIC_IPR8,          NVIC + 0x0420
+.equ NVIC_IPR9,          NVIC + 0x0424
+.equ NVIC_IPR10,         NVIC + 0x0428
+.equ NVIC_IPR11,         NVIC + 0x042c
+.equ NVIC_IPR12,         NVIC + 0x0430
+.equ NVIC_IPR13,         NVIC + 0x0434
+.equ NVIC_IPR14,         NVIC + 0x0438
+.equ NVIC_STIR,          NVIC + 0x0f00

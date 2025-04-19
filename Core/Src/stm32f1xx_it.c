@@ -187,6 +187,6 @@ void SPI1_IRQHandler(void) {
 /**
   * @brief This function handles USART1 global interrupt.
   */
-void USART1_IRQHandler(void) {
+void __attribute((__weak__)) USART1_IRQHandler(void) {
 
 }

@@ -42,4 +42,20 @@ WWDG_IRQHandler:
 
   pop {pc}
 
+
+
+
+/**
+  * USART1 interrupt handler.
+  *
+  */
+  .section .text.USART1_IRQHandler
+  .global USART1_IRQHandler
+  .type USART1_IRQHandler, %function
+USART1_IRQHandler:
+  push {r0-r1, lr}
+  mov zero, 0
+  STRPB zero, USART1_SR, USART_SR_RXNE_Pos
+  pop {r0-r1, pc}
+
   .end

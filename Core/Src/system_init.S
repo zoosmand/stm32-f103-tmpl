@@ -12,14 +12,13 @@
 .include "local.inc"
 
 
-.global SystemInit
-@.global SystemCoreClockUpdate
 
 /**
   * System initialization.
   *
   */
   .section .text.SystemInit
+  .global SystemInit
   .type SystemInit, %function
 
 SystemInit:
@@ -59,6 +58,7 @@ _ClearSystemStack:
   bl PeripheralInit
   @ bl WWatchdogInit
   bl LedInit
+  bl Usart1Init
 
   pop {pc}
   .size SystemInit, .-SystemInit
@@ -137,12 +137,15 @@ PeripheralInit:
 
   STRW \
     RCC_APB2ENR_AFIOEN \
+  | RCC_APB2ENR_IOPAEN \
   | RCC_APB2ENR_IOPBEN \
   | RCC_APB2ENR_IOPCEN \
+  | RCC_APB2ENR_USART1EN \
   , RCC_APB2ENR
   
   STRW \
     RCC_APB1ENR_WWDGEN \
+  | RCC_APB1ENR_PWREN \
   , RCC_APB1ENR
 
   pop {pc}
@@ -229,43 +232,21 @@ WWatchdogInit:
   */
 LedInit:
   push {lr}
+
   /** PB13 Output LED, max 2 MHz, push-pull */
-  MOVP GPIOB_CRH
-  STRP zero, GPIO_MODE13_0
-  STRP one,  GPIO_MODE13_1
-  STRP zero, GPIO_CNF13_0
-  STRP zero, GPIO_CNF13_1
+  ldr tmpa, =GPIOB_CRH
+  ldr tmpd, [tmpa]
+  mov tmp, ~PIN_13_Mask
+  and tmpd, tmp
+  mov tmp, _IOS_2 << ((PIN_13_Pos - 8) * 4)
+  orr tmpd, tmp
+  str tmpd, [tmpa]
 
 	/** PB13 Input pull-up */
-	STRPB one, GPIOB_BSRR, 13
+	STRPB one, GPIOB_BSRR, PIN_13_Pos
+
   pop {pc}
 
-
-
-
-/**
-  * USART1 initialization.
-  *
-  */
-Usart1Init:
-  push {lr}
-  
-  MOVP GPIOA_CRH
-  /** PA9 TX, max 50 MHz, alternative */
-  STRP one, GPIO_MODE9_0
-  STRP one,  GPIO_MODE9_1
-  STRP zero, GPIO_CNF9_0
-  STRP zero, GPIO_CNF9_1
-
-  /** PA10 RX, max 50 MHz, alternative */
-  STRP one, GPIO_MODE10_0
-  STRP one,  GPIO_MODE10_1
-  STRP zero, GPIO_CNF10_0
-  STRP zero, GPIO_CNF10_1
-
-	@ /** PB13 Input pull-up */
-	@ STRPB one, GPIOB_BSRR, 13
-  pop {pc}
 
 
 
