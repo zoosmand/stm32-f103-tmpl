@@ -11,13 +11,13 @@
   * @brief Register definitions.
   *
   */
-tmpa    .req r0
-tmpd    .req r1
-zero    .req r10
-one     .req r11
-_OFF_   .req r10
-_ON_    .req r11
-tmp     .req r12
+tmpa    .req v1
+tmpd    .req v2
+tmp     .req v3
+zero    .req v6
+one     .req v7
+_OFF_   .req v6
+_ON_    .req v7
 
 /* ------------------------------------------------------------------------- */
 /*                Definitions that are not exist in headers                  */

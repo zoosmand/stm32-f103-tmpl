@@ -27,7 +27,7 @@
   .global Usart1Init
   .type Usart1Init, %function
 Usart1Init:
-  push {lr}
+  push {tmpa, tmpd, tmp, lr}
   
   /* Condigure PA9 - TX, PA10 - RX, max frequency, alternative*/
   ldr tmpa, =GPIOA_CRH
@@ -62,7 +62,7 @@ Usart1Init:
   /* Set NVIC Priority */
   STRW 0x0000f000, NVIC_IPR9
 
-  pop {pc}
+  pop {tmpa, tmpd, tmp, pc}
   .size Usart1Init, .-Usart1Init
 
 

@@ -44,9 +44,10 @@ int main(void) {
     aaa++;
     LedToggle();
     // WRITE_REG(IWDG->KR, 0x0000aaaa);
-    printf("The long test message, that might stuck the program...\n");
+    // printf("The long test message, that might stuck the program...\n");
+    printf("The long test message, that might stuck the program but now it does not at all...\n");
 
-    FLAG_CLR(_GEREG_, _SYSSECF_);
+    // FLAG_CLR(_GEREG_, _SYSSECF_);
   }
 
 }

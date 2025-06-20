@@ -3,6 +3,7 @@
 #
 # ChangeLog :
 #	2025-02-08 - Init empty project
+# 2025-06-20 - Add THUMB conditional instruction
 # ------------------------------------------------
 
 ######################################
@@ -128,15 +129,15 @@ ASFLAGS = $(MCU) $(AS_DEFS) $(AS_INCLUDES) $(OPT) -Wall -fdata-sections -ffuncti
 CFLAGS += $(MCU) $(C_DEFS) $(C_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections
 
 ifeq ($(DEBUG), 1)
+# CFLAGS += -g -gdwarf-2 -D CMAKE_CXX_FLAGS_RELEASE="-Wa,-mimplicit-it=thumb"
 CFLAGS += -g -gdwarf-2
-ASFLAGS += -g -gdwarf-2
+ASFLAGS += $(CFLAGS)
 endif
 
 
 # Generate dependency information
 CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)"
-
-ASFLAGS += -MMD -MP -MF"$(@:%.O=%.d)"
+ASFLAGS += $(CFLAGS)
 
 
 #######################################

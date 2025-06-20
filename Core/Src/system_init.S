@@ -28,11 +28,11 @@ SystemInit:
   
   /** Clear system stack */    
   ldr tmpa, =(SRAM_BASE - 4)
-  mov r2, (_SystemStackSize_ / 4)
+  mov tmp, (_SystemStackSize_ / 4)
 _ClearSystemStack:
 	str zero, [tmpa, #4]!
-	sub r2, 1
-	teq r2, 0
+	sub tmp, 1
+	teq tmp, 0
 	bne _ClearSystemStack
 
   /** Init second cache with 1000 value */
