@@ -600,7 +600,7 @@
 .equ DAC_DOR2,          0x40007430
 .equ DBGMCU_IDCODE,     0xE0042000
 .equ DBGMCU_CR,         0xE0042004
-@ .equ NVIC,              0xE000E004
+
 .equ SYSTICKCSR,        0xE000E010
 .equ SYSTICKRVR,        0xE000E014
 .equ SYSTICKCVR,        0xE000E018
@@ -630,7 +630,8 @@
 @ .equ IP12,              0xE000E430
 @ .equ IP13,              0xE000E434
 @ .equ IP14,              0xE000E438
-.equ IP15,              0xE000E43C
+@ .equ IP15,              0xE000E43C
+
 .equ CPUIDBR,           0xE000ED00
 .equ ICSR,              0xE000ED04
 .equ VTOR,              0xE000ED08

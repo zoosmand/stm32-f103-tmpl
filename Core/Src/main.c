@@ -39,15 +39,14 @@ static __IO uint32_t aaa = 1;
  * @retval int
  */
 int main(void) {
+
+  // __NVIC_SetPriorityGrouping(NVIC_PRIORITYGROUP_4);
   
   if (CronSec) {
     aaa++;
     LedToggle();
-    // WRITE_REG(IWDG->KR, 0x0000aaaa);
-    // printf("The long test message, that might stuck the program...\n");
-    printf("The long test message, that might stuck the program but now it does not at all...\n");
+    // printf("The long test message, that might stuck the program but now it does not at all...\n");
 
-    // FLAG_CLR(_GEREG_, _SYSSECF_);
   }
 
 }

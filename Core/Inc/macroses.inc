@@ -225,8 +225,9 @@
   *
   */
 .macro STRPB value, paddr, offset=0
+  mov tmpd, \value
   MOVP \paddr
-  STRP \value, \offset
+  STRP tmpd, \offset
   @ ldr tmpa, =((\paddr & 0x00ffffff) * 0x20 + PERIPH_BB)
   @ str \value, [tmpa, #(\offset * 4)] 
 .endm
@@ -397,7 +398,7 @@ _LOAD_MOVVAG_cycleGCNT:
   *
   */
 .macro FLSP periph, flag	
-	STRPB one, \periph, \flag
+	STRPB 1, \periph, \flag
 .endm
 
 
@@ -406,7 +407,7 @@ _LOAD_MOVVAG_cycleGCNT:
   *
   */
 .macro FLCP periph, flag	
-	STRPB zero, \periph, \flag
+	STRPB 0, \periph, \flag
 .endm
 
 

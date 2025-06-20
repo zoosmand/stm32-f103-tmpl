@@ -58,11 +58,14 @@ WWDG_IRQHandler:
   .global USART1_IRQHandler
   .type USART1_IRQHandler, %function
 USART1_IRQHandler:
-  push {tmpa, tmpd, zero, lr}
+  push {tmpa, tmpd, tmp, lr}
 
-  mov zero, 0
-  STRPB zero, USART1_SR, USART_SR_RXNE_Pos
+  @ mov tmp, 0
+  @ STRPB 0, USART1_SR, USART_SR_RXNE_Pos
+  FLCP USART1_SR, USART_SR_RXNE_Pos
+  ldr tmpd, =USART1_DR
+  ldr tmp, [tmpd]
   
-  pop {tmpa, tmpd, zero, pc}
+  pop {tmpa, tmpd, tmp, pc}
 
   .end

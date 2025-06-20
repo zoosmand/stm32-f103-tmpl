@@ -243,7 +243,8 @@ LedInit:
   str tmpd, [tmpa]
 
 	/** PB13 Input pull-up */
-	STRPB one, GPIOB_BSRR, PIN_13_Pos
+	@ STRPB 1, GPIOB_BSRR, PIN_13_Pos
+  FLSP GPIOB_BSRR, PIN_13_Pos
 
   pop {pc}
 

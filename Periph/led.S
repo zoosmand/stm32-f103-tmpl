@@ -18,14 +18,17 @@
 
 LedToggle:
   push {lr}
-  mov one, 1
-	LDRPB tmpd, GPIOB_IDR, PIN_13_Pos
+  @ mov one, 1
+	@ LDRPB tmpd, GPIOB_IDR, PIN_13_Pos
+	FLTP GPIOB_IDR, PIN_13_Pos
 	cbz tmpd, _LedToggleDown
-	STRPB one, GPIOB_BSRR, (PIN_13_Pos + 16)
+	@ STRPB 1, GPIOB_BSRR, (PIN_13_Pos + 16)
+	FLSP GPIOB_BSRR, (PIN_13_Pos + 16)
 	pop {pc}
 
 _LedToggleDown:
-	STRPB one, GPIOB_BSRR, PIN_13_Pos
+	@ STRPB 1, GPIOB_BSRR, PIN_13_Pos
+	FLSP GPIOB_BSRR, PIN_13_Pos
   pop {pc}
 
 

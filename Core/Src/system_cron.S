@@ -13,7 +13,7 @@
 
 
 /**
-  * SysTick interrupt handler.
+  * System Cron handler.
   *
   */
   .section .text.Cron_Handler

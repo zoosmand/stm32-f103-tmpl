@@ -36,7 +36,7 @@ Usart1Init:
   and tmpd, tmp
   mov tmp, \
       (_AF_PP | _IOS_50) << ((PIN_9_Pos - 8) * 4) \
-    | (_AF_PP | _IOS_50) << ((PIN_10_Pos - 8) * 4)
+    | _IN_FL << ((PIN_10_Pos - 8) * 4)
   orr tmpd, tmp
   str tmpd, [tmpa]
 
