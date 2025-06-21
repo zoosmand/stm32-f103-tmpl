@@ -21,11 +21,15 @@
   .type SysTick_Handler, %function
 
 SysTick_Handler:
-  push {lr}
+  push {tmpa, tmpd, lr}
 
-  FLS _GEREG_, _SYSTICKF_
+  /* Increase 1ms System tick. */
+  ldr tmpa, =sysQuantCnt
+  ldr tmpd, [tmpa]
+  add tmpd, tmpd, 1 
+  str tmpd, [tmpa]
 
-  pop {pc}
+  pop {tmpa, tmpd, pc}
 
 
 /**
@@ -38,6 +42,30 @@ SysTick_Handler:
 WWDG_IRQHandler:
   push {lr}
 
+  STRBW 0, WWDG_SR
+  STRLHW 0xff, WWDG_CR
+
   pop {pc}
+
+
+
+
+/**
+  * USART1 interrupt handler.
+  *
+  */
+  .section .text.USART1_IRQHandler
+  .global USART1_IRQHandler
+  .type USART1_IRQHandler, %function
+USART1_IRQHandler:
+  push {tmpa, tmpd, tmp, lr}
+
+  @ mov tmp, 0
+  @ STRPB 0, USART1_SR, USART_SR_RXNE_Pos
+  FLCP USART1_SR, USART_SR_RXNE_Pos
+  ldr tmpd, =USART1_DR
+  ldr tmp, [tmpd]
+  
+  pop {tmpa, tmpd, tmp, pc}
 
   .end
