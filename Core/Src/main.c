@@ -1,4 +1,3 @@
-/* USER CODE BEGIN Header */
 /**
   ******************************************************************************
   * @file           : main.c
@@ -15,8 +14,8 @@
   *
   ******************************************************************************
   */
-/* USER CODE END Header */
-/* Includes ------------------------------------------------------------------*/
+
+  /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -28,6 +27,7 @@
 /* Private macro -------------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
+static __IO uint32_t aaa = 1;
 
 /* Private function prototypes -----------------------------------------------*/
 
@@ -35,36 +35,19 @@
 
 
 /**
-  * @brief  The application entry point.
-  * @retval int
-  */
+ * @brief  The application entry point.
+ * @retval int
+ */
 int main(void) {
 
-  while (1) {
-    
+  // __NVIC_SetPriorityGrouping(NVIC_PRIORITYGROUP_4);
+  
+  if (CronSec) {
+    aaa++;
+    LedToggle();
+    // printf("The long test message, that might stuck the program but now it does not at all...\n");
+
   }
 
 }
 
-
-/**
-  * @brief  This function is executed in case of error occurrence.
-  * @retval None
-  */
-void Error_Handler(void) {
-  __disable_irq();
-  while (1) {
-  }
-}
-
-#ifdef  USE_FULL_ASSERT
-/**
-  * @brief  Reports the name of the source file and the source line number
-  *         where the assert_param error has occurred.
-  * @param  file: pointer to the source file name
-  * @param  line: assert_param error line source number
-  * @retval None
-  */
-void assert_failed(uint8_t *file, uint32_t line) {
-}
-#endif /* USE_FULL_ASSERT */

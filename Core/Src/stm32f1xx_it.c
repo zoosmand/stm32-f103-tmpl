@@ -102,7 +102,7 @@ void PendSV_Handler(void) {
 /**
   * @brief This function handles System tick timer.
   */
-void SysTick_Handler(void) {
+void __attribute((__weak__)) SysTick_Handler(void) {
 
 }
 
@@ -113,6 +113,14 @@ void SysTick_Handler(void) {
 /* please refer to the startup file (startup_stm32f1xx.s).                    */
 /******************************************************************************/
 
+/**
+  * @brief This function handles Window Watchdog.
+  */
+ void __attribute((__weak__)) WWDG_IRQHandler(void) {
+
+ }
+ 
+ 
 /**
   * @brief This function handles DMA1 channel2 global interrupt.
   */
@@ -179,6 +187,6 @@ void SPI1_IRQHandler(void) {
 /**
   * @brief This function handles USART1 global interrupt.
   */
-void USART1_IRQHandler(void) {
+void __attribute((__weak__)) USART1_IRQHandler(void) {
 
 }

@@ -172,7 +172,7 @@ const uint8_t APBPrescTable[8U] =  {0, 0, 0, 0, 1, 2, 3, 4};
   * @param  None
   * @retval None
   */
-void SystemInit (void)
+void __attribute__((__weak__)) SystemInit (void)
 {
 #if defined(STM32F100xE) || defined(STM32F101xE) || defined(STM32F101xG) || defined(STM32F103xE) || defined(STM32F103xG)
   #ifdef DATA_IN_ExtSRAM
@@ -221,7 +221,7 @@ void SystemInit (void)
   * @param  None
   * @retval None
   */
-void SystemCoreClockUpdate (void)
+void __attribute__((__weak__)) SystemCoreClockUpdate (void)
 {
   uint32_t tmp = 0U, pllmull = 0U, pllsource = 0U;
 

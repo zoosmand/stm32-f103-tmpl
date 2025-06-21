@@ -40,6 +40,8 @@
  extern "C" {
 #endif 
 
+#ifndef __ASSEMBLER__
+
 /** @addtogroup Configuration_section_for_CMSIS
   * @{
   */
@@ -568,6 +570,7 @@ typedef struct
   * @{
   */
 
+#endif  /*__ASSEMBLER__*/
 
 #define FLASH_BASE            0x08000000UL /*!< FLASH base address in the alias region */
 #define FLASH_BANK1_END       0x0801FFFFUL /*!< FLASH END address of bank1 */

@@ -15,6 +15,8 @@ sudo udevadm control --reload-rules
 
 ### Useful Links
 
+* <http://thomasloven.com/blog/2012/06/C-Headers-In-Asm/>
+* <https://sourceware.org/binutils/docs/as/Pseudo-Ops.html>
 
 ---
 
