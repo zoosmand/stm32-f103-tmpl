@@ -15,13 +15,31 @@
 .equ RCC_APB1ENR,       0x4002101C
 .equ RCC_BDCR,          0x40021020
 .equ RCC_CSR,           0x40021024
-.equ GPIOA_CRL,         0x40010800
-.equ GPIOA_CRH,         0x40010804
-.equ GPIOA_IDR,         0x40010808
-.equ GPIOA_ODR,         0x4001080C
-.equ GPIOA_BSRR,        0x40010810
-.equ GPIOA_BRR,         0x40010814
-.equ GPIOA_LCKR,        0x40010818
+
+.equ GPIO_CRL_Offset,   0x00
+.equ GPIO_CRH_Offset,   0x04
+.equ GPIO_IDR_Offset,   0x08
+.equ GPIO_ODR_Offset,   0x0c
+.equ GPIO_BSRR_Offset,  0x10
+.equ GPIO_BRR_Offset,   0x14
+.equ GPIO_LCKR_Offset,  0x18
+
+.equ GPIOA,             0x40010800
+.equ GPIOA_CRL,         GPIOA + GPIO_CRL_Offset
+.equ GPIOA_CRH,         GPIOA + GPIO_CRH_Offset
+.equ GPIOA_IDR,         GPIOA + GPIO_IDR_Offset
+.equ GPIOA_ODR,         GPIOA + GPIO_ODR_Offset
+.equ GPIOA_BSRR,        GPIOA + GPIO_BSRR_Offset
+.equ GPIOA_BRR,         GPIOA + GPIO_BRR_Offset
+.equ GPIOA_LCKR,        GPIOA + GPIO_LCKR_Offset
+@ .equ GPIOA_CRL,         0x40010800
+@ .equ GPIOA_CRH,         0x40010804
+@ .equ GPIOA_IDR,         0x40010808
+@ .equ GPIOA_ODR,         0x4001080C
+@ .equ GPIOA_BSRR,        0x40010810
+@ .equ GPIOA_BRR,         0x40010814
+@ .equ GPIOA_LCKR,        0x40010818
+
 .equ GPIOB_CRL,         0x40010C00
 .equ GPIOB_CRH,         0x40010C04
 .equ GPIOB_IDR,         0x40010C08

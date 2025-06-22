@@ -242,9 +242,9 @@ LedInit:
   orr tmpd, tmp
   str tmpd, [tmpa]
 
-	/** PB13 Input pull-up */
-	@ STRPB 1, GPIOB_BSRR, PIN_13_Pos
-  FLSP GPIOB_BSRR, PIN_13_Pos
+	/** PB13 Output pull-up */
+	STRPB 1, GPIOB_BSRR, PIN_13_Pos
+  @ FLSP GPIOB_BSRR, PIN_13_Pos
 
   pop {pc}
 
