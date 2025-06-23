@@ -163,6 +163,9 @@
 #define PREG_CLR(peripheral, key)                              SET_PERIPH_BB_VAL((uint32_t)&peripheral, 0, key, 0)
 #define PREG_CHECK(peripheral, key)                            (GET_PERIPH_BB_VAL((uint32_t)&peripheral, 0, key))
 
+/* --- Task control --- */
+#define TASK_CTRL(task)                                     if (FLAG_CHECK(task.scheduler->counterReg, task.scheduler->flag)) task.callback((__I uint32_t*)&task);
+
 
 #define BIT_2_0(per)        (per * 2U)
 #define BIT_2_1(per)        (per * 2U + 1U)

@@ -63,11 +63,11 @@ _Cron_Handler_Exit:
   * Scheduler handler.
   *
   */
-  .section .text.Task_Handler
-  .global Task_Handler
-  .type Task_Handler, %function
+  .section .text.Scheduler_Handler
+  .global Scheduler_Handler
+  .type Scheduler_Handler, %function
 
-Task_Handler:
+Scheduler_Handler:
   push {a1-a4, v1-v5, lr}
   /* Stop interrupts globally */
   cpsid i
@@ -87,7 +87,7 @@ Task_Handler:
   cmp v2, v3
   ite hi
   addhi v3, v2, v4
-  bls _Task_Handler_Exit
+  bls _Scheduler_Handler_Exit
   str v3, [tmpa]
 
   @ get flag bit value
@@ -109,7 +109,7 @@ Task_Handler:
   @ mov v3, 1
   @ str v3, [tmpa, v2] 
 
-_Task_Handler_Exit:
+_Scheduler_Handler_Exit:
   cpsie i
   pop {a1-a4, v1-v5, pc}
 

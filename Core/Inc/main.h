@@ -69,19 +69,29 @@ extern "C" {
 
 
 /* Private strictures -------------------------------------------------------------*/
+// typedef void (*callback_)( void );
+
 typedef struct {
   uint32_t  *counter;
   uint32_t  *counterSrc;
   uint32_t  *counterReg;
   uint32_t  flag;
  	uint32_t  period;
-} task_t;
+} task_scheduler_t;
+
+
+typedef struct {
+  GPIO_TypeDef      *port;
+  uint16_t          pin;
+  task_scheduler_t  *scheduler;
+  void              (*callback)(__I uint32_t*);
+} task_led_toggle_t;
 
 
 /* Exported functions prototypes ---------------------------------------------*/
 void Error_Handler(void);
-void LedToggle(GPIO_TypeDef*, uint16_t, __I task_t*);
-void Task_Handler(__I task_t*); // localted in ./Core/system_cron.S
+void LedToggle_Task(__I uint32_t*); // localted in ./Periph/led.S
+void Scheduler_Handler(__I task_scheduler_t*); // localted in ./Core/system_cron.S
 
 
 #ifdef __cplusplus
