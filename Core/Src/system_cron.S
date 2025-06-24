@@ -72,34 +72,36 @@ Scheduler_Handler:
   /* Stop interrupts globally */
   cpsid i
 
-  @ counter source address
-  ldr tmpa, [a1, #0x04]
-  ldr v2, [tmpa]
-
-  @ counter address
+  @ get scheduler struct address
   ldr tmpa, [a1, #0x00]
-  ldr v3, [tmpa]
+  
+  @ get source counter value
+  ldr v5, [tmpa, #0x04]   @ source counter address
+  ldr v2, [v5]            @ source counter value
 
-  @ period address
-  ldr v4, [a1, #0x10]
+  @ get dedicated counter value
+  ldr v5, [tmpa, #0x00]
+  ldr v3, [v5]
 
-  @ comparison
+  @ get refresh period value
+  ldr v4, [tmpa, #0x08]
+
+  @ comparison and store the new counter value
   cmp v2, v3
   ite hi
   addhi v3, v2, v4
   bls _Scheduler_Handler_Exit
-  str v3, [tmpa]
+  str v3, [v5]
 
   @ get flag bit value
-  ldr v2, [a1, #0x0c]
+  ldr v2, [a1, #0x08]
   mov v3, 1
   lsl v2, v3, v2
 
-  @ get BB register address
-  ldr tmpa, [a1, #0x08]
-  ldr v3, [tmpa]
+  @ get BB register address and store the flag
+  ldr v5, [a1, #0x04]
   orr v3, v3, v2
-  str v3, [tmpa]
+  str v3, [v5]
   
   @ ldr tmpa, =((_GEREG_ & 0x0000ffff) * 0x20 + SRAM_BB)
   @ @ set BB offset using the flag value

@@ -59,31 +59,27 @@ extern "C" {
 
 /* Exported macro ------------------------------------------------------------*/
 
+
 /* Private definitions ---------------------------------------------------------*/
 
 
 /* Private macro -------------------------------------------------------------*/
-#define CronSec                       FLAG_CHECK(_GEREG_, _SYSSECF_)
-
-/* Exported macro ------------------------------------------------------------*/
 
 
-/* Private strictures -------------------------------------------------------------*/
-// typedef void (*callback_)( void );
-
+/* Private structures -------------------------------------------------------------*/
 typedef struct {
   uint32_t  *counter;
   uint32_t  *counterSrc;
-  uint32_t  *counterReg;
-  uint32_t  flag;
  	uint32_t  period;
 } task_scheduler_t;
 
 
 typedef struct {
+  task_scheduler_t  *scheduler;
+  uint32_t          *counterReg;
+  uint32_t          entranceFlag;
   GPIO_TypeDef      *port;
   uint16_t          pin;
-  task_scheduler_t  *scheduler;
   void              (*callback)(__I uint32_t*);
 } task_led_toggle_t;
 
@@ -91,7 +87,7 @@ typedef struct {
 /* Exported functions prototypes ---------------------------------------------*/
 void Error_Handler(void);
 void LedToggle_Task(__I uint32_t*); // localted in ./Periph/led.S
-void Scheduler_Handler(__I task_scheduler_t*); // localted in ./Core/system_cron.S
+void Scheduler_Handler(__I uint32_t*); // localted in ./Core/system_cron.S
 
 
 #ifdef __cplusplus

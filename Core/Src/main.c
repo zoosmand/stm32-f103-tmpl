@@ -32,16 +32,16 @@ static __IO uint32_t toggleTaskReg  = 0;
 static __I task_scheduler_t toggleScheduler = {
   .counter    = &toggleTaskCnt,
   .counterSrc = sysQuantCnt,
-  .counterReg = &toggleTaskReg,
-  .flag       = 4,
   .period     = 50,
 };
 
 static __I task_led_toggle_t toggleTask = {
-  .port       = GPIOB,
-  .pin        = GPIO_PIN_13_Pos,
-  .scheduler  = &toggleScheduler,
-  .callback   = &LedToggle_Task,
+  .scheduler    = &toggleScheduler,
+  .counterReg   = &toggleTaskReg,
+  .entranceFlag = 31,
+  .port         = GPIOB,
+  .pin          = GPIO_PIN_13_Pos,
+  .callback     = &LedToggle_Task,
 };
 
 /* Private function prototypes -----------------------------------------------*/
@@ -57,11 +57,11 @@ int main(void) {
 
   // __NVIC_SetPriorityGrouping(NVIC_PRIORITYGROUP_4);
   
-  if (CronSec) {
+  if (CRON_SEC_EVENT) {
     printf("The long test message, that might stuck the program but now it does not at all...\n");
   }
 
-  Scheduler_Handler(&toggleScheduler);
+  Scheduler_Handler((__I uint32_t*)&toggleTask);
 
   TASK_CTRL(toggleTask);
 
@@ -73,5 +73,5 @@ void LedToggle_Task(__I uint32_t *task) {
   __I task_led_toggle_t* tmpTask = (task_led_toggle_t*)task;
   (PIN_LEVEL(tmpTask->port, tmpTask->pin)) ? PIN_L(tmpTask->port, tmpTask->pin) : PIN_H(tmpTask->port, tmpTask->pin);
   // Turn off the task, aka clear task flag
-  FLAG_CLR(tmpTask->scheduler->counterReg, tmpTask->scheduler->flag);
+  FLAG_CLR(tmpTask->counterReg, tmpTask->entranceFlag);
 }

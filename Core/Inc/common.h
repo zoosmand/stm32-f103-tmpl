@@ -123,19 +123,13 @@
 #define GPIO_BSRR_Offset            (uint16_t)0x0010
 #define GPIO_BRR_Offset             (uint16_t)0x0014
 
-// /* EXTI */
-// #define EXTI_TRIGGER_NONE           0b00 /*!< No Trigger Mode */
-// #define EXTI_TRIGGER_RISING         0b01 /*!< Trigger Rising Mode */
-// #define EXTI_TRIGGER_FALLING        0b10 /*!< Trigger Falling Mode */
-// #define EXTI_TRIGGER_BOTH           0b11 /*!< Trigger Rising & Falling Mode */
-
-// /* Independent Watchdog */
-// #define IWDG_KEY_RELOAD             0x0000aaaa               /*!< IWDG Reload Counter Enable   */
-// #define IWDG_KEY_ENABLE             0x0000cccc               /*!< IWDG Peripheral Enable       */
-// #define IWDG_KEY_WR_ACCESS_ENABLE   0x00005555               /*!< IWDG KR Write Access Enable  */
+/* EXTI */
+#define EXTI_TRIGGER_NONE           0b00 /*!< No Trigger Mode */
+#define EXTI_TRIGGER_RISING         0b01 /*!< Trigger Rising Mode */
+#define EXTI_TRIGGER_FALLING        0b10 /*!< Trigger Falling Mode */
+#define EXTI_TRIGGER_BOTH           0b11 /*!< Trigger Rising & Falling Mode */
 
 
-/* Private macro -------------------------------------------------------------*/
 
 
 /* Exported macro ------------------------------------------------------------*/
@@ -147,7 +141,7 @@
 #define SET_SRAM_BB_VAL(addr, offset, key)                      (*(uint32_t*)(GET_SRAM_BB_ADDR(addr, offset)) = key)
 #define GET_SRAM_BB_VAL(addr, offset)                           (*(__O uint32_t*)(GET_SRAM_BB_ADDR(addr, offset)))
 
-/* Exported macro ------------------------------------------------------------*/
+/* Private macro -------------------------------------------------------------*/
 /* --- Bit Band RAM Register flag management macro --- */
 #define FLAG_SET(registry, flag)                                SET_SRAM_BB_VAL((uint32_t)registry, flag, 1)
 #define FLAG_CLR(registry, flag)                                SET_SRAM_BB_VAL((uint32_t)registry, flag, 0)
@@ -159,12 +153,13 @@
 #define PIN_LEVEL(port, pinSource)                              (GET_PERIPH_BB_VAL((uint32_t)port, GPIO_IDR_Offset, pinSource))
 
 /* --- Bit Band Peripheral Registrie key management macro --- */
-#define PREG_SET(peripheral, key)                              SET_PERIPH_BB_VAL((uint32_t)&peripheral, 0, key, 1)
-#define PREG_CLR(peripheral, key)                              SET_PERIPH_BB_VAL((uint32_t)&peripheral, 0, key, 0)
-#define PREG_CHECK(peripheral, key)                            (GET_PERIPH_BB_VAL((uint32_t)&peripheral, 0, key))
+#define PREG_SET(peripheral, key)                               SET_PERIPH_BB_VAL((uint32_t)&peripheral, 0, key, 1)
+#define PREG_CLR(peripheral, key)                               SET_PERIPH_BB_VAL((uint32_t)&peripheral, 0, key, 0)
+#define PREG_CHECK(peripheral, key)                             (GET_PERIPH_BB_VAL((uint32_t)&peripheral, 0, key))
 
 /* --- Task control --- */
-#define TASK_CTRL(task)                                     if (FLAG_CHECK(task.scheduler->counterReg, task.scheduler->flag)) task.callback((__I uint32_t*)&task);
+#define CRON_SEC_EVENT                                          FLAG_CHECK(_GEREG_, _SYSSECF_)
+#define TASK_CTRL(task)                                         if (FLAG_CHECK(task.counterReg, task.entranceFlag)) task.callback((__I uint32_t*)&task);
 
 
 #define BIT_2_0(per)        (per * 2U)
