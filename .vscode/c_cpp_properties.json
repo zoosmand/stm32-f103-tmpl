@@ -11,7 +11,8 @@
                 "${env:VSARM}/arm-gcc/arm-none-eabi/include",
                 "${workspaceRoot}/Drivers/CMSIS/Include",
                 "${workspaceRoot}/Drivers/CMSIS/Device/ST/STM32F1xx/Include",
-                "${workspaceRoot}/Core/Inc"
+                "${workspaceRoot}/Core/Inc",
+                "${workspaceRoot}/Tasks/Led/Inc"
             ],
             "defines": [
                 "DEBUG",

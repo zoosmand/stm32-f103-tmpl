@@ -38,6 +38,7 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 #include "common.h"
+#include "led.h"
 
 #if defined(USE_FULL_ASSERT)
 #include "stm32_assert.h"
@@ -67,27 +68,35 @@ extern "C" {
 
 
 /* Private structures -------------------------------------------------------------*/
-typedef struct {
-  uint32_t  *counter;
-  uint32_t  *counterSrc;
- 	uint32_t  period;
-} task_scheduler_t;
+// typedef struct {
+//   uint32_t  *counter;
+//   uint32_t  *counterSrc;
+//  	uint32_t  period;
+// } task_scheduler_t;
 
 
-typedef struct {
-  task_scheduler_t  *scheduler;
-  uint32_t          *counterReg;
-  uint32_t          entranceFlag;
-  GPIO_TypeDef      *port;
-  uint16_t          pin;
-  void              (*callback)(__I uint32_t*);
-} task_led_toggle_t;
+// typedef struct {
+//   task_scheduler_t  *scheduler;
+//   uint32_t          *counterReg;
+//   uint32_t          entranceFlag;
+//   GPIO_TypeDef      *port;
+//   uint16_t          pin;
+//   void              (*callback)(__I uint32_t*);
+//   uint32_t          *pauseCnt_1;
+//   uint32_t          *srcPauseCnt_1;
+//   uint32_t          pauseValue_1;
+//   uint32_t          *pauseCnt_2;
+//   uint32_t          *srcPauseCnt_2;
+//   uint32_t          pauseValue_2;
+// } task_led_toggle_t;
 
 
 /* Exported functions prototypes ---------------------------------------------*/
 void Error_Handler(void);
-void LedToggle_Task(__I uint32_t*); // localted in ./Periph/led.S
+// void LedToggle_Task(__I uint32_t*); // localted in ./Periph/led.S
 void Scheduler_Handler(__I uint32_t*); // localted in ./Core/system_cron.S
+
+// extern void Led_Handler(void);
 
 
 #ifdef __cplusplus
