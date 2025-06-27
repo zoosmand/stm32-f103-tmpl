@@ -225,31 +225,4 @@ WWatchdogInit:
   pop {pc}
 
 
-
-/**
-  * LED GPIO initialization.
-  *
-  */
-LedInit:
-  push {lr}
-
-  /** PB13 Output LED, max 2 MHz, push-pull */
-  ldr tmpa, =GPIOB_CRH
-  ldr tmpd, [tmpa]
-  mov tmp, ~PIN_13_Mask
-  and tmpd, tmp
-  mov tmp, _IOS_2 << ((PIN_13_Pos - 8) * 4)
-  orr tmpd, tmp
-  str tmpd, [tmpa]
-
-	/** PB13 Output pull-up */
-	STRPB 1, GPIOB_BSRR, PIN_13_Pos
-  @ FLSP GPIOB_BSRR, PIN_13_Pos
-
-  pop {pc}
-
-
-
-
-
   .end

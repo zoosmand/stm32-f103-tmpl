@@ -30,12 +30,12 @@ static __I task_led_toggle_t toggleTask = {
   .scheduler      = &toggleScheduler,
   .counterReg     = &toggleTaskReg,
   .entranceFlag   = 31,
-  .port           = GPIOB,
-  .pin            = GPIO_PIN_13_Pos,
+  .port           = GPIOA,
+  .pin            = GPIO_PIN_8_Pos,
   .callback       = &LedToggle_Task,
   .pauseCnt_1     = &toggleTaskPauseCnt_1,
   .srcPauseCnt_1  = sysQuantCnt,
-  .pauseValue_1   = 50,
+  .pauseValue_1   = 25,
   .pauseCnt_2     = &toggleTaskPauseCnt_2,
   .srcPauseCnt_2  = sysQuantCnt,
   .pauseValue_2   = 50,
@@ -58,38 +58,35 @@ void LedToggle_Task(__I uint32_t *task) {
   // Turn on the LED
   if (!FLAG_CHECK(tmpTask->counterReg, 1)) {
     FLAG_SET(tmpTask->counterReg, 1);
-    PIN_L(tmpTask->port, tmpTask->pin);
+    PIN_H(tmpTask->port, tmpTask->pin);
     // Set up the first pause
-    *tmpTask->srcPauseCnt_1 = *tmpTask->srcPauseCnt_1 + tmpTask->pauseValue_1;
+    *tmpTask->pauseCnt_1 = *tmpTask->srcPauseCnt_1 + tmpTask->pauseValue_1;
     return;
   }
 
   // Handle the first pause
   if (!FLAG_CHECK(tmpTask->counterReg, 2)) {
-    if (*tmpTask->srcPauseCnt_1 <= *tmpTask->srcPauseCnt_1) return;
-    FLAG_SET(tmpTask->counterReg, 3);
+    if (*tmpTask->pauseCnt_1 > *tmpTask->srcPauseCnt_1) return;
+    FLAG_SET(tmpTask->counterReg, 2);
     return;
   }
 
   // Turn off the LED
   if (!FLAG_CHECK(tmpTask->counterReg, 3)) {
     FLAG_SET(tmpTask->counterReg, 3);
-    PIN_H(tmpTask->port, tmpTask->pin);
+    PIN_L(tmpTask->port, tmpTask->pin);
     // Set up the first pause
-    *tmpTask->srcPauseCnt_1 = *tmpTask->srcPauseCnt_1 + tmpTask->pauseValue_1;
+    *tmpTask->pauseCnt_2 = *tmpTask->srcPauseCnt_2 + tmpTask->pauseValue_2;
     return;
   }
 
   // Handle the second pause
   if (!FLAG_CHECK(tmpTask->counterReg, 4)) {
-    if (*tmpTask->srcPauseCnt_1 <= *tmpTask->srcPauseCnt_1) return;
+    if (*tmpTask->pauseCnt_2 > *tmpTask->srcPauseCnt_1) return;
     FLAG_SET(tmpTask->counterReg, 4);
     return;
   }
 
-
-  // Turn off the task, aka clear task flag
-  // FLAG_CLR(tmpTask->counterReg, tmpTask->entranceFlag);
   // Clear dedicated registry
   tmpTask->counterReg;
 }

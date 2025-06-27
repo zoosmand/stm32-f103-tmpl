@@ -75,21 +75,6 @@ extern "C" {
 // } task_scheduler_t;
 
 
-// typedef struct {
-//   task_scheduler_t  *scheduler;
-//   uint32_t          *counterReg;
-//   uint32_t          entranceFlag;
-//   GPIO_TypeDef      *port;
-//   uint16_t          pin;
-//   void              (*callback)(__I uint32_t*);
-//   uint32_t          *pauseCnt_1;
-//   uint32_t          *srcPauseCnt_1;
-//   uint32_t          pauseValue_1;
-//   uint32_t          *pauseCnt_2;
-//   uint32_t          *srcPauseCnt_2;
-//   uint32_t          pauseValue_2;
-// } task_led_toggle_t;
-
 
 /* Exported functions prototypes ---------------------------------------------*/
 void Error_Handler(void);
