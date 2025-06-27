@@ -13,40 +13,107 @@
 #include "led.h"
 
 /* Private includes ----------------------------------------------------------*/
-static __IO uint32_t toggleTaskCnt        = 0;
-static __IO uint32_t toggleTaskReg        = 0;
-static __IO uint32_t toggleTaskPauseCnt_1  = 0;
-static __IO uint32_t toggleTaskPauseCnt_2  = 0;
+static __IO uint32_t ledRedTaskCnt           = 0;
+static __IO uint32_t ledRedTaskReg           = 0;
+static __IO uint32_t ledRedTaskPauseCnt_1    = 0;
+static __IO uint32_t ledRedTaskPauseCnt_2    = 0;
+
+static __IO uint32_t ledBlueTaskCnt          = 0;
+static __IO uint32_t ledBlueTaskReg          = 0;
+static __IO uint32_t ledBlueTaskPauseCnt_1   = 0;
+static __IO uint32_t ledBlueTaskPauseCnt_2   = 0;
+
+static __IO uint32_t ledGreenTaskCnt         = 0;
+static __IO uint32_t ledGreenTaskReg         = 0;
+static __IO uint32_t ledGreenTaskPauseCnt_1  = 0;
+static __IO uint32_t ledGreenTaskPauseCnt_2  = 0;
 
 
 /* Private variables ---------------------------------------------------------*/
-static __I task_scheduler_t toggleScheduler = {
-  .counter    = &toggleTaskCnt,
+static __I task_scheduler_t ledRedScheduler = {
+  .counter    = &ledRedTaskCnt,
   .counterSrc = secCnt,
   .period     = 5,
 };
 
-static __I task_led_toggle_t toggleTask = {
-  .scheduler      = &toggleScheduler,
-  .counterReg     = &toggleTaskReg,
+static __I task_led_toggle_t ledRedTask = {
+  .scheduler      = &ledRedScheduler,
+  .counterReg     = &ledRedTaskReg,
   .entranceFlag   = 31,
   .port           = GPIOA,
   .pin            = GPIO_PIN_8_Pos,
   .callback       = &LedToggle_Task,
-  .pauseCnt_1     = &toggleTaskPauseCnt_1,
+  .pauseCnt_1     = &ledRedTaskPauseCnt_1,
   .srcPauseCnt_1  = sysQuantCnt,
   .pauseValue_1   = 25,
-  .pauseCnt_2     = &toggleTaskPauseCnt_2,
+  .pauseCnt_2     = &ledRedTaskPauseCnt_2,
   .srcPauseCnt_2  = sysQuantCnt,
   .pauseValue_2   = 50,
 };
 
 
+/* ----------------------------------------------------------------------------- */
+static __I task_scheduler_t ledBlueScheduler = {
+  .counter    = &ledBlueTaskCnt,
+  .counterSrc = secCnt,
+  .period     = 4,
+};
+
+static __I task_led_toggle_t ledBlueTask = {
+  .scheduler      = &ledBlueScheduler,
+  .counterReg     = &ledBlueTaskReg,
+  .entranceFlag   = 31,
+  .port           = GPIOB,
+  .pin            = GPIO_PIN_15_Pos,
+  .callback       = &LedToggle_Task,
+  .pauseCnt_1     = &ledBlueTaskPauseCnt_1,
+  .srcPauseCnt_1  = sysQuantCnt,
+  .pauseValue_1   = 14,
+  .pauseCnt_2     = &ledBlueTaskPauseCnt_2,
+  .srcPauseCnt_2  = sysQuantCnt,
+  .pauseValue_2   = 50,
+};
+
+/* ----------------------------------------------------------------------------- */
+
+
+static __I task_scheduler_t ledGreenScheduler = {
+  .counter    = &ledGreenTaskCnt,
+  .counterSrc = secCnt,
+  .period     = 3,
+};
+
+static __I task_led_toggle_t ledGreenTask = {
+  .scheduler      = &ledGreenScheduler,
+  .counterReg     = &ledGreenTaskReg,
+  .entranceFlag   = 31,
+  .port           = GPIOB,
+  .pin            = GPIO_PIN_13_Pos,
+  .callback       = &LedToggle_Task,
+  .pauseCnt_1     = &ledGreenTaskPauseCnt_1,
+  .srcPauseCnt_1  = sysQuantCnt,
+  .pauseValue_1   = 25,
+  .pauseCnt_2     = &ledGreenTaskPauseCnt_2,
+  .srcPauseCnt_2  = sysQuantCnt,
+  .pauseValue_2   = 50,
+};
+
+/* ----------------------------------------------------------------------------- */
+/* ----------------------------------------------------------------------------- */
+/* ----------------------------------------------------------------------------- */
+/* ----------------------------------------------------------------------------- */
+/* ----------------------------------------------------------------------------- */
+/* ----------------------------------------------------------------------------- */
+
 void Led_Handler(void) {
 
-  Scheduler_Handler((__I uint32_t*)&toggleTask);
+  Scheduler_Handler((__I uint32_t*)&ledRedTask);
+  Scheduler_Handler((__I uint32_t*)&ledBlueTask);
+  Scheduler_Handler((__I uint32_t*)&ledGreenTask);
 
-  TASK_CTRL(toggleTask);
+  TASK_CTRL(ledRedTask);
+  TASK_CTRL(ledBlueTask);
+  TASK_CTRL(ledGreenTask);
 
 }
 

@@ -37,10 +37,10 @@ _Cron_Handler_Sec:
   ldr tmpa, =secCntCache
   ldr tmpd, [tmpa]
 
-  cmp tmp, tmpd
-  ite hi
-  addhi tmpd, tmp, 0x03e8
-  bls _Cron_Handler_Exit
+  cmp tmpd, tmp
+  ite ls
+  addls tmpd, tmp, 0x03e8
+  bhi _Cron_Handler_Exit
   str tmpd, [tmpa]
 
   ldr tmpa, =secCnt
@@ -87,10 +87,10 @@ Scheduler_Handler:
   ldr v4, [tmpa, #0x08]
 
   @ comparison and store the new counter value
-  cmp v2, v3
-  ite hi
-  addhi v3, v2, v4
-  bls _Scheduler_Handler_Exit
+  cmp v3, v2
+  ite ls
+  addls v3, v2, v4
+  bhi _Scheduler_Handler_Exit
   str v3, [v5]
 
   @ get flag bit value
