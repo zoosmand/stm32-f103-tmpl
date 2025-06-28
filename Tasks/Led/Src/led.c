@@ -33,7 +33,7 @@ static __IO uint32_t ledGreenTaskPauseCnt_2  = 0;
 static __I task_scheduler_t ledRedScheduler = {
   .counter    = &ledRedTaskCnt,
   .counterSrc = secCnt,
-  .period     = 5,
+  .period     = 7,
 };
 
 static __I task_led_toggle_t ledRedTask = {
@@ -56,7 +56,7 @@ static __I task_led_toggle_t ledRedTask = {
 static __I task_scheduler_t ledBlueScheduler = {
   .counter    = &ledBlueTaskCnt,
   .counterSrc = secCnt,
-  .period     = 4,
+  .period     = 5,
 };
 
 static __I task_led_toggle_t ledBlueTask = {

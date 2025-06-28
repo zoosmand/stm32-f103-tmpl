@@ -3,6 +3,7 @@
  */
 
 
+
 .equ PWR_CSR,           0x40007004
 .equ PWR_CR,            0x40007000
 .equ RCC_CR,            0x40021000
@@ -32,68 +33,75 @@
 .equ GPIOA_BSRR,        GPIOA + GPIO_BSRR_Offset
 .equ GPIOA_BRR,         GPIOA + GPIO_BRR_Offset
 .equ GPIOA_LCKR,        GPIOA + GPIO_LCKR_Offset
-@ .equ GPIOA_CRL,         0x40010800
-@ .equ GPIOA_CRH,         0x40010804
-@ .equ GPIOA_IDR,         0x40010808
-@ .equ GPIOA_ODR,         0x4001080C
-@ .equ GPIOA_BSRR,        0x40010810
-@ .equ GPIOA_BRR,         0x40010814
-@ .equ GPIOA_LCKR,        0x40010818
 
-.equ GPIOB_CRL,         0x40010C00
-.equ GPIOB_CRH,         0x40010C04
-.equ GPIOB_IDR,         0x40010C08
-.equ GPIOB_ODR,         0x40010C0C
-.equ GPIOB_BSRR,        0x40010C10
-.equ GPIOB_BRR,         0x40010C14
-.equ GPIOB_LCKR,        0x40010C18
+.equ GPIOB,             0x40010c00
+.equ GPIOB_CRL,         GPIOB + GPIO_CRL_Offset
+.equ GPIOB_CRH,         GPIOB + GPIO_CRH_Offset
+.equ GPIOB_IDR,         GPIOB + GPIO_IDR_Offset
+.equ GPIOB_ODR,         GPIOB + GPIO_ODR_Offset
+.equ GPIOB_BSRR,        GPIOB + GPIO_BSRR_Offset
+.equ GPIOB_BRR,         GPIOB + GPIO_BRR_Offset
+.equ GPIOB_LCKR,        GPIOB + GPIO_LCKR_Offset
+
 .equ GPIOC_CRL,         0x40011000
-.equ GPIOC_CRH,         0x40011004
-.equ GPIOC_IDR,         0x40011008
-.equ GPIOC_ODR,         0x4001100C
-.equ GPIOC_BSRR,        0x40011010
-.equ GPIOC_BRR,         0x40011014
-.equ GPIOC_LCKR,        0x40011018
+.equ GPIOC_CRL,         GPIOC + GPIO_CRL_Offset
+.equ GPIOC_CRH,         GPIOC + GPIO_CRH_Offset
+.equ GPIOC_IDR,         GPIOC + GPIO_IDR_Offset
+.equ GPIOC_ODR,         GPIOC + GPIO_ODR_Offset
+.equ GPIOC_BSRR,        GPIOC + GPIO_BSRR_Offset
+.equ GPIOC_BRR,         GPIOC + GPIO_BRR_Offset
+.equ GPIOC_LCKR,        GPIOC + GPIO_LCKR_Offset
+
 .equ GPIOD_CRL,         0x40011400
-.equ GPIOD_CRH,         0x40011404
-.equ GPIOD_IDR,         0x40011408
-.equ GPIOD_ODR,         0x4001140C
-.equ GPIOD_BSRR,        0x40011410
-.equ GPIOD_BRR,         0x40011414
-.equ GPIOD_LCKR,        0x40011418
+.equ GPIOD_CRL,         GPIOD + GPIO_CRL_Offset
+.equ GPIOD_CRH,         GPIOD + GPIO_CRH_Offset
+.equ GPIOD_IDR,         GPIOD + GPIO_IDR_Offset
+.equ GPIOD_ODR,         GPIOD + GPIO_ODR_Offset
+.equ GPIOD_BSRR,        GPIOD + GPIO_BSRR_Offset
+.equ GPIOD_BRR,         GPIOD + GPIO_BRR_Offset
+.equ GPIOD_LCKR,        GPIOD + GPIO_LCKR_Offset
+
 .equ GPIOE_CRL,         0x40011800
-.equ GPIOE_CRH,         0x40011804
-.equ GPIOE_IDR,         0x40011808
-.equ GPIOE_ODR,         0x4001180C
-.equ GPIOE_BSRR,        0x40011810
-.equ GPIOE_BRR,         0x40011814
-.equ GPIOE_LCKR,        0x40011818
-.equ GPIOF_CRL,         0x40011C00
-.equ GPIOF_CRH,         0x40011C04
-.equ GPIOF_IDR,         0x40011C08
-.equ GPIOF_ODR,         0x40011C0C
-.equ GPIOF_BSRR,        0x40011C10
-.equ GPIOF_BRR,         0x40011C14
-.equ GPIOF_LCKR,        0x40011C18
+.equ GPIOE_CRL,         GPIOE + GPIO_CRL_Offset
+.equ GPIOE_CRH,         GPIOE + GPIO_CRH_Offset
+.equ GPIOE_IDR,         GPIOE + GPIO_IDR_Offset
+.equ GPIOE_ODR,         GPIOE + GPIO_ODR_Offset
+.equ GPIOE_BSRR,        GPIOE + GPIO_BSRR_Offset
+.equ GPIOE_BRR,         GPIOE + GPIO_BRR_Offset
+.equ GPIOE_LCKR,        GPIOE + GPIO_LCKR_Offset
+
+.equ GPIOF_CRL,         0x40011c00
+.equ GPIOF_CRL,         GPIOF + GPIO_CRL_Offset
+.equ GPIOF_CRH,         GPIOF + GPIO_CRH_Offset
+.equ GPIOF_IDR,         GPIOF + GPIO_IDR_Offset
+.equ GPIOF_ODR,         GPIOF + GPIO_ODR_Offset
+.equ GPIOF_BSRR,        GPIOF + GPIO_BSRR_Offset
+.equ GPIOF_BRR,         GPIOF + GPIO_BRR_Offset
+.equ GPIOF_LCKR,        GPIOF + GPIO_LCKR_Offset
+
 .equ GPIOG_CRL,         0x40012000
-.equ GPIOG_CRH,         0x40012004
-.equ GPIOG_IDR,         0x40012008
-.equ GPIOG_ODR,         0x4001200C
-.equ GPIOG_BSRR,        0x40012010
-.equ GPIOG_BRR,         0x40012014
-.equ GPIOG_LCKR,        0x40012018
+.equ GPIOG_CRL,         GPIOG + GPIO_CRL_Offset
+.equ GPIOG_CRH,         GPIOG + GPIO_CRH_Offset
+.equ GPIOG_IDR,         GPIOG + GPIO_IDR_Offset
+.equ GPIOG_ODR,         GPIOG + GPIO_ODR_Offset
+.equ GPIOG_BSRR,        GPIOG + GPIO_BSRR_Offset
+.equ GPIOG_BRR,         GPIOG + GPIO_BRR_Offset
+.equ GPIOG_LCKR,        GPIOG + GPIO_LCKR_Offset
+
 .equ AFIO_EVCR,         0x40010000
 .equ AFIO_MAPR,         0x40010004
 .equ AFIO_EXTICR1,      0x40010008
 .equ AFIO_EXTICR2,      0x4001000C
 .equ AFIO_EXTICR3,      0x40010010
 .equ AFIO_EXTICR4,      0x40010014
+
 .equ EXTI_IMR,          0x40010400
 .equ EXTI_EMR,          0x40010404
 .equ EXTI_RTSR,         0x40010408
 .equ EXTI_FTSR,         0x4001040C
 .equ EXTI_SWIER,        0x40010410
 .equ EXTI_PR,           0x40010414
+
 .equ DMA_ISR,           0x40020000
 .equ DMA_IFCR,          0x40020004
 .equ DMA_CCR1,          0x40020008
@@ -706,3 +714,7 @@
 .equ NVIC_IPR13,         NVIC + 0x0434
 .equ NVIC_IPR14,         NVIC + 0x0438
 .equ NVIC_STIR,          NVIC + 0x0f00
+
+
+
+  @ .end

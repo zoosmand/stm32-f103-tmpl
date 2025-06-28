@@ -5,7 +5,7 @@
   .syntax unified
   .thumb
 
-#include <stm32f103xb.h>
+@ #include <stm32f103xb.h>
 .include "stm32f1xx.inc"
 .include "macroses.inc"
 .include "local.inc"
