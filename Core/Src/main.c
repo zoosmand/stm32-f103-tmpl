@@ -27,7 +27,6 @@
 /* Private macro -------------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
-static __IO uint32_t aaa = 1;
 
 /* Private function prototypes -----------------------------------------------*/
 
@@ -42,12 +41,10 @@ int main(void) {
 
   // __NVIC_SetPriorityGrouping(NVIC_PRIORITYGROUP_4);
   
-  if (CronSec) {
-    aaa++;
-    LedToggle();
-    // printf("The long test message, that might stuck the program but now it does not at all...\n");
-
+  if (CRON_SEC_EVENT) {
+    printf("The long test message, that might stuck the program but now it does not at all...\n");
   }
 
-}
+  Led_Handler();
 
+}

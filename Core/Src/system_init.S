@@ -6,7 +6,6 @@
   .thumb
 
 #include <stm32f103xb.h>
-#include <core_cm3.h>
 .include "stm32f1xx.inc"
 .include "macroses.inc"
 .include "local.inc"
@@ -223,33 +222,6 @@ WWatchdogInit:
   STRP one, WWDG_CR_WDGA_Pos
 
   pop {pc}
-
-
-
-/**
-  * LED GPIO initialization.
-  *
-  */
-LedInit:
-  push {lr}
-
-  /** PB13 Output LED, max 2 MHz, push-pull */
-  ldr tmpa, =GPIOB_CRH
-  ldr tmpd, [tmpa]
-  mov tmp, ~PIN_13_Mask
-  and tmpd, tmp
-  mov tmp, _IOS_2 << ((PIN_13_Pos - 8) * 4)
-  orr tmpd, tmp
-  str tmpd, [tmpa]
-
-	/** PB13 Input pull-up */
-	@ STRPB 1, GPIOB_BSRR, PIN_13_Pos
-  FLSP GPIOB_BSRR, PIN_13_Pos
-
-  pop {pc}
-
-
-
 
 
   .end

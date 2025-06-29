@@ -32,7 +32,8 @@ BUILD_DIR = build
 ######################################
 # C sources
 C_SOURCES =  \
-$(wildcard Core/Src/*.c)
+$(wildcard Core/Src/*.c) \
+$(wildcard Tasks/Led/Src/*.c)
 
 # ASM sources
 ASM_SOURCES =  \
@@ -111,16 +112,20 @@ C_DEFS =  \
 
 
 # AS includes
-AS_INCLUDES = \
--ICore/Inc \
--IDrivers/CMSIS/Device/ST/STM32F1xx/Include \
--IDrivers/CMSIS/Include
+# AS_INCLUDES = \
+# -ICore/Inc \
+# -IDrivers/CMSIS/Device/ST/STM32F1xx/Include \
+# -IDrivers/CMSIS/Include
 
 # C includes
 C_INCLUDES =  \
 -ICore/Inc \
+-ITasks/Led/Inc \
 -IDrivers/CMSIS/Device/ST/STM32F1xx/Include \
 -IDrivers/CMSIS/Include
+
+# AS includes
+AS_INCLUDES = $(C_INCLUDES)
 
 
 # compile gcc flags
