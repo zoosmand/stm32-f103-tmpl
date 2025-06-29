@@ -282,7 +282,8 @@
   */
 .macro STRRB value, addr, offset=0
   MOVR \addr
-  STRR \value, \offset
+  mov tmp, \value
+  STRR tmp, \offset
 	@ ldr tmpa, =((\addr & 0x0000ffff) * 0x20 + SRAM_BB)
 	@ str \value, [tmpa, #(\offset * 4)] 
 .endm
@@ -297,21 +298,21 @@
   * 
   */
 .macro MOVVA srcaddr, dstaddr, nw 
-	push {r0-r2, r12}
-	ldr tmpa, =(\dstaddr)
-	ldr tmpd, =(\srcaddr)
-	ldr r2, =\nw
+	push {v1-v4}
+	ldr v1, =(\dstaddr)
+	ldr v2, =(\srcaddr)
+	ldr v3, =\nw
 
 .set GCNT = GCNT + 1
 	
 _LOAD_MOVVA_cycleGCNT:
-	ldrne tmp, [tmpd, #4]!
-	strne tmp, [tmpa, #4]!
-	sub r2, 1
-	teq r2, 0
+	ldrne v4, [v2, #4]!
+	strne v4, [v1, #4]!
+	sub v3, 1
+	teq v3, 0
 	bne _LOAD_MOVVA_cycleGCNT
 
-	pop {r0-r2, r12}
+	pop {v1-v4}
 .endm
 
 
@@ -320,21 +321,21 @@ _LOAD_MOVVA_cycleGCNT:
   * 
   */
 .macro MOVVAG srcaddr, dstaddr, nw
-  push {r0-r2, r12}
-	ldr tmpa, =(\dstaddr - 4)
-	ldr tmpd, =(\srcaddr - 4)
-	add R2, \nw, 1
+  push {v1-v4}
+	ldr v1, =(\dstaddr - 4)
+	ldr v2, =(\srcaddr - 4)
+	add v3, \nw, 1
 
 .set GCNT = GCNT + 1
 	
 _LOAD_MOVVAG_cycleGCNT:
-	ldrne tmp, [tmpd, #4]!
-	strne tmp, [tmpa, #4]!
-	sub r2, #1
-	teq r2, #0
+	ldrne v4, [v2, #4]!
+	strne v4, [v1, #4]!
+	sub v3, #1
+	teq v3, #0
 	bne _LOAD_MOVVAG_cycleGCNT
 
-	pop {r0-r2, r12}
+	pop {v1-v4}
 .endm
 
 
@@ -371,7 +372,7 @@ _LOAD_MOVVAG_cycleGCNT:
   *
   */
 .macro FLS register, flag	
-	STRRB one, \register, \flag
+	STRRB 1, \register, \flag
 .endm
 
 
@@ -380,7 +381,7 @@ _LOAD_MOVVAG_cycleGCNT:
   *
   */
 .macro FLC register, flag	
-	STRRB zero, \register, \flag
+	STRRB 0, \register, \flag
 .endm
 
 
