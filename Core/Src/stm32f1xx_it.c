@@ -16,7 +16,7 @@
   */
 
 /* Includes ------------------------------------------------------------------*/
-#include "main.h"
+// #include "main.h"
 #include "stm32f1xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 
@@ -102,20 +102,8 @@ void PendSV_Handler(void) {
 /**
   * @brief This function handles System tick timer.
   */
-// void __attribute((__weak__)) SysTick_Handler(void) {
 void SysTick_Handler(void) {
   sysCnt++;
-// void SysTick_Handler(void) {
-//   __asm__ volatile (
-//     "ldr r4, =counter \n\t"
-//     "ldr r5, [r4] \n\t"
-//     "add r5, r5, 1 \n\t" 
-//     "str r5, [r4] \n\t"
-//     :
-//     : //"c" (counter)
-//     : "r4", "r5"
-//   );
-
 }
 
 /******************************************************************************/
@@ -128,7 +116,6 @@ void SysTick_Handler(void) {
 /**
   * @brief This function handles Window Watchdog.
   */
-//  void __attribute((__weak__)) WWDG_IRQHandler(void) {
 void WWDG_IRQHandler(void) {
   WWDG->SR = 0;
   WWDG->CR = 0x00ff;
@@ -201,7 +188,6 @@ void SPI1_IRQHandler(void) {
 /**
   * @brief This function handles USART1 global interrupt.
   */
-// void __attribute((__weak__)) USART1_IRQHandler(void) {
 void USART1_IRQHandler(void) {
   PREG_CLR(USART1->SR, USART_SR_RXNE_Pos);
   uint16_t q = USART1->DR;

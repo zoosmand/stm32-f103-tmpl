@@ -11,27 +11,26 @@
 
   /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "led.h"
 
 /* Private includes ----------------------------------------------------------*/
-static __IO uint32_t ledRedTaskCnt           = 0;
-static __IO uint32_t ledRedTaskReg           = 0;
-static __IO uint32_t ledRedTaskPauseCnt_1    = 0;
-static __IO uint32_t ledRedTaskPauseCnt_2    = 0;
+static uint32_t ledRedTaskCnt           = 0;
+static uint32_t ledRedTaskReg           = 0;
+static uint32_t ledRedTaskPauseCnt_1    = 0;
+static uint32_t ledRedTaskPauseCnt_2    = 0;
 
-static __IO uint32_t ledBlueTaskCnt          = 0;
-static __IO uint32_t ledBlueTaskReg          = 0;
-static __IO uint32_t ledBlueTaskPauseCnt_1   = 0;
-static __IO uint32_t ledBlueTaskPauseCnt_2   = 0;
+static uint32_t ledBlueTaskCnt          = 0;
+static uint32_t ledBlueTaskReg          = 0;
+static uint32_t ledBlueTaskPauseCnt_1   = 0;
+static uint32_t ledBlueTaskPauseCnt_2   = 0;
 
-static __IO uint32_t ledGreenTaskCnt         = 0;
-static __IO uint32_t ledGreenTaskReg         = 0;
-static __IO uint32_t ledGreenTaskPauseCnt_1  = 0;
-static __IO uint32_t ledGreenTaskPauseCnt_2  = 0;
+static uint32_t ledGreenTaskCnt         = 0;
+static uint32_t ledGreenTaskReg         = 0;
+static uint32_t ledGreenTaskPauseCnt_1  = 0;
+static uint32_t ledGreenTaskPauseCnt_2  = 0;
 
 
 /* Private variables ---------------------------------------------------------*/
-static __I task_scheduler_t ledRedScheduler = {
+static task_scheduler_t ledRedScheduler = {
   .counter    = &ledRedTaskCnt,
   .counterSrc = &secCnt,
   .period     = 7,
@@ -39,9 +38,8 @@ static __I task_scheduler_t ledRedScheduler = {
   .entranceFlag   = 31,
 };
 
-static __I task_led_toggle_t ledRedTask = {
+static task_led_toggle_t ledRedTask = {
   .scheduler      = &ledRedScheduler,
-  // .taskReg        = &ledRedTaskReg,
   .port           = GPIOA,
   .pin            = GPIO_PIN_8_Pos,
   .callback       = &LedToggle_Task,
@@ -55,7 +53,7 @@ static __I task_led_toggle_t ledRedTask = {
 
 
 /* ----------------------------------------------------------------------------- */
-static __I task_scheduler_t ledBlueScheduler = {
+static task_scheduler_t ledBlueScheduler = {
   .counter    = &ledBlueTaskCnt,
   .counterSrc = &secCnt,
   .period     = 5,
@@ -63,9 +61,8 @@ static __I task_scheduler_t ledBlueScheduler = {
   .entranceFlag   = 31,
 };
 
-static __I task_led_toggle_t ledBlueTask = {
+static task_led_toggle_t ledBlueTask = {
   .scheduler      = &ledBlueScheduler,
-  // .taskReg        = &ledBlueTaskReg,
   .port           = GPIOB,
   .pin            = GPIO_PIN_15_Pos,
   .callback       = &LedToggle_Task,
@@ -80,17 +77,16 @@ static __I task_led_toggle_t ledBlueTask = {
 /* ----------------------------------------------------------------------------- */
 
 
-static __I task_scheduler_t ledGreenScheduler = {
-  .counter    = &ledGreenTaskCnt,
-  .counterSrc = &secCnt,
-  .period     = 3,
+static task_scheduler_t ledGreenScheduler = {
+  .counter        = &ledGreenTaskCnt,
+  .counterSrc     = &secCnt,
+  .period         = 3,
   .counterReg     = &ledGreenTaskReg,
   .entranceFlag   = 31,
 };
 
-static __I task_led_toggle_t ledGreenTask = {
+static task_led_toggle_t ledGreenTask = {
   .scheduler      = &ledGreenScheduler,
-  // .taskReg        = &ledGreenTaskReg,
   .port           = GPIOB,
   .pin            = GPIO_PIN_13_Pos,
   .callback       = &LedToggle_Task,
@@ -111,9 +107,9 @@ static __I task_led_toggle_t ledGreenTask = {
 
 void Led_Handler(void) {
 
-  Scheduler_Handler(&ledRedTask);
-  Scheduler_Handler(&ledBlueTask);
-  Scheduler_Handler(&ledGreenTask);
+  Scheduler_Handler(&ledRedScheduler);
+  Scheduler_Handler(&ledBlueScheduler);
+  Scheduler_Handler(&ledGreenScheduler);
 
   TASK_CTRL(ledRedTask);
   TASK_CTRL(ledBlueTask);
@@ -122,9 +118,8 @@ void Led_Handler(void) {
 }
 
 
-void LedToggle_Task(__I uint32_t *task) {
+void LedToggle_Task(uint32_t *task) {
   __I task_led_toggle_t* tmpTask = (task_led_toggle_t*)task;
-  // (PIN_LEVEL(tmpTask->port, tmpTask->pin)) ? PIN_L(tmpTask->port, tmpTask->pin) : PIN_H(tmpTask->port, tmpTask->pin);
 
   // Turn on the LED
   if (!FLAG_CHECK(tmpTask->scheduler->counterReg, 1)) {
@@ -146,7 +141,7 @@ void LedToggle_Task(__I uint32_t *task) {
   if (!FLAG_CHECK(tmpTask->scheduler->counterReg, 3)) {
     FLAG_SET(tmpTask->scheduler->counterReg, 3);
     PIN_L(tmpTask->port, tmpTask->pin);
-    // Set up the first pause
+    // Set up the second pause
     *tmpTask->pauseCnt_2 = *tmpTask->srcPauseCnt_2 + tmpTask->pauseValue_2;
     return;
   }
@@ -159,5 +154,5 @@ void LedToggle_Task(__I uint32_t *task) {
   }
 
   // Clear dedicated registry
-  tmpTask->scheduler->counterReg;
+  *tmpTask->scheduler->counterReg = 0;
 }

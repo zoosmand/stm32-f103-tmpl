@@ -37,8 +37,6 @@ extern "C" {
 #include "stm32f1xx.h"
 
 /* Private includes ----------------------------------------------------------*/
-#include "common.h"
-#include "led.h"
 
 #if defined(USE_FULL_ASSERT)
 #include "stm32_assert.h"
@@ -49,15 +47,12 @@ extern "C" {
 #define SWO_USART
 
 /* Exported variables --------------------------------------------------------*/
-extern __IO uint32_t _GEREG_;
-extern __IO uint32_t sysCnt;
-extern __IO uint32_t secCnt;
+extern uint32_t _GEREG_;
+extern uint32_t sysCnt;
+extern uint32_t secCnt;
 
 
 /* Exported constants --------------------------------------------------------*/
-// #define _GEREG_                       (uint32_t*)(SRAM_BASE)
-// #define sysQuantCnt                   (uint32_t*)(SRAM_BASE + 0x04)
-// #define secCnt                        (uint32_t*)(SRAM_BASE + 0x08)
 
 
 /** Global Events Register Flags */
@@ -83,13 +78,14 @@ typedef struct {
 } task_scheduler_t;
 
 
+/* Private includes ----------------------------------------------------------*/
+#include "common.h"
+#include "led.h"
+
 
 /* Exported functions prototypes ---------------------------------------------*/
 void Error_Handler(void);
-// void LedToggle_Task(__I uint32_t*); // localted in ./Periph/led.S
-void Scheduler_Handler(__IO task_scheduler_t*); // localted in ./Core/system_cron.S
-
-// extern void Led_Handler(void);
+void Scheduler_Handler(task_scheduler_t*);
 
 
 #ifdef __cplusplus

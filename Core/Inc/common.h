@@ -164,7 +164,7 @@
 
 /* --- Task control --- */
 #define CRON_SEC_EVENT                                          FLAG_CHECK(_GEREG_, _SYSSECF_)
-#define TASK_CTRL(task)                                         if (FLAG_CHECK(task.scheduler->counterReg, task.scheduler->entranceFlag)) task.callback((__I uint32_t*)&task);
+#define TASK_CTRL(task)                                         if (FLAG_CHECK(task.scheduler->counterReg, task.scheduler->entranceFlag)) task.callback((uint32_t*)&task);
 
 
 #define BIT_2_0(per)        (per * 2U)

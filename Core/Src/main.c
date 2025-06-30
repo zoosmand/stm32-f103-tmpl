@@ -19,10 +19,10 @@
 #include "main.h"
 
 /* Global variables ---------------------------------------------------------*/
-__IO uint32_t _GEREG_       = 0;
-__IO uint32_t sysCnt        = 0;
-__IO uint32_t secCnt        = 0;
-static __IO uint32_t secCntCache   = 1000;
+__attribute__((section(".cron"))) uint32_t _GEREG_               = 0;
+__attribute__((section(".cron"))) uint32_t sysCnt                = 0;
+__attribute__((section(".cron"))) uint32_t secCnt                = 0;
+static  __attribute__((section(".cron"))) uint32_t secCntCache   = 0;
 
 /* Private includes ----------------------------------------------------------*/
 
@@ -82,11 +82,11 @@ void Cron_Handler(void) {
 
 
 
-void Scheduler_Handler(__IO task_scheduler_t *scheduler) {
+void Scheduler_Handler(task_scheduler_t *scheduler) {
   __disable_irq();
 
-  if (scheduler->counter <= scheduler->counterSrc) {
-    scheduler->counter = scheduler->counterSrc + scheduler->period;
+  if (*scheduler->counter <= *scheduler->counterSrc) {
+    *scheduler->counter = *scheduler->counterSrc + scheduler->period;
     FLAG_SET(scheduler->counterReg, scheduler->entranceFlag);
   }
 
