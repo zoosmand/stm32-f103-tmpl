@@ -48,10 +48,16 @@ extern "C" {
 /* Exported types ------------------------------------------------------------*/
 #define SWO_USART
 
+/* Exported variables --------------------------------------------------------*/
+extern __IO uint32_t _GEREG_;
+extern __IO uint32_t sysCnt;
+extern __IO uint32_t secCnt;
+
+
 /* Exported constants --------------------------------------------------------*/
-#define _GEREG_                       (uint32_t*)(SRAM_BASE)
-#define sysQuantCnt                   (uint32_t*)(SRAM_BASE + 0x04)
-#define secCnt                        (uint32_t*)(SRAM_BASE + 0x08)
+// #define _GEREG_                       (uint32_t*)(SRAM_BASE)
+// #define sysQuantCnt                   (uint32_t*)(SRAM_BASE + 0x04)
+// #define secCnt                        (uint32_t*)(SRAM_BASE + 0x08)
 
 
 /** Global Events Register Flags */
@@ -68,18 +74,20 @@ extern "C" {
 
 
 /* Private structures -------------------------------------------------------------*/
-// typedef struct {
-//   uint32_t  *counter;
-//   uint32_t  *counterSrc;
-//  	uint32_t  period;
-// } task_scheduler_t;
+typedef struct {
+  uint32_t  *counter;
+  uint32_t  *counterSrc;
+  uint32_t  period;
+  uint32_t  *counterReg;
+  uint32_t  entranceFlag;
+} task_scheduler_t;
 
 
 
 /* Exported functions prototypes ---------------------------------------------*/
 void Error_Handler(void);
 // void LedToggle_Task(__I uint32_t*); // localted in ./Periph/led.S
-void Scheduler_Handler(__I uint32_t*); // localted in ./Core/system_cron.S
+void Scheduler_Handler(__IO task_scheduler_t*); // localted in ./Core/system_cron.S
 
 // extern void Led_Handler(void);
 
@@ -89,4 +97,3 @@ void Scheduler_Handler(__I uint32_t*); // localted in ./Core/system_cron.S
 #endif
 
 #endif /* __MAIN_H */
-

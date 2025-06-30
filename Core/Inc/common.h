@@ -129,6 +129,11 @@
 #define EXTI_TRIGGER_FALLING        0b10 /*!< Trigger Falling Mode */
 #define EXTI_TRIGGER_BOTH           0b11 /*!< Trigger Rising & Falling Mode */
 
+/* IWDG */
+#define IWDG_KEY_RELOAD             0x0000aaaa
+#define IWDG_KEY_ENABLE             0x0000cccc
+#define IWDG_KEY_ACCESS             0x00005555
+#define IWDG_RELOAD_COUNTER         0x00000fff /* 4095 */
 
 
 
@@ -159,7 +164,7 @@
 
 /* --- Task control --- */
 #define CRON_SEC_EVENT                                          FLAG_CHECK(_GEREG_, _SYSSECF_)
-#define TASK_CTRL(task)                                         if (FLAG_CHECK(task.counterReg, task.entranceFlag)) task.callback((__I uint32_t*)&task);
+#define TASK_CTRL(task)                                         if (FLAG_CHECK(task.scheduler->counterReg, task.scheduler->entranceFlag)) task.callback((__I uint32_t*)&task);
 
 
 #define BIT_2_0(per)        (per * 2U)

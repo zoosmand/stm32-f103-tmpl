@@ -34,11 +34,11 @@ _ClearSystemStack:
 	teq tmp, 0
 	bne _ClearSystemStack
 
-  /** Init second cache with 1000 value */
-  ldr tmpa, =secCntCache
-  ldr tmpd, [tmpa]
-  add tmpd, tmpd, #0x03e8
-  str tmpd, [tmpa]
+  @ /** Init second cache with 1000 value */
+  @ ldr tmpa, =secCntCache
+  @ ldr tmpd, [tmpa]
+  @ add tmpd, tmpd, #0x03e8
+  @ str tmpd, [tmpa]
 
   /** Switch on MCU power */
   STRW \

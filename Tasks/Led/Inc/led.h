@@ -18,18 +18,19 @@
 #endif 
 
 /* Includes ------------------------------------------------------------------*/
-#include "main.h"
+// #include "main.h"
 
-typedef struct {
-  uint32_t  *counter;
-  uint32_t  *counterSrc;
-  uint32_t  period;
-} task_scheduler_t;
+// typedef struct {
+//   uint32_t  *counter;
+//   uint32_t  *counterSrc;
+//   uint32_t  period;
+//   uint32_t  *counterReg;
+//   uint32_t  entranceFlag;
+// } task_scheduler_t;
 
 typedef struct {
   task_scheduler_t  *scheduler;
-  uint32_t          *counterReg;
-  uint32_t          entranceFlag;
+  // uint32_t          *taskReg;
   GPIO_TypeDef      *port;
   uint16_t          pin;
   void              (*callback)(__I uint32_t*);
