@@ -19,14 +19,10 @@
 #include "main.h"
 
 /* Global variables ---------------------------------------------------------*/
-// uint32_t _GEREG_               = 0;
-uint32_t sysCnt                = 0;
-uint32_t secCnt                = 0;
-static uint32_t secCntCache    = 0;
-__attribute__((section(".cron"))) uint32_t _GEREG_               = 0x20000000;
-// __attribute__((section(".cron"))) uint32_t sysCnt                = 0x20000004;
-// __attribute__((section(".cron"))) uint32_t secCnt                = 0x20000008;
-// static __attribute__((section(".cron"))) uint32_t secCntCache    = 0x2000000c;
+__attribute__((section(".cron"))) uint32_t _GEREG_               = 0;
+__attribute__((section(".cron"))) uint32_t sysCnt                = 0;
+__attribute__((section(".cron"))) uint32_t secCnt                = 0;
+static __attribute__((section(".cron"))) uint32_t secCntCache    = 0;
 
 /* Private includes ----------------------------------------------------------*/
 
@@ -68,15 +64,15 @@ void Cron_Handler(void) {
   while (1) {
     __disable_irq();
     
-    if (FLAG_CHECK(_GEREG_, _SYSSECF_)) {
-      FLAG_CLR(_GEREG_, _SYSSECF_);
+    if (FLAG_CHECK(&_GEREG_, _SYSSECF_)) {
+      FLAG_CLR(&_GEREG_, _SYSSECF_);
       IWDG->KR = IWDG_KEY_RELOAD;
     }
 
     if (secCntCache <= sysCnt) {
       secCntCache = sysCnt + 1000;
       secCnt++;
-      FLAG_SET(_GEREG_, _SYSSECF_);
+      FLAG_SET(&_GEREG_, _SYSSECF_);
     }
 
     __enable_irq();

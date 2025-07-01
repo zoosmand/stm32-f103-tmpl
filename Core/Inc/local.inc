@@ -25,21 +25,12 @@ _ON_    .req v7
 .equ PERIPH_BB,               0x42000000
 .equ SRAM_BB,                 0x22000000
 .equ SRAM_BASE,               0x20000000
-.equ _SystemStackSize_,       128
+.equ _SystemStackSize_,       256
 
 
 /* ------------------------------------------------------------------------- */
 /*                            Critical values                                */
 /* ------------------------------------------------------------------------- */
-/** Global system variables */
-.equ _GEREG_,                 SRAM_BASE
-.equ sysQuantCnt,             SRAM_BASE + 0x04
-.equ secCnt,                  SRAM_BASE + 0x08
-.equ secCntCache,             SRAM_BASE + 0x0c
-
-/** Global Events Register Flags */
-@ .equ _SYSTICKF_,              0 @ SysTick Interval Flag
-.equ _SYSSECF_,               1 @ SysTick Interval Flag
 
 
 /* ------------------------------------------------------------------------- */
