@@ -155,13 +155,23 @@ SECTIONS
   } >RAM AT> FLASH
 
   
-  .cron :
+  .cron (NOLOAD) :
   {
+    *(.cron)
+    *(.cron*)
+  } >CRON
+  
+ 
+  /*  .cron :
+  {
+    _scron = .;
     . = ALIGN(4);
     KEEP(*(.cron))
     KEEP(*(.cron*))
+    . = ALIGN(4);
+    _ecron = .;
   } >CRON
-  
+  */
  
   /* Uninitialized data section */
   . = ALIGN(4);

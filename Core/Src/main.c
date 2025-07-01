@@ -19,11 +19,11 @@
 #include "main.h"
 
 /* Global variables ---------------------------------------------------------*/
-uint32_t _GEREG_               = 0;
+// uint32_t _GEREG_               = 0;
 uint32_t sysCnt                = 0;
 uint32_t secCnt                = 0;
 static uint32_t secCntCache    = 0;
-// __attribute__((section(".cron"))) uint32_t _GEREG_               = 0x20000000;
+__attribute__((section(".cron"))) uint32_t _GEREG_               = 0x20000000;
 // __attribute__((section(".cron"))) uint32_t sysCnt                = 0x20000004;
 // __attribute__((section(".cron"))) uint32_t secCnt                = 0x20000008;
 // static __attribute__((section(".cron"))) uint32_t secCntCache    = 0x2000000c;
