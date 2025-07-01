@@ -61,9 +61,9 @@ _Min_Stack_Size = 0x400; /* required amount of stack */
 /* Specify the memory areas */
 MEMORY
 {
-CRON (xrw)      : ORIGIN = 0x20000000, LENGTH = 0x0100
-RAM (xrw)      : ORIGIN = 0x20000100, LENGTH = 20K - 0x0100
-FLASH (rx)      : ORIGIN = 0x8000000, LENGTH = 64K
+  CRON (xrw)      : ORIGIN = 0x20000000, LENGTH = 256
+  RAM (xrw)       : ORIGIN = 0x20000100, LENGTH = 20K - 256
+  FLASH (rx)      : ORIGIN = 0x8000000, LENGTH = 64K
 }
 
 /* Define output sections */
@@ -131,7 +131,6 @@ SECTIONS
     PROVIDE_HIDDEN (__fini_array_end = .);
   } >FLASH
 
-
   /* Initialized data sections goes into RAM, load LMA copy after code */
   .system : 
   {
@@ -156,6 +155,14 @@ SECTIONS
   } >RAM AT> FLASH
 
   
+  .cron :
+  {
+    . = ALIGN(4);
+    KEEP(*(.cron))
+    KEEP(*(.cron*))
+  } >CRON
+  
+ 
   /* Uninitialized data section */
   . = ALIGN(4);
   .bss :
@@ -183,10 +190,6 @@ SECTIONS
     . = ALIGN(8);
   } >RAM
 
-  ._cron :
-  {
-    KEEP(*(.cron))
-  } >CRON
 
 
   /* Remove information from the standard libraries */
