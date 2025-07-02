@@ -154,15 +154,9 @@ SECTIONS
     _edata = .;        /* define a global symbol at data end */
   } >RAM AT> FLASH
 
-  
+  /* CRON region specification */
+  _sicron = LOADADDR(.cron);
   .cron (NOLOAD) :
-  {
-    *(.cron)
-    *(.cron*)
-  } >CRON
-  
- 
-  /*  .cron :
   {
     _scron = .;
     . = ALIGN(4);
@@ -170,8 +164,8 @@ SECTIONS
     KEEP(*(.cron*))
     . = ALIGN(4);
     _ecron = .;
-  } >CRON
-  */
+  } >CRON AT> FLASH
+  
  
   /* Uninitialized data section */
   . = ALIGN(4);
