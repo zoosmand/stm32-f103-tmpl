@@ -13,27 +13,27 @@
 #include "main.h"
 
 /* Private includes ----------------------------------------------------------*/
-static uint32_t ledRedTaskCnt           = 0;
-static uint32_t ledRedTaskReg           = 0;
-static uint32_t ledRedTaskPauseCnt_1    = 0;
-static uint32_t ledRedTaskPauseCnt_2    = 0;
+__attribute__((section(".cron"))) static uint32_t ledRedTaskCnt           = 0;
+__attribute__((section(".cron"))) static uint32_t ledRedTaskReg           = 0;
+__attribute__((section(".cron"))) static uint32_t ledRedTaskPauseCnt_1    = 0;
+__attribute__((section(".cron"))) static uint32_t ledRedTaskPauseCnt_2    = 0;
 
-static uint32_t ledBlueTaskCnt          = 0;
-static uint32_t ledBlueTaskReg          = 0;
-static uint32_t ledBlueTaskPauseCnt_1   = 0;
-static uint32_t ledBlueTaskPauseCnt_2   = 0;
+__attribute__((section(".cron"))) static uint32_t ledBlueTaskCnt          = 0;
+__attribute__((section(".cron"))) static uint32_t ledBlueTaskReg          = 0;
+__attribute__((section(".cron"))) static uint32_t ledBlueTaskPauseCnt_1   = 0;
+__attribute__((section(".cron"))) static uint32_t ledBlueTaskPauseCnt_2   = 0;
 
-static uint32_t ledGreenTaskCnt         = 0;
-static uint32_t ledGreenTaskReg         = 0;
-static uint32_t ledGreenTaskPauseCnt_1  = 0;
-static uint32_t ledGreenTaskPauseCnt_2  = 0;
+__attribute__((section(".cron"))) static uint32_t ledGreenTaskCnt         = 0;
+__attribute__((section(".cron"))) static uint32_t ledGreenTaskReg         = 0;
+__attribute__((section(".cron"))) static uint32_t ledGreenTaskPauseCnt_1  = 0;
+__attribute__((section(".cron"))) static uint32_t ledGreenTaskPauseCnt_2  = 0;
 
 
 /* Private variables ---------------------------------------------------------*/
 static task_scheduler_t ledRedScheduler = {
-  .counter    = &ledRedTaskCnt,
-  .counterSrc = &secCnt,
-  .period     = 7,
+  .counter        = &ledRedTaskCnt,
+  .counterSrc     = &sysCnt,
+  .period         = 193,
   .counterReg     = &ledRedTaskReg,
   .entranceFlag   = 31,
 };
@@ -45,7 +45,7 @@ static task_led_toggle_t ledRedTask = {
   .callback       = &LedToggle_Task,
   .pauseCnt_1     = &ledRedTaskPauseCnt_1,
   .srcPauseCnt_1  = &sysCnt,
-  .pauseValue_1   = 25,
+  .pauseValue_1   = 15,
   .pauseCnt_2     = &ledRedTaskPauseCnt_2,
   .srcPauseCnt_2  = &sysCnt,
   .pauseValue_2   = 50,
@@ -54,9 +54,9 @@ static task_led_toggle_t ledRedTask = {
 
 /* ----------------------------------------------------------------------------- */
 static task_scheduler_t ledBlueScheduler = {
-  .counter    = &ledBlueTaskCnt,
-  .counterSrc = &secCnt,
-  .period     = 5,
+  .counter        = &ledBlueTaskCnt,
+  .counterSrc     = &sysCnt,
+  .period         = 211,
   .counterReg     = &ledBlueTaskReg,
   .entranceFlag   = 31,
 };
@@ -68,7 +68,7 @@ static task_led_toggle_t ledBlueTask = {
   .callback       = &LedToggle_Task,
   .pauseCnt_1     = &ledBlueTaskPauseCnt_1,
   .srcPauseCnt_1  = &sysCnt,
-  .pauseValue_1   = 14,
+  .pauseValue_1   = 10,
   .pauseCnt_2     = &ledBlueTaskPauseCnt_2,
   .srcPauseCnt_2  = &sysCnt,
   .pauseValue_2   = 50,
@@ -79,8 +79,8 @@ static task_led_toggle_t ledBlueTask = {
 
 static task_scheduler_t ledGreenScheduler = {
   .counter        = &ledGreenTaskCnt,
-  .counterSrc     = &secCnt,
-  .period         = 3,
+  .counterSrc     = &sysCnt,
+  .period         = 237,
   .counterReg     = &ledGreenTaskReg,
   .entranceFlag   = 31,
 };
@@ -92,7 +92,7 @@ static task_led_toggle_t ledGreenTask = {
   .callback       = &LedToggle_Task,
   .pauseCnt_1     = &ledGreenTaskPauseCnt_1,
   .srcPauseCnt_1  = &sysCnt,
-  .pauseValue_1   = 25,
+  .pauseValue_1   = 15,
   .pauseCnt_2     = &ledGreenTaskPauseCnt_2,
   .srcPauseCnt_2  = &sysCnt,
   .pauseValue_2   = 50,

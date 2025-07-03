@@ -22,34 +22,28 @@
 LedInit:
   push {lr}
 
-  /** PB13 Output LED, max 2 MHz, push-pull */
+  /** PB13, PB15 Output LED, max 2 MHz, push-pull */
   ldr tmpa, =GPIOB_CRH
   ldr tmpd, [tmpa]
-  mov tmp, ~PIN_13_Mask
+  ldr tmp, =(~(PIN_13_Mask | PIN_15_Mask))
   and tmpd, tmp
-  mov tmp, _IOS_2 << ((PIN_13_Pos - 8) * 4)
+  ldr tmp, =( \
+      (_IOS_2 << ((PIN_13_Pos - 8) * 4)) \
+    | (_IOS_2 << ((PIN_15_Pos - 8) * 4)) \
+  )
   orr tmpd, tmp
   str tmpd, [tmpa]
 
-	/** PB13 Output pull-up */
-	@ STRPB 1, GPIOB_BSRR, PIN_13_Pos
-  @ FLSP GPIOB_BSRR, PIN_13_Pos
-
-  /** PB15 Output LED, max 2 MHz, push-pull */
-  ldr tmpa, =GPIOB_CRH
-  ldr tmpd, [tmpa]
-  mov tmp, ~PIN_15_Mask
-  and tmpd, tmp
-  mov tmp, _IOS_2 << ((PIN_15_Pos - 8) * 4)
-  orr tmpd, tmp
-  str tmpd, [tmpa]
+	@ /** PB13 Output pull-up */
+	@ @ STRPB 1, GPIOB_BSRR, PIN_13_Pos
+  @ @ FLSP GPIOB_BSRR, PIN_13_Pos
 
   /** PA8 Output LED, max 2 MHz, push-pull */
   ldr tmpa, =GPIOA_CRH
   ldr tmpd, [tmpa]
-  mov tmp, ~PIN_8_Mask
+  ldr tmp, =(~PIN_8_Mask)
   and tmpd, tmp
-  mov tmp, _IOS_2 << ((PIN_8_Pos - 8) * 4)
+  ldr tmp, =(_IOS_2 << ((PIN_8_Pos - 8) * 4))
   orr tmpd, tmp
   str tmpd, [tmpa]
 
