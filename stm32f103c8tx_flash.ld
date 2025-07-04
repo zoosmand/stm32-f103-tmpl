@@ -61,8 +61,9 @@ _Min_Stack_Size = 0x400; /* required amount of stack */
 /* Specify the memory areas */
 MEMORY
 {
-RAM (xrw)      : ORIGIN = 0x20000080, LENGTH = 20K - 128
-FLASH (rx)      : ORIGIN = 0x8000000, LENGTH = 64K
+  CRON (xrw)      : ORIGIN = 0x20000000, LENGTH = 256
+  RAM (xrw)       : ORIGIN = 0x20000100, LENGTH = 20K - 256
+  FLASH (rx)      : ORIGIN = 0x8000000, LENGTH = 64K
 }
 
 /* Define output sections */
@@ -130,7 +131,6 @@ SECTIONS
     PROVIDE_HIDDEN (__fini_array_end = .);
   } >FLASH
 
-
   /* Initialized data sections goes into RAM, load LMA copy after code */
   .system : 
   {
@@ -154,7 +154,19 @@ SECTIONS
     _edata = .;        /* define a global symbol at data end */
   } >RAM AT> FLASH
 
+  /* CRON region specification */
+  _sicron = LOADADDR(.cron);
+  .cron (NOLOAD) :
+  {
+    _scron = .;
+    . = ALIGN(4);
+    KEEP(*(.cron))
+    KEEP(*(.cron*))
+    . = ALIGN(4);
+    _ecron = .;
+  } >CRON AT> FLASH
   
+ 
   /* Uninitialized data section */
   . = ALIGN(4);
   .bss :
@@ -182,7 +194,7 @@ SECTIONS
     . = ALIGN(8);
   } >RAM
 
-  
+
 
   /* Remove information from the standard libraries */
   /DISCARD/ :

@@ -631,32 +631,7 @@
 .equ SYSTICKRVR,        0xE000E014
 .equ SYSTICKCVR,        0xE000E018
 .equ SYSTICKCALVR,      0xE000E01C
-@ .equ SETENA0,           0xE000E100
-@ .equ SETENA1,           0xE000E104
-@ .equ CLRENA0,           0xE000E180
-@ .equ CLRENA1,           0xE000E184
-@ .equ SETPEND0,          0xE000E200
-@ .equ SETPEND1,          0xE000E204
-@ .equ CLRPEND0,          0xE000E280
-@ .equ CLRPEND1,          0xE000E284
-@ .equ ACTIVE0,           0xE000E300
-@ .equ ACTIVE1,           0xE000E304
-@ .equ IP0,               0xE000E400
-@ .equ IP1,               0xE000E404
-@ .equ IP2,               0xE000E408
-@ .equ IP3,               0xE000E40C
-@ .equ IP4,               0xE000E410
-@ .equ IP5,               0xE000E414
-@ .equ IP6,               0xE000E418
-@ .equ IP7,               0xE000E41C
-@ .equ IP8,               0xE000E420
-@ .equ IP9,               0xE000E424
-@ .equ IP10,              0xE000E428
-@ .equ IP11,              0xE000E42C
-@ .equ IP12,              0xE000E430
-@ .equ IP13,              0xE000E434
-@ .equ IP14,              0xE000E438
-@ .equ IP15,              0xE000E43C
+
 
 .equ CPUIDBR,           0xE000ED00
 .equ ICSR,              0xE000ED04
@@ -715,6 +690,3 @@
 .equ NVIC_IPR14,         NVIC + 0x0438
 .equ NVIC_STIR,          NVIC + 0x0f00
 
-
-
-  @ .end

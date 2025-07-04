@@ -45,6 +45,11 @@ defined in linker script */
 /* end address for the .bss section. defined in linker script */
 .word _ebss
 
+/* cron global symbols */
+.word _sicron
+.word _scron
+.word _ecron
+
 .equ  BootRAM, 0xF108F85F
 /**
  * @brief  This is the code that gets called when the processor first
@@ -61,7 +66,18 @@ defined in linker script */
 Reset_Handler:
 
 /* Call the clock system initialization function.*/
-    bl  SystemInit
+  bl  SystemInit
+
+/* Initialize Cron variables */
+  ldr v1, =_scron
+  ldr v2, =_ecron
+  movs v3, #0
+
+CronDataInit:
+  str v3, [v1]
+  adds v1, v1, #4 
+  cmp v1, v2
+  bcc CronDataInit
 
 /* Copy the data segment initializers from flash to SRAM */
   ldr r0, =_sdata
@@ -95,7 +111,8 @@ LoopFillZerobss:
   bcc FillZerobss
 
 /* Call static constructors */
-    bl __libc_init_array
+  bl __libc_init_array
+
 /* Call the application's entry point.*/
   bl Cron_Handler
   bx lr
@@ -109,7 +126,7 @@ LoopFillZerobss:
  * @param  None
  * @retval : None
 */
-    .section .text.Default_Handler,"ax",%progbits
+  .section .text.Default_Handler,"ax",%progbits
 Default_Handler:
 Infinite_Loop:
   b Infinite_Loop

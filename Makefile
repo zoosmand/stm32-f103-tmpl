@@ -4,6 +4,7 @@
 # ChangeLog :
 #	2025-02-08 - Init empty project
 # 2025-06-20 - Add THUMB conditional instruction
+# 2025-06-30 - Refactor text
 # ------------------------------------------------
 
 ######################################
@@ -83,20 +84,6 @@ CPU = -mcpu=cortex-m3
 MCU = $(CPU) -mthumb $(FPU) $(FLOAT-ABI)
 
 # macros for gcc
-# AS defines
-AS_DEFS = \
--DUSE_FULL_LL_DRIVER \
--DHSE_VALUE=8000000 \
--DHSE_STARTUP_TIMEOUT=100 \
--DLSE_STARTUP_TIMEOUT=5000 \
--DLSE_VALUE=32768 \
--DHSI_VALUE=8000000 \
--DLSI_VALUE=40000 \
--DVDD_VALUE=3300 \
--DPREFETCH_ENABLE=1 \
--DSTM32F103xB \
--D__ASSEMBLER__
-
 # C defines
 C_DEFS =  \
 -DUSE_FULL_LL_DRIVER \
@@ -110,12 +97,10 @@ C_DEFS =  \
 -DPREFETCH_ENABLE=1 \
 -DSTM32F103xB
 
+# AS defines
+AS_DEFS = $(C_DEFS) \
+-D__ASSEMBLER__
 
-# AS includes
-# AS_INCLUDES = \
-# -ICore/Inc \
-# -IDrivers/CMSIS/Device/ST/STM32F1xx/Include \
-# -IDrivers/CMSIS/Include
 
 # C includes
 C_INCLUDES =  \
@@ -135,7 +120,7 @@ CFLAGS += $(MCU) $(C_DEFS) $(C_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction
 
 ifeq ($(DEBUG), 1)
 # CFLAGS += -g -gdwarf-2 -D CMAKE_CXX_FLAGS_RELEASE="-Wa,-mimplicit-it=thumb"
-CFLAGS += -g -gdwarf-2
+CFLAGS += -g -gdwarf-2 -Wall -Wextra -pedantic
 ASFLAGS += $(CFLAGS)
 endif
 

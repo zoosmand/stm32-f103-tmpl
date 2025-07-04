@@ -25,20 +25,6 @@ SystemInit:
   mov zero, 0
   mov one, 1
   
-  /** Clear system stack */    
-  ldr tmpa, =(SRAM_BASE - 4)
-  mov tmp, (_SystemStackSize_ / 4)
-_ClearSystemStack:
-	str zero, [tmpa, #4]!
-	sub tmp, 1
-	teq tmp, 0
-	bne _ClearSystemStack
-
-  /** Init second cache with 1000 value */
-  ldr tmpa, =secCntCache
-  ldr tmpd, [tmpa]
-  add tmpd, tmpd, #0x03e8
-  str tmpd, [tmpa]
 
   /** Switch on MCU power */
   STRW \
