@@ -417,6 +417,7 @@
 .equ CAN_F12R2,         0x400066A4
 .equ CAN_F13R1,         0x400066A8
 .equ CAN_F13R2,         0x400066AC
+
 .equ I2C1_CR1,          0x40005400
 .equ I2C1_CR2,          0x40005404
 .equ I2C1_OAR1,         0x40005408
@@ -426,6 +427,7 @@
 .equ I2C1_SR2,          0x40005418
 .equ I2C1_CCR,          0x4000541C
 .equ I2C1_TRISE,        0x40005420
+
 .equ I2C2_CR1,          0x40005800
 .equ I2C2_CR2,          0x40005804
 .equ I2C2_OAR1,         0x40005808
@@ -435,6 +437,7 @@
 .equ I2C2_SR2,          0x40005818
 .equ I2C2_CCR,          0x4000581C
 .equ I2C2_TRISE,        0x40005820
+
 .equ SPI1_CR1,          0x40013000
 .equ SPI1_CR2,          0x40013004
 .equ SPI1_SR,           0x40013008

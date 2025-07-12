@@ -5,7 +5,7 @@
   ******************************************************************************
   * @attention
   *
-  * Copyright (c) 2025 STMicroelectronics.
+  * Copyright (c) 2025 Askug Ltd.
   * All rights reserved.
   *
   * This software is licensed under terms that can be found in the LICENSE file
@@ -61,12 +61,16 @@ int main(void) {
  * @retval none
  */
 void Cron_Handler(void) {
+  WH1602_I2C_Init(I2C1);
+
+  
   while (1) {
     __disable_irq();
     
     if (FLAG_CHECK(&_GEREG_, _SYSSECF_)) {
       FLAG_CLR(&_GEREG_, _SYSSECF_);
       IWDG->KR = IWDG_KEY_RELOAD;
+      // WH1602_I2C_Init(I2C1);
     }
 
     if (secCntCache <= sysCnt) {
@@ -92,3 +96,19 @@ void Scheduler_Handler(task_scheduler_t *scheduler) {
 
   __enable_irq();
 }
+
+
+
+// void SimpleDelay(uint32_t __us_delay){
+//   __asm__ __volatile__ (
+//     // "ldr r0, #%__us_delay\n"
+//     "mul r0, r0, 1\n"
+//     "_LOOP_: \n"
+//     "subs r0, r0, 1\n"
+//     "bpl _LOOP_\n"
+//     // : //"=r" (__us_delay)
+//     // :
+//     // : "r0"
+//   );
+// }
+

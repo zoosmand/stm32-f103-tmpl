@@ -59,7 +59,6 @@ __STATIC_INLINE void _putc(uint8_t ch) {
 
 
 
-
 /**
  * @brief An interpretation of the __weak system _write()
  * @param file: IO file

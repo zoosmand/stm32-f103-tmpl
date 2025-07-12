@@ -37,11 +37,15 @@ extern "C" {
 #include "stm32f1xx.h"
 
 /* Private includes ----------------------------------------------------------*/
+#include "display.h"
 
 #if defined(USE_FULL_ASSERT)
 #include "stm32_assert.h"
 #endif /* USE_FULL_ASSERT */
 
+/* Freq definitions */
+#define APB2_FREQ   72000000U
+#define APB1_FREQ   APB2_FREQ/2
 
 /* Exported types ------------------------------------------------------------*/
 #define SWO_USART USART1
@@ -88,6 +92,7 @@ typedef struct {
 /* Exported functions prototypes ---------------------------------------------*/
 void Error_Handler(void);
 void Scheduler_Handler(task_scheduler_t*);
+void SimpleDelay(uint32_t);
 
 
 #ifdef __cplusplus
