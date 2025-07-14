@@ -88,16 +88,16 @@ void WH1602_I2C_WriteByte(I2C_TypeDef* I2CPort, uint8_t RxByte){
   /* Send the slave address into the bus */
   I2CPort->DR = _ADDR_<<1;
   /* Wait until address is sent */
-  while(PREG_CHECK(I2CPort->SR1, I2C_SR1_ADDR_Pos));
+  while(!(PREG_CHECK(I2CPort->SR1, I2C_SR1_ADDR_Pos)));
   /* Verify before transferring if trasmit buffer is empty */
   while(!(PREG_CHECK(I2CPort->SR1, I2C_SR1_TXE_Pos)));
 
-  SimpleDelay(1000);
+  SimpleDelay(10000);
   
   /* Send data byte to the slave */
   I2CPort->DR = RxByte;
   /* Verify after transferring if trasmit buffer is empty */
-  // while(!(PREG_CHECK(I2CPort->SR1, I2C_SR1_TXE_Pos)));
+  while(!(PREG_CHECK(I2CPort->SR1, I2C_SR1_TXE_Pos)));
   /* Verify if byte transfer finished */
   /* TODO Carefull with ACK NACK and bus errors  */
   while(!(PREG_CHECK(I2CPort->SR1, I2C_SR1_BTF_Pos)));
