@@ -57,14 +57,6 @@ I2c1Init:
   @ movs tmpd, #((I2C_TRISE_SM/(1/APB1_FREQ))+1)
   str tmpd, [tmpa]
 
-  /* Configure I2c2 */
-  @ ldr tmpa, =I2C1_CR1
-  @ mov tmpd, \
-  @     I2C_CR1_PE \
-  @   | I2C_CR1_ACK
-  @ str tmpd, [tmpa]
-
-
   pop {tmpa, tmpd, tmp, pc}
   .size I2c1Init, .-I2c1Init
 

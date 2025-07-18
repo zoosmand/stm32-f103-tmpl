@@ -33,7 +33,7 @@
 /* Private function prototypes -----------------------------------------------*/
 void WH1602_I2C_WriteByte(I2C_TypeDef*, uint8_t);
 void WH1602_WriteChar(I2C_TypeDef*, uint8_t);
-void WH1602_WriteCommand(I2C_TypeDef*, uint8_t, uint16_t);
+void WH1602_WriteCommand(I2C_TypeDef*, uint8_t, uint32_t);
 void WH1602_I2C_Write(I2C_TypeDef* I2Cx, uint8_t, const char*);
 
 
@@ -63,9 +63,10 @@ void WH1602_I2C_Init(I2C_TypeDef* I2CPort){
     SimpleDelay(params[i++]*1000);
   }
 
-  SimpleDelay(1000);
+  // SimpleDelay(1000);
 
   WH1602_WriteChar(I2CPort, 'K');
+  WH1602_I2C_Write(I2CPort, 0x01, "commanwertsssfsfggs");
 }
 
 
@@ -93,6 +94,7 @@ void WH1602_I2C_WriteByte(I2C_TypeDef* I2CPort, uint8_t RxByte){
   /* Verify before transferring if trasmit buffer is empty */
   while(!(PREG_CHECK(I2CPort->SR1, I2C_SR1_TXE_Pos)));
   
+  /* Clear status registers */
   (void)I2C1->SR1;
   (void)I2C1->SR2;
   
@@ -121,7 +123,7 @@ void WH1602_WriteChar(I2C_TypeDef* I2CPort, uint8_t charValue){
   WH1602_I2C_WriteByte(I2CPort, ((charValue & 0xf0) | (_Bl + _Rs)));
   WH1602_I2C_WriteByte(I2CPort, (((charValue << 4) & 0xf0) | (_E + _Bl + _Rs)));
   WH1602_I2C_WriteByte(I2CPort, (((charValue << 4) & 0xf0) | (_Bl + _Rs)));
-  SimpleDelay(50);
+  SimpleDelay(500);
 }
 
 
@@ -129,7 +131,7 @@ void WH1602_WriteChar(I2C_TypeDef* I2CPort, uint8_t charValue){
 
 
 
-void WH1602_WriteCommand(I2C_TypeDef* I2CPort, uint8_t commandValue, uint16_t delay){  
+void WH1602_WriteCommand(I2C_TypeDef* I2CPort, uint8_t commandValue, uint32_t delay){  
   WH1602_I2C_WriteByte(I2CPort, ((commandValue & 0xf0) | (_E + _Bl)));
   WH1602_I2C_WriteByte(I2CPort, ((commandValue & 0xf0) | _Bl));
   WH1602_I2C_WriteByte(I2CPort, (((commandValue << 4) & 0xf0) | (_E + _Bl)));
@@ -156,7 +158,7 @@ uint32_t WH1602_I2C_LineLength(const char* charLine){
 void WH1602_I2C_Write(I2C_TypeDef* I2Cx, uint8_t dsplAddress, const char* charLine){
   
   printf("%s\n", charLine);
-  WH1602_WriteCommand(I2C1, dsplAddress, 50);
+  WH1602_WriteCommand(I2C1, dsplAddress, 500);
   
   uint32_t len = WH1602_I2C_LineLength(charLine);
   
