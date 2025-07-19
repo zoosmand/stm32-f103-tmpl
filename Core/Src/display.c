@@ -43,30 +43,30 @@ void WH1602_I2C_Write(I2C_TypeDef* I2Cx, uint8_t, const char*);
 /******************************************************************************/
 void WH1602_I2C_Init(I2C_TypeDef* I2CPort){
   
-  SimpleDelay(50000);
+  SimpleDelay(15000);
  
-  uint8_t params[14] = {
-    0x03, 0x05,
-    0x03, 0x05,
-    0x03, 0x01,
-    0x02, 0x02,
-    0x28, 0x01,
-    0x0c, 0x01,
-    0x01, 0x00
+  uint16_t params[14] = {
+    _8BBUS_,      4100,
+    _8BBUS_,      100,
+    _8BBUS_,      40,
+    _CURUPLEFT_,  1640,
+    _4BBUS2L_,    40,
+    _DSPLSW_,     40,
+    _CLRDSLP_,    1640
   }; 
   
   for(uint8_t i = 0; i < sizeof(params); i++){
-    WH1602_I2C_WriteByte(I2CPort, ((params[i] & 0xf0) | (_E + _Bl)));
-    WH1602_I2C_WriteByte(I2CPort, ((params[i] & 0xf0) | _Bl));
-    WH1602_I2C_WriteByte(I2CPort, (((params[i] << 4) & 0xf0) | (_E + _Bl)));
-    WH1602_I2C_WriteByte(I2CPort, (((params[i] << 4) & 0xf0) | _Bl));
-    SimpleDelay(params[i++]*1000);
+    WH1602_I2C_WriteByte(I2CPort, _WR1NCMD((uint8_t)params[i]));
+    WH1602_I2C_WriteByte(I2CPort, _WR2NCMD((uint8_t)params[i]));
+    WH1602_I2C_WriteByte(I2CPort, _WR1NCMD(((uint8_t)params[i] << 4)));
+    WH1602_I2C_WriteByte(I2CPort, _WR2NCMD(((uint8_t)params[i] << 4)));
+    SimpleDelay(params[i++]);
   }
 
-  // SimpleDelay(1000);
+  WH1602_WriteCommand(I2CPort, _CLRDSLP_, 1640);
+  WH1602_I2C_Write(I2CPort, 1, "QWErtyuiop");
+  WH1602_I2C_Write(I2CPort, 2, "1234567890");
 
-  WH1602_WriteChar(I2CPort, 'K');
-  WH1602_I2C_Write(I2CPort, 0x01, "commanwertsssfsfggs");
 }
 
 
@@ -81,6 +81,10 @@ void WH1602_I2C_WriteByte(I2C_TypeDef* I2CPort, uint8_t RxByte){
   PREG_SET(I2CPort->CR1, I2C_CR1_PE_Pos);
   /* Generate start condition */
   PREG_SET(I2CPort->CR1, I2C_CR1_START_Pos);
+  
+  /* TODO Implement bus errors cycle */
+  /* TODO Implement timeout in cycles */
+  
   /* Wait until the start bit is set*/
   while(!(PREG_CHECK(I2CPort->SR1, I2C_SR1_SB_Pos)));
   /* Verify master mode*/
@@ -101,7 +105,6 @@ void WH1602_I2C_WriteByte(I2C_TypeDef* I2CPort, uint8_t RxByte){
   /* Send data byte to the slave */
   I2CPort->DR = RxByte;
   /* Verify if byte transfer finished */
-  /* TODO Care of ACK NACK and bus errors  */
   while(!(PREG_CHECK(I2CPort->SR1, I2C_SR1_BTF_Pos)));
   /* Verify after transferring if trasmit buffer is empty */
   while(!(PREG_CHECK(I2CPort->SR1, I2C_SR1_TXE_Pos)));
@@ -118,12 +121,12 @@ void WH1602_I2C_WriteByte(I2C_TypeDef* I2CPort, uint8_t RxByte){
 
 
 
-void WH1602_WriteChar(I2C_TypeDef* I2CPort, uint8_t charValue){  
-  WH1602_I2C_WriteByte(I2CPort, ((charValue & 0xf0) | (_E + _Bl + _Rs)));
-  WH1602_I2C_WriteByte(I2CPort, ((charValue & 0xf0) | (_Bl + _Rs)));
-  WH1602_I2C_WriteByte(I2CPort, (((charValue << 4) & 0xf0) | (_E + _Bl + _Rs)));
-  WH1602_I2C_WriteByte(I2CPort, (((charValue << 4) & 0xf0) | (_Bl + _Rs)));
-  SimpleDelay(500);
+void WH1602_WriteChar(I2C_TypeDef* I2CPort, uint8_t ch){  
+  WH1602_I2C_WriteByte(I2CPort, _WR1NCHAR(ch));
+  WH1602_I2C_WriteByte(I2CPort, _WR2NCHAR(ch));
+  WH1602_I2C_WriteByte(I2CPort, _WR1NCHAR(ch << 4));
+  WH1602_I2C_WriteByte(I2CPort, _WR2NCHAR(ch << 4));
+  SimpleDelay(40);
 }
 
 
@@ -131,23 +134,23 @@ void WH1602_WriteChar(I2C_TypeDef* I2CPort, uint8_t charValue){
 
 
 
-void WH1602_WriteCommand(I2C_TypeDef* I2CPort, uint8_t commandValue, uint32_t delay){  
-  WH1602_I2C_WriteByte(I2CPort, ((commandValue & 0xf0) | (_E + _Bl)));
-  WH1602_I2C_WriteByte(I2CPort, ((commandValue & 0xf0) | _Bl));
-  WH1602_I2C_WriteByte(I2CPort, (((commandValue << 4) & 0xf0) | (_E + _Bl)));
-  WH1602_I2C_WriteByte(I2CPort, (((commandValue << 4) & 0xf0) | _Bl));
+void WH1602_WriteCommand(I2C_TypeDef* I2CPort, uint8_t cmd, uint32_t delay){  
+  WH1602_I2C_WriteByte(I2CPort, _WR1NCMD(cmd));
+  WH1602_I2C_WriteByte(I2CPort, _WR2NCMD(cmd));
+  WH1602_I2C_WriteByte(I2CPort, _WR1NCMD(cmd << 4));
+  WH1602_I2C_WriteByte(I2CPort, _WR2NCMD(cmd << 4));
   SimpleDelay(delay);
 }
 
 
 
 
-uint32_t WH1602_I2C_LineLength(const char* charLine){
+uint32_t WH1602_I2C_LineLength(const char* buf){
   uint32_t len = 0;
-  while(*charLine){
+  while(*buf){
     len++;
-    charLine++;
-    if (*charLine == 0x0a) break;
+    buf++;
+    if (*buf == 0x0a) break;
   }
   return len;
 }
@@ -155,15 +158,16 @@ uint32_t WH1602_I2C_LineLength(const char* charLine){
 
 
 
-void WH1602_I2C_Write(I2C_TypeDef* I2Cx, uint8_t dsplAddress, const char* charLine){
+void WH1602_I2C_Write(I2C_TypeDef* I2Cx, uint8_t line, const char* buf){
   
-  printf("%s\n", charLine);
-  WH1602_WriteCommand(I2C1, dsplAddress, 500);
+  // printf("%s\n", buf);
+  uint8_t dsplAddr = (line == 2) ? 0xc0 : 0x80;
+  WH1602_WriteCommand(I2C1, dsplAddr, 40);
   
-  uint32_t len = WH1602_I2C_LineLength(charLine);
+  uint32_t len = WH1602_I2C_LineLength(buf);
   
   for(uint32_t i = 0 ; i < len ; i++){
-    WH1602_WriteChar(I2Cx, (*charLine++));
+    WH1602_WriteChar(I2Cx, (*buf++));
   }
 }
 
