@@ -36,8 +36,8 @@
 
 /* Exported functions prototypes ---------------------------------------------*/
 void WH1602_I2C_Init(I2C_TypeDef*);
-void WH1602_WriteChar(I2C_TypeDef*, uint8_t);
-void WH1602_WriteCommand(I2C_TypeDef*, uint8_t, uint32_t);
+// void WH1602_WriteChar(I2C_TypeDef*, uint8_t);
+// void WH1602_WriteCommand(I2C_TypeDef*, uint8_t, uint32_t);
 void WH1602_I2C_Write(I2C_TypeDef* I2Cx, uint8_t, const char*);
    
 /* Private defines -----------------------------------------------------------*/

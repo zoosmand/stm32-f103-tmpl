@@ -37,6 +37,7 @@ extern "C" {
 #include "stm32f1xx.h"
 
 /* Private includes ----------------------------------------------------------*/
+#include "i2c.h"
 #include "display.h"
 
 #if defined(USE_FULL_ASSERT)

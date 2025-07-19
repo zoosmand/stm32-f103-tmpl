@@ -31,17 +31,17 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* Private function prototypes -----------------------------------------------*/
-void WH1602_I2C_WriteByte(I2C_TypeDef*, uint8_t);
+// void I2C_WriteByte(I2C_TypeDef*, uint8_t);
 void WH1602_WriteChar(I2C_TypeDef*, uint8_t);
 void WH1602_WriteCommand(I2C_TypeDef*, uint8_t, uint32_t);
-void WH1602_I2C_Write(I2C_TypeDef* I2Cx, uint8_t, const char*);
+// void WH1602_I2C_Write(I2C_TypeDef* I2Cx, uint8_t, const char*);
 
 
 
 
 
 /******************************************************************************/
-void WH1602_I2C_Init(I2C_TypeDef* I2CPort){
+void WH1602_I2C_Init(I2C_TypeDef* I2Cx){
   
   SimpleDelay(15000);
  
@@ -55,17 +55,25 @@ void WH1602_I2C_Init(I2C_TypeDef* I2CPort){
     _CLRDSLP_,    1640
   }; 
   
+  I2C_Start(I2Cx);
+  I2C_SendAddress(I2Cx, _ADDR_);
   for(uint8_t i = 0; i < sizeof(params); i++){
-    WH1602_I2C_WriteByte(I2CPort, _WR1NCMD((uint8_t)params[i]));
-    WH1602_I2C_WriteByte(I2CPort, _WR2NCMD((uint8_t)params[i]));
-    WH1602_I2C_WriteByte(I2CPort, _WR1NCMD(((uint8_t)params[i] << 4)));
-    WH1602_I2C_WriteByte(I2CPort, _WR2NCMD(((uint8_t)params[i] << 4)));
+    I2C_WriteByte(I2Cx, _WR1NCMD((uint8_t)params[i]));
+    I2C_WriteByte(I2Cx, _WR2NCMD((uint8_t)params[i]));
+    I2C_WriteByte(I2Cx, _WR1NCMD(((uint8_t)params[i] << 4)));
+    I2C_WriteByte(I2Cx, _WR2NCMD(((uint8_t)params[i] << 4)));
     SimpleDelay(params[i++]);
   }
+  I2C_Stop(I2Cx);
 
-  WH1602_WriteCommand(I2CPort, _CLRDSLP_, 1640);
-  WH1602_I2C_Write(I2CPort, 1, "QWErtyuiop");
-  WH1602_I2C_Write(I2CPort, 2, "1234567890");
+
+
+  I2C_Start(I2Cx);
+  I2C_SendAddress(I2Cx, _ADDR_);
+  WH1602_WriteCommand(I2Cx, _CLRDSLP_, 1640);
+  WH1602_I2C_Write(I2Cx, 1, "QWErtyuiop");
+  WH1602_I2C_Write(I2Cx, 2, "1234567890");
+  I2C_Stop(I2Cx);
 
 }
 
@@ -73,59 +81,11 @@ void WH1602_I2C_Init(I2C_TypeDef* I2CPort){
 
 
 
-
-
-
-void WH1602_I2C_WriteByte(I2C_TypeDef* I2CPort, uint8_t RxByte){
-  /* Stast I2C Peripherals enable */
-  PREG_SET(I2CPort->CR1, I2C_CR1_PE_Pos);
-  /* Generate start condition */
-  PREG_SET(I2CPort->CR1, I2C_CR1_START_Pos);
-  
-  /* TODO Implement bus errors cycle */
-  /* TODO Implement timeout in cycles */
-  
-  /* Wait until the start bit is set*/
-  while(!(PREG_CHECK(I2CPort->SR1, I2C_SR1_SB_Pos)));
-  /* Verify master mode*/
-  while(!(PREG_CHECK(I2CPort->SR1, I2C_SR2_MSL_Pos)));
-  
-  /* Send the slave address into the bus */
-  I2CPort->DR = _ADDR_<<1;
-  
-  /* Wait until address is sent */
-  while(!(PREG_CHECK(I2CPort->SR1, I2C_SR1_ADDR_Pos)));
-  /* Verify before transferring if trasmit buffer is empty */
-  while(!(PREG_CHECK(I2CPort->SR1, I2C_SR1_TXE_Pos)));
-  
-  /* Clear status registers */
-  (void)I2C1->SR1;
-  (void)I2C1->SR2;
-  
-  /* Send data byte to the slave */
-  I2CPort->DR = RxByte;
-  /* Verify if byte transfer finished */
-  while(!(PREG_CHECK(I2CPort->SR1, I2C_SR1_BTF_Pos)));
-  /* Verify after transferring if trasmit buffer is empty */
-  while(!(PREG_CHECK(I2CPort->SR1, I2C_SR1_TXE_Pos)));
-  
-  /* Generate stop condition */
-  PREG_CLR(I2CPort->CR1, I2C_CR1_STOP_Pos);
-  /* Stop the Peripherals */
-  PREG_CLR(I2CPort->CR1, I2C_CR1_PE_Pos);
-}
-
-
-
-
-
-
-
-void WH1602_WriteChar(I2C_TypeDef* I2CPort, uint8_t ch){  
-  WH1602_I2C_WriteByte(I2CPort, _WR1NCHAR(ch));
-  WH1602_I2C_WriteByte(I2CPort, _WR2NCHAR(ch));
-  WH1602_I2C_WriteByte(I2CPort, _WR1NCHAR(ch << 4));
-  WH1602_I2C_WriteByte(I2CPort, _WR2NCHAR(ch << 4));
+void WH1602_WriteChar(I2C_TypeDef* I2Cx, uint8_t ch){  
+  I2C_WriteByte(I2Cx, _WR1NCHAR(ch));
+  I2C_WriteByte(I2Cx, _WR2NCHAR(ch));
+  I2C_WriteByte(I2Cx, _WR1NCHAR(ch << 4));
+  I2C_WriteByte(I2Cx, _WR2NCHAR(ch << 4));
   SimpleDelay(40);
 }
 
@@ -134,11 +94,11 @@ void WH1602_WriteChar(I2C_TypeDef* I2CPort, uint8_t ch){
 
 
 
-void WH1602_WriteCommand(I2C_TypeDef* I2CPort, uint8_t cmd, uint32_t delay){  
-  WH1602_I2C_WriteByte(I2CPort, _WR1NCMD(cmd));
-  WH1602_I2C_WriteByte(I2CPort, _WR2NCMD(cmd));
-  WH1602_I2C_WriteByte(I2CPort, _WR1NCMD(cmd << 4));
-  WH1602_I2C_WriteByte(I2CPort, _WR2NCMD(cmd << 4));
+void WH1602_WriteCommand(I2C_TypeDef* I2Cx, uint8_t cmd, uint32_t delay){  
+  I2C_WriteByte(I2Cx, _WR1NCMD(cmd));
+  I2C_WriteByte(I2Cx, _WR2NCMD(cmd));
+  I2C_WriteByte(I2Cx, _WR1NCMD(cmd << 4));
+  I2C_WriteByte(I2Cx, _WR2NCMD(cmd << 4));
   SimpleDelay(delay);
 }
 
