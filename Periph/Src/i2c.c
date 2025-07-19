@@ -1,7 +1,7 @@
 /**
   ******************************************************************************
-  * @file           : display.c
-  * @brief          : This file contains display code
+  * @file           : i2c.c
+  * @brief          : This file contains I2C peripherals code
   ******************************************************************************
   * @attention
   *

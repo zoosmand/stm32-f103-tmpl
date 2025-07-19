@@ -31,10 +31,8 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* Private function prototypes -----------------------------------------------*/
-// void I2C_WriteByte(I2C_TypeDef*, uint8_t);
 void WH1602_WriteChar(I2C_TypeDef*, uint8_t);
 void WH1602_WriteCommand(I2C_TypeDef*, uint8_t, uint32_t);
-// void WH1602_I2C_Write(I2C_TypeDef* I2Cx, uint8_t, const char*);
 
 
 
@@ -46,17 +44,17 @@ void WH1602_I2C_Init(I2C_TypeDef* I2Cx){
   SimpleDelay(15000);
  
   uint16_t params[14] = {
-    _8BBUS_,      4100,
-    _8BBUS_,      100,
-    _8BBUS_,      40,
-    _CURUPLEFT_,  1640,
-    _4BBUS2L_,    40,
-    _DSPLSW_,     40,
-    _CLRDSLP_,    1640
+    _1602A_8BBUS_,      4100,
+    _1602A_8BBUS_,      100,
+    _1602A_8BBUS_,      40,
+    _1602A_CURUPLEFT_,  1640,
+    _1602A_4BBUS2L_,    40,
+    _1602A_DSPLSW_,     40,
+    _1602A_CLRDSLP_,    1640
   }; 
   
   I2C_Start(I2Cx);
-  I2C_SendAddress(I2Cx, _ADDR_);
+  I2C_SendAddress(I2Cx, _1602A_ADDR_);
   for(uint8_t i = 0; i < sizeof(params); i++){
     I2C_WriteByte(I2Cx, _WR1NCMD((uint8_t)params[i]));
     I2C_WriteByte(I2Cx, _WR2NCMD((uint8_t)params[i]));
@@ -67,14 +65,8 @@ void WH1602_I2C_Init(I2C_TypeDef* I2Cx){
   I2C_Stop(I2Cx);
 
 
-
-  I2C_Start(I2Cx);
-  I2C_SendAddress(I2Cx, _ADDR_);
-  WH1602_WriteCommand(I2Cx, _CLRDSLP_, 1640);
-  WH1602_I2C_Write(I2Cx, 1, "QWErtyuiop");
-  WH1602_I2C_Write(I2Cx, 2, "1234567890");
-  I2C_Stop(I2Cx);
-
+  WH1602_I2C_Write(I2Cx, 1, _1602A_CLRDSLP_, "QWErtyuiop");
+  WH1602_I2C_Write(I2Cx, 2, _1602A_NOCMD_, "1234567890");
 }
 
 
@@ -105,7 +97,7 @@ void WH1602_WriteCommand(I2C_TypeDef* I2Cx, uint8_t cmd, uint32_t delay){
 
 
 
-uint32_t WH1602_I2C_LineLength(const char* buf){
+uint32_t WH1602_I2C_BufferLength(const char* buf){
   uint32_t len = 0;
   while(*buf){
     len++;
@@ -118,17 +110,25 @@ uint32_t WH1602_I2C_LineLength(const char* buf){
 
 
 
-void WH1602_I2C_Write(I2C_TypeDef* I2Cx, uint8_t line, const char* buf){
+void WH1602_I2C_Write(I2C_TypeDef* I2Cx, uint8_t line, uint8_t extraCmd, const char* buf){
   
+  I2C_Start(I2Cx);
+  I2C_SendAddress(I2Cx, _1602A_ADDR_);
+
+  if (extraCmd) {
+    WH1602_WriteCommand(I2Cx, extraCmd, 1640);
+  }
+
   // printf("%s\n", buf);
   uint8_t dsplAddr = (line == 2) ? 0xc0 : 0x80;
   WH1602_WriteCommand(I2C1, dsplAddr, 40);
   
-  uint32_t len = WH1602_I2C_LineLength(buf);
+  uint32_t len = WH1602_I2C_BufferLength(buf);
   
   for(uint32_t i = 0 ; i < len ; i++){
     WH1602_WriteChar(I2Cx, (*buf++));
   }
+  I2C_Stop(I2Cx);
 }
 
 

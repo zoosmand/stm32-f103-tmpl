@@ -1,7 +1,7 @@
 /**
   ******************************************************************************
-  * @file           : display.h
-  * @brief          : This file contains header definitions for display code
+  * @file           : i2c.h
+  * @brief          : This file contains header definitions for I2C peripherals code
   ******************************************************************************
   * @attention
   *
@@ -25,14 +25,12 @@
 #include "main.h"
 
 
+/* Exported functions prototypes ---------------------------------------------*/
 void I2C_Start(I2C_TypeDef*);
 void I2C_Stop(I2C_TypeDef*);
 void I2C_SendAddress(I2C_TypeDef*, uint8_t);
 void I2C_WriteByte(I2C_TypeDef*, uint8_t);
 uint8_t I2C_ReadByte(I2C_TypeDef*);
-
-
-
 
 
 
