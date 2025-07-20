@@ -49,6 +49,7 @@ int main(void) {
   
   if (CRON_SEC_EVENT) {
     printf("The long test message, that might stuck the program but now it does not at all...\n");
+    printf("%i", secCnt);
   }
 
   Led_Handler();
@@ -70,7 +71,6 @@ void Cron_Handler(void) {
     if (FLAG_CHECK(&_GEREG_, _SYSSECF_)) {
       FLAG_CLR(&_GEREG_, _SYSSECF_);
       IWDG->KR = IWDG_KEY_RELOAD;
-      // WH1602_I2C_Init(I2C1);
     }
 
     if (secCntCache <= sysCnt) {

@@ -71,10 +71,6 @@ void WH1602_I2C_Init(I2C_TypeDef* I2Cx){
     SimpleDelay(params[i++]);
   }
   I2C_Stop(I2Cx);
-
-
-  WH1602_I2C_Write(I2Cx, 1, _1602A_CLRDSLP_, "QWErtyuiop");
-  WH1602_I2C_Write(I2Cx, 2, _1602A_NOCMD_, "1234567890");
 }
 
 
@@ -178,3 +174,19 @@ void WH1602_I2C_Read(I2C_TypeDef* I2Cx, uint16_t bufLen, uint8_t* buf){
 }
 
 
+/**
+ * @brief  Writes/Sends cgarachter to the given display
+ * @param  ch: charachter to write
+ * @param  dspl: display index #TODO define desctop selection
+ * @retval None
+ */
+void PrintCharDisplay(char ch, uint8_t dspl){
+
+  // WH1602_I2C_Write(I2C1, 1, _1602A_CLRDSLP_, &ch);
+  // WH1602_I2C_Write(I2Cx, 2, _1602A_NOCMD_, "1234567890");
+  I2C_Start(I2C1);
+  I2C_SendAddress(I2C1, _1602A_ADDR_);
+  WH1602_WriteChar(I2C1, ch);
+  I2C_Stop(I2C1);
+
+}

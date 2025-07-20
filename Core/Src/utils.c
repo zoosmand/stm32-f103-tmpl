@@ -44,16 +44,16 @@ __STATIC_INLINE void _putc(uint8_t ch) {
  if (ch == '\n') _putc('\r');
 
  #ifdef SWO_ITM
-   ITM_SendCharChannel(ch, SWO_ITM);
+    ITM_SendCharChannel(ch, SWO_ITM);
  #endif
 
  #ifdef SWO_DSPL
-   PrintDisplay(ch, SWO_DSPL);
+    PrintCharDisplay(ch, SWO_DSPL);
  #endif
 
  #ifdef SWO_USART
-   while (!(PREG_CHECK(SWO_USART->SR, USART_SR_TXE_Pos)));
-   USART1->DR = ch;
+    while (!(PREG_CHECK(SWO_USART->SR, USART_SR_TXE_Pos)));
+    USART1->DR = ch;
  #endif
 }
 
