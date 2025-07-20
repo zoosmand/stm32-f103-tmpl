@@ -33,16 +33,24 @@
 /* Private function prototypes -----------------------------------------------*/
 void WH1602_WriteChar(I2C_TypeDef*, uint8_t);
 void WH1602_WriteCommand(I2C_TypeDef*, uint8_t, uint32_t);
+uint32_t WH1602_I2C_BufferLength(const char*);
+void WH1602_I2C_ReadByte(I2C_TypeDef*, uint8_t);
 
 
 
 
 
-/******************************************************************************/
+/**
+ * @brief  Initializes WH1602A display
+ * @param  I2Cx: pointer to the I2C peripherals
+ * @retval None
+ */
 void WH1602_I2C_Init(I2C_TypeDef* I2Cx){
   
+  /* Initial delay according 1602a documentation */
   SimpleDelay(15000);
  
+  /* Initial parameter-delay pairs */
   uint16_t params[14] = {
     _1602A_8BBUS_,      4100,
     _1602A_8BBUS_,      100,
@@ -70,9 +78,12 @@ void WH1602_I2C_Init(I2C_TypeDef* I2Cx){
 }
 
 
-
-
-
+/**
+ * @brief  Writes/Sends a charachter symbol to WH1602A display
+ * @param  I2Cx: pointer to the I2C peripherals
+ * @param  ch: ACSII charachter
+ * @retval None
+ */
 void WH1602_WriteChar(I2C_TypeDef* I2Cx, uint8_t ch){  
   I2C_WriteByte(I2Cx, _WR1NCHAR(ch));
   I2C_WriteByte(I2Cx, _WR2NCHAR(ch));
@@ -82,10 +93,13 @@ void WH1602_WriteChar(I2C_TypeDef* I2Cx, uint8_t ch){
 }
 
 
-
-
-
-
+/**
+ * @brief  Writes/Sends a command to WH1602A display
+ * @param  I2Cx: pointer to the I2C peripherals
+ * @param  cmd: 1602a command
+ * @param  delay: command delay according documentation
+ * @retval None
+ */
 void WH1602_WriteCommand(I2C_TypeDef* I2Cx, uint8_t cmd, uint32_t delay){  
   I2C_WriteByte(I2Cx, _WR1NCMD(cmd));
   I2C_WriteByte(I2Cx, _WR2NCMD(cmd));
@@ -95,8 +109,11 @@ void WH1602_WriteCommand(I2C_TypeDef* I2Cx, uint8_t cmd, uint32_t delay){
 }
 
 
-
-
+/**
+ * @brief  Writes/Sends a command to WH1602A display
+ * @param  buf: pointer to the charachter/text buffer
+ * @retval The buffer length 
+ */
 uint32_t WH1602_I2C_BufferLength(const char* buf){
   uint32_t len = 0;
   while(*buf){
@@ -108,8 +125,14 @@ uint32_t WH1602_I2C_BufferLength(const char* buf){
 }
 
 
-
-
+/**
+ * @brief  Writes/Sends a text buffer to WH1602A display
+ * @param  I2Cx: pointer to the I2C peripherals
+ * @param  line: 1602a display line [1,2]
+ * @param  extraCmd: extra 1602a command, e.g. clear display
+ * @param  buf: pointer to the charachter/text buffer
+ * @retval None
+ */
 void WH1602_I2C_Write(I2C_TypeDef* I2Cx, uint8_t line, uint8_t extraCmd, const char* buf){
   
   I2C_Start(I2Cx);
@@ -119,7 +142,6 @@ void WH1602_I2C_Write(I2C_TypeDef* I2Cx, uint8_t line, uint8_t extraCmd, const c
     WH1602_WriteCommand(I2Cx, extraCmd, 1640);
   }
 
-  // printf("%s\n", buf);
   uint8_t dsplAddr = (line == 2) ? 0xc0 : 0x80;
   WH1602_WriteCommand(I2C1, dsplAddr, 40);
   
@@ -133,11 +155,26 @@ void WH1602_I2C_Write(I2C_TypeDef* I2Cx, uint8_t line, uint8_t extraCmd, const c
 
 
 
-void WH1602_I2C_ReadByte(I2C_TypeDef* I2Cx, uint8_t RxByte){
+/**
+ * @brief  Reads a byte from WH1602A display
+ * @param  I2Cx: pointer to the I2C peripherals
+ * @param  rxByte: received byte
+ * @retval None
+ */
+void WH1602_I2C_ReadByte(I2C_TypeDef* I2Cx, uint8_t rxByte){
+
 }
 
 
-void WH1602_I2C_ReadBuffer(I2C_TypeDef* I2Cx, uint16_t RxLength, uint8_t* RxBuffer){
+/**
+ * @brief  Reads a text buffer from WH1602A display
+ * @param  I2Cx: pointer to the I2C peripherals
+ * @param  bufLen: received buffer length
+ * @param  buf: pointer to the charachter/text buffer to receive
+ * @retval None
+ */
+void WH1602_I2C_Read(I2C_TypeDef* I2Cx, uint16_t bufLen, uint8_t* buf){
+
 }
 
 

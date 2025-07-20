@@ -19,6 +19,11 @@
 #include "i2c.h"
 
 
+/**
+ * @brief  Starts (sends start condition) to the given I2C peripherals
+ * @param  I2Cx: pointer to the I2C peripherals
+ * @retval None
+ */
 void I2C_Start(I2C_TypeDef* I2Cx){
   /* Stast I2C Peripherals enable */
   PREG_SET(I2Cx->CR1, I2C_CR1_PE_Pos);
@@ -32,6 +37,13 @@ void I2C_Start(I2C_TypeDef* I2Cx){
 
 }
 
+
+/**
+ * @brief  Sends slave's address to the given I2C bus
+ * @param  I2Cx: pointer to the I2C peripherals
+ * @param  addr: slave address
+ * @retval None
+ */
 void I2C_SendAddress(I2C_TypeDef* I2Cx, uint8_t addr){
  /* Send the slave address into the bus */
   I2Cx->DR = addr<<1;
@@ -47,6 +59,11 @@ void I2C_SendAddress(I2C_TypeDef* I2Cx, uint8_t addr){
  }
 
 
+/**
+ * @brief  Starts (sends stop condition) to the given I2C bus
+ * @param  I2Cx: pointer to the I2C peripherals
+ * @retval None
+ */
 void I2C_Stop(I2C_TypeDef* I2Cx){
   /* Generate stop condition */
   PREG_CLR(I2Cx->CR1, I2C_CR1_STOP_Pos);
@@ -58,10 +75,16 @@ void I2C_Stop(I2C_TypeDef* I2Cx){
 }
 
 
-void I2C_WriteByte(I2C_TypeDef* I2Cx, uint8_t RxByte){
+/**
+ * @brief  Writes a byte value to the given I2C bus
+ * @param  I2Cx: pointer to the I2C peripherals
+ * @param  txByte: byte to send to the given bus
+ * @retval None
+ */
+void I2C_WriteByte(I2C_TypeDef* I2Cx, uint8_t txByte){
   
   /* Send data byte to the couterpart */
-  I2Cx->DR = RxByte;
+  I2Cx->DR = txByte;
   /* Verify if byte transfer finished */
   while(!(PREG_CHECK(I2Cx->SR1, I2C_SR1_BTF_Pos)));
   /* Verify after transferring if trasmit buffer is empty */
@@ -69,14 +92,21 @@ void I2C_WriteByte(I2C_TypeDef* I2Cx, uint8_t RxByte){
   
 }
 
+
+/**
+ * @brief  Reads a byte value from the given I2C bus
+ * @param  I2Cx: pointer to the I2C peripherals
+ * @retval A byte to receive from the given bus
+ */
 uint8_t I2C_ReadByte(I2C_TypeDef* I2Cx){
   
   /* Receive data byte from the couterpart */
-  uint8_t TxByte = I2Cx->DR;
+  uint8_t rxByte = I2Cx->DR;
   /* Verify if byte transfer finished */
   while(!(PREG_CHECK(I2Cx->SR1, I2C_SR1_BTF_Pos)));
   /* Verify after transferring if trasmit buffer is empty */
   while(PREG_CHECK(I2Cx->SR1, I2C_SR1_RXNE_Pos));
   
+  return rxByte;
 }
 
