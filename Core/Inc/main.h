@@ -49,7 +49,7 @@ extern "C" {
 #define APB1_FREQ   APB2_FREQ/2
 
 /* Exported types ------------------------------------------------------------*/
-#define SWO_USART USART1
+// #define SWO_USART USART1
 // #define SWO_ITM 0
 #define SWO_DSPL 0
 

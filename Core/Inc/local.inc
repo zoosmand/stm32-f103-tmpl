@@ -189,13 +189,9 @@ _ON_    .req v7
 
 
 /* I2C */
-.equ I2C_SM_FREQ,             100000
-.equ I2C_FM_FREQ,             400000
+.equ I2C_SM_FREQ,             100
+.equ I2C_FM_FREQ,             400
 
-.equ I2C_PERIPH_FREQ_2,       0b000010
-.equ I2C_PERIPH_FREQ_10,      0b001010
-.equ I2C_PERIPH_FREQ_50,      0b110010
-
-.equ I2C_TRISE_SM,            1/I2C_SM_FREQ /* 1000ns */
-.equ I2C_TRISE_FM,            1/I2C_FM_FREQ /* 250ns */
+.equ I2C_TRISE_SM,            1000000/I2C_SM_FREQ /* 10000ns */
+.equ I2C_TRISE_FM,            1000000/I2C_FM_FREQ /* 2500ns */
 

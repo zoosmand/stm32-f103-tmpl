@@ -42,19 +42,24 @@ I2c1Init:
 
   /* Peripheral frequency */
   ldr tmpa, =I2C1_CR2
-  movs tmpd, #36
+
+  .equ I2C_BUS_FREQ, APB1_FREQ/1000000
+  @ movs tmpd, #36
+  movs tmpd, #I2C_BUS_FREQ
   str tmpd, [tmpa]
 
   /* CCR calculating */
   ldr tmpa, =I2C1_CCR
-  movs tmpd, #180 /* (1/I2C_SM_FREQ/2)/(1/APB1_FREQ) */
-  @ movs tmpd, #(1/I2C_SM_FREQ/2)/(1/APB1_FREQ)
+  .equ I2C_CCR_VAL, ((I2C_TRISE_SM/2)/(1000/(APB1_FREQ/1000000)))+1
+  ldr tmpd, =I2C_CCR_VAL
+  @ movs tmpd, #180
   str tmpd, [tmpa]
 
   /* TRISE calculating */
   ldr tmpa, =I2C1_TRISE
-  movs tmpd, #37 /* ((I2C_TRISE_SM/(1/APB1_FREQ)+1) */
-  @ movs tmpd, #((I2C_TRISE_SM/(1/APB1_FREQ))+1)
+  .equ I2C1_TRISE_VAL, (1000/(1000/(APB1_FREQ/1000000)))+1
+  movs tmpd, #I2C1_TRISE_VAL
+  @ movs tmpd, #37
   str tmpd, [tmpa]
 
   pop {tmpa, tmpd, tmp, pc}

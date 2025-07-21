@@ -184,12 +184,9 @@ void WH1602_I2C_Read(I2C_TypeDef* I2Cx, uint16_t bufLen, uint8_t* buf) {
  * @retval None
  */
 void PrintCharDisplay(char ch, uint8_t dspl){
-
-  // WH1602_I2C_Write(I2C1, 1, _1602A_CLRDSLP_, &ch);
-  // WH1602_I2C_Write(I2Cx, 2, _1602A_NOCMD_, "1234567890");
-  if ((FLAG_CHECK(&_DSPLREG_, 0)) && (FLAG_CHECK(&_DSPLREG_, 1))) {
-    FLAG_CLR(&_DSPLREG_, 0);
-    FLAG_CLR(&_DSPLREG_, 1);
+  if ((FLAG_CHECK(&_DSPLREG_, _0DCF_)) && (FLAG_CHECK(&_DSPLREG_, _0ACF_))) {
+    FLAG_CLR(&_DSPLREG_, _0DCF_);
+    FLAG_CLR(&_DSPLREG_, _0ACF_);
 
     I2C_Start(I2C1);
     I2C_SendAddress(I2C1, _1602A_ADDR_);
@@ -210,7 +207,7 @@ void PrintCharDisplay(char ch, uint8_t dspl){
     diplPrintPos++;
   }
   
-  if (ch == 0x0a) FLAG_SET(&_DSPLREG_, 0);
-  if (ch == 0x0d) FLAG_SET(&_DSPLREG_, 1);
+  if (ch == 0x0a) FLAG_SET(&_DSPLREG_, _0DCF_);
+  if (ch == 0x0d) FLAG_SET(&_DSPLREG_, _0ACF_);
 
 }

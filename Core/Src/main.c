@@ -49,7 +49,7 @@ int main(void) {
   
   if (CRON_SEC_EVENT) {
     // printf("The long test message, that might stuck the program but now it does not at all...\n");
-    printf("the current second is:%li\n", secCnt);
+    printf("second:%li\n", secCnt);
   }
 
   Led_Handler();

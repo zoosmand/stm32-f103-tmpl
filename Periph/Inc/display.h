@@ -44,7 +44,7 @@ void PrintCharDisplay(char, uint8_t);
 #define _1602A_ADDR_        0x27 // WH1602 I2C Address
 #define _1602A_8BBUS_       0x03 // 8-bit initial bus initialization
 #define _1602A_CURUPLEFT_   0x02 // Cursor positioin up an left
-#define	_1602A_4BBUS2L_     0x28 // 4-bit bus, LCD of 2 lines
+#define	_1602A_4BBUS2L_     0x20 // 4-bit bus, LCD of 2 lines
 #define _1602A_DSPLSW_	    0x0c // Display on, cursor off, blink off
 #define _1602A_CLRDSLP_     0x01 // Clear display
 #define _1602A_NOCMD_       0x00 // No command
@@ -62,6 +62,9 @@ void PrintCharDisplay(char, uint8_t);
 #define _WR1NCMD(cmd) ((cmd & _1602A_4BMASK_)|(1<<_1602A_E)|(1<<_1602A_Bl))
 #define _WR2NCMD(cmd) ((cmd & _1602A_4BMASK_)|(1<<_1602A_Bl))
 
+/* --- Display end of line parameters --- */
+#define _0DCF_              0
+#define _0ACF_              1
 
 /* Extern functions prototypes ----------------------------------------------*/
 
