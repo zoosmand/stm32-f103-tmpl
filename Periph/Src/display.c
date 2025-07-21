@@ -61,7 +61,8 @@ void WH1602_I2C_Init(I2C_TypeDef* I2Cx) {
     _1602A_CURUPLEFT_,  1640,
     _1602A_4BBUS2L_,    40,
     _1602A_DSPLSW_,     40,
-    _1602A_CLRDSLP_,    1640
+    _1602A_CLRDSLP_,    1640,
+    _1602A_1LS_,        40
   }; 
   
   I2C_Start(I2Cx);
@@ -141,7 +142,7 @@ void WH1602_I2C_Write(I2C_TypeDef* I2Cx, uint8_t line, uint8_t extraCmd, const c
     WH1602_WriteCommand(I2Cx, extraCmd, 1640);
   }
 
-  uint8_t dsplAddr = (line == 2) ? 0xc0 : 0x80;
+  uint8_t dsplAddr = (line == 2) ? _1602A_2LS_ : _1602A_1LS_;
   WH1602_WriteCommand(I2C1, dsplAddr, 40);
   
   uint32_t len = WH1602_I2C_BufferLength(buf);
@@ -191,7 +192,7 @@ void PrintCharDisplay(char ch, uint8_t dspl){
     I2C_Start(I2C1);
     I2C_SendAddress(I2C1, _1602A_ADDR_);
     WH1602_WriteCommand(I2C1, _1602A_CLRDSLP_, 1640);
-    WH1602_WriteCommand(I2C1, 0x80, 1640);
+    WH1602_WriteCommand(I2C1, _1602A_1LS_, 40);
     I2C_Stop(I2C1);
     diplPrintPos = 0;
   }
@@ -199,7 +200,7 @@ void PrintCharDisplay(char ch, uint8_t dspl){
     I2C_Start(I2C1);
     I2C_SendAddress(I2C1, _1602A_ADDR_);
     if (diplPrintPos > 15) {
-      WH1602_WriteCommand(I2C1, 0xc0, 40);
+      WH1602_WriteCommand(I2C1, _1602A_2LS_, 40);
       diplPrintPos = 0;
     }
     WH1602_WriteChar(I2C1, ch);

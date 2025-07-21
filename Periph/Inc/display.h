@@ -44,9 +44,12 @@ void PrintCharDisplay(char, uint8_t);
 #define _1602A_ADDR_        0x27 // WH1602 I2C Address
 #define _1602A_8BBUS_       0x03 // 8-bit initial bus initialization
 #define _1602A_CURUPLEFT_   0x02 // Cursor positioin up an left
-#define	_1602A_4BBUS2L_     0x20 // 4-bit bus, LCD of 2 lines
+// #define	_1602A_4BBUS2L_     0x28 // 4-bit bus, LCD of 2 lines
+#define	_1602A_4BBUS2L_     0x20 // 4-bit bus, LCD of 1 line inverted
 #define _1602A_DSPLSW_	    0x0c // Display on, cursor off, blink off
 #define _1602A_CLRDSLP_     0x01 // Clear display
+#define _1602A_1LS_         0x80 // Position at 1-st line, start 
+#define _1602A_2LS_         0xc0 // Position ar 2-nd line, start
 #define _1602A_NOCMD_       0x00 // No command
 
 /* --- WH0802A control parameters --- */
