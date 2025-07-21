@@ -32,8 +32,8 @@ __attribute__((section(".cron"))) static uint32_t ledGreenTaskPauseCnt_2  = 0;
 /* Private variables ---------------------------------------------------------*/
 static task_scheduler_t ledRedScheduler = {
   .counter        = &ledRedTaskCnt,
-  .counterSrc     = &sysCnt,
-  .period         = 193,
+  .counterSrc     = &secCnt,
+  .period         = 7,
   .counterReg     = &ledRedTaskReg,
   .entranceFlag   = 31,
 };
@@ -55,8 +55,8 @@ static task_led_toggle_t ledRedTask = {
 /* ----------------------------------------------------------------------------- */
 static task_scheduler_t ledBlueScheduler = {
   .counter        = &ledBlueTaskCnt,
-  .counterSrc     = &sysCnt,
-  .period         = 211,
+  .counterSrc     = &secCnt,
+  .period         = 5,
   .counterReg     = &ledBlueTaskReg,
   .entranceFlag   = 31,
 };
@@ -79,8 +79,8 @@ static task_led_toggle_t ledBlueTask = {
 
 static task_scheduler_t ledGreenScheduler = {
   .counter        = &ledGreenTaskCnt,
-  .counterSrc     = &sysCnt,
-  .period         = 237,
+  .counterSrc     = &secCnt,
+  .period         = 3,
   .counterReg     = &ledGreenTaskReg,
   .entranceFlag   = 31,
 };
