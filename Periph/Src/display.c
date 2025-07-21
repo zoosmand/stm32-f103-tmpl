@@ -29,6 +29,9 @@
 /* Global variables ----------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
+static __attribute__((section(".cron"))) uint32_t _DSPLREG_    = 0;
+
+
 
 /* Private function prototypes -----------------------------------------------*/
 void WH1602_WriteChar(I2C_TypeDef*, uint8_t);
@@ -45,7 +48,7 @@ void WH1602_I2C_ReadByte(I2C_TypeDef*, uint8_t);
  * @param  I2Cx: pointer to the I2C peripherals
  * @retval None
  */
-void WH1602_I2C_Init(I2C_TypeDef* I2Cx){
+void WH1602_I2C_Init(I2C_TypeDef* I2Cx) {
   
   /* Initial delay according 1602a documentation */
   SimpleDelay(15000);
@@ -63,7 +66,7 @@ void WH1602_I2C_Init(I2C_TypeDef* I2Cx){
   
   I2C_Start(I2Cx);
   I2C_SendAddress(I2Cx, _1602A_ADDR_);
-  for(uint8_t i = 0; i < sizeof(params); i++){
+  for(uint8_t i = 0; i < sizeof(params); i++) {
     I2C_WriteByte(I2Cx, _WR1NCMD((uint8_t)params[i]));
     I2C_WriteByte(I2Cx, _WR2NCMD((uint8_t)params[i]));
     I2C_WriteByte(I2Cx, _WR1NCMD(((uint8_t)params[i] << 4)));
@@ -80,7 +83,7 @@ void WH1602_I2C_Init(I2C_TypeDef* I2Cx){
  * @param  ch: ACSII charachter
  * @retval None
  */
-void WH1602_WriteChar(I2C_TypeDef* I2Cx, uint8_t ch){  
+void WH1602_WriteChar(I2C_TypeDef* I2Cx, uint8_t ch) {
   I2C_WriteByte(I2Cx, _WR1NCHAR(ch));
   I2C_WriteByte(I2Cx, _WR2NCHAR(ch));
   I2C_WriteByte(I2Cx, _WR1NCHAR(ch << 4));
@@ -96,7 +99,7 @@ void WH1602_WriteChar(I2C_TypeDef* I2Cx, uint8_t ch){
  * @param  delay: command delay according documentation
  * @retval None
  */
-void WH1602_WriteCommand(I2C_TypeDef* I2Cx, uint8_t cmd, uint32_t delay){  
+void WH1602_WriteCommand(I2C_TypeDef* I2Cx, uint8_t cmd, uint32_t delay) {  
   I2C_WriteByte(I2Cx, _WR1NCMD(cmd));
   I2C_WriteByte(I2Cx, _WR2NCMD(cmd));
   I2C_WriteByte(I2Cx, _WR1NCMD(cmd << 4));
@@ -129,7 +132,7 @@ uint32_t WH1602_I2C_BufferLength(const char* buf){
  * @param  buf: pointer to the charachter/text buffer
  * @retval None
  */
-void WH1602_I2C_Write(I2C_TypeDef* I2Cx, uint8_t line, uint8_t extraCmd, const char* buf){
+void WH1602_I2C_Write(I2C_TypeDef* I2Cx, uint8_t line, uint8_t extraCmd, const char* buf) {
   
   I2C_Start(I2Cx);
   I2C_SendAddress(I2Cx, _1602A_ADDR_);
@@ -143,7 +146,7 @@ void WH1602_I2C_Write(I2C_TypeDef* I2Cx, uint8_t line, uint8_t extraCmd, const c
   
   uint32_t len = WH1602_I2C_BufferLength(buf);
   
-  for(uint32_t i = 0 ; i < len ; i++){
+  for(uint32_t i = 0 ; i < len ; i++) {
     WH1602_WriteChar(I2Cx, (*buf++));
   }
   I2C_Stop(I2Cx);
@@ -157,7 +160,7 @@ void WH1602_I2C_Write(I2C_TypeDef* I2Cx, uint8_t line, uint8_t extraCmd, const c
  * @param  rxByte: received byte
  * @retval None
  */
-void WH1602_I2C_ReadByte(I2C_TypeDef* I2Cx, uint8_t rxByte){
+void WH1602_I2C_ReadByte(I2C_TypeDef* I2Cx, uint8_t rxByte) {
 
 }
 
@@ -169,7 +172,7 @@ void WH1602_I2C_ReadByte(I2C_TypeDef* I2Cx, uint8_t rxByte){
  * @param  buf: pointer to the charachter/text buffer to receive
  * @retval None
  */
-void WH1602_I2C_Read(I2C_TypeDef* I2Cx, uint16_t bufLen, uint8_t* buf){
+void WH1602_I2C_Read(I2C_TypeDef* I2Cx, uint16_t bufLen, uint8_t* buf) {
 
 }
 
@@ -184,9 +187,24 @@ void PrintCharDisplay(char ch, uint8_t dspl){
 
   // WH1602_I2C_Write(I2C1, 1, _1602A_CLRDSLP_, &ch);
   // WH1602_I2C_Write(I2Cx, 2, _1602A_NOCMD_, "1234567890");
-  I2C_Start(I2C1);
-  I2C_SendAddress(I2C1, _1602A_ADDR_);
-  WH1602_WriteChar(I2C1, ch);
-  I2C_Stop(I2C1);
+  if ((FLAG_CHECK(&_DSPLREG_, 0)) && (FLAG_CHECK(&_DSPLREG_, 1))) {
+    FLAG_CLR(&_DSPLREG_, 0);
+    FLAG_CLR(&_DSPLREG_, 1);
+
+    I2C_Start(I2C1);
+    I2C_SendAddress(I2C1, _1602A_ADDR_);
+    WH1602_WriteCommand(I2C1, _1602A_CLRDSLP_, 1640);
+    WH1602_WriteCommand(I2C1, 0x80, 1640);
+    I2C_Stop(I2C1);
+  }
+  if ((ch != 0x0a) && (ch != 0x0d)) {
+    I2C_Start(I2C1);
+    I2C_SendAddress(I2C1, _1602A_ADDR_);
+    WH1602_WriteChar(I2C1, ch);
+    I2C_Stop(I2C1);
+  }
+  
+  if (ch == 0x0a) FLAG_SET(&_DSPLREG_, 0);
+  if (ch == 0x0d) FLAG_SET(&_DSPLREG_, 1);
 
 }

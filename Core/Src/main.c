@@ -48,8 +48,8 @@ int main(void) {
   // __NVIC_SetPriorityGrouping(NVIC_PRIORITYGROUP_4);
   
   if (CRON_SEC_EVENT) {
-    printf("The long test message, that might stuck the program but now it does not at all...\n");
-    printf("%i", secCnt);
+    // printf("The long test message, that might stuck the program but now it does not at all...\n");
+    printf("%li\n", secCnt);
   }
 
   Led_Handler();
