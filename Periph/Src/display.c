@@ -30,7 +30,7 @@
 
 /* Private variables ---------------------------------------------------------*/
 static __attribute__((section(".cron"))) uint32_t _DSPLREG_    = 0;
-
+static uint16_t diplPrintPos = 0;
 
 
 /* Private function prototypes -----------------------------------------------*/
@@ -196,12 +196,18 @@ void PrintCharDisplay(char ch, uint8_t dspl){
     WH1602_WriteCommand(I2C1, _1602A_CLRDSLP_, 1640);
     WH1602_WriteCommand(I2C1, 0x80, 1640);
     I2C_Stop(I2C1);
+    diplPrintPos = 0;
   }
   if ((ch != 0x0a) && (ch != 0x0d)) {
     I2C_Start(I2C1);
     I2C_SendAddress(I2C1, _1602A_ADDR_);
+    if (diplPrintPos > 15) {
+      WH1602_WriteCommand(I2C1, 0xc0, 40);
+      diplPrintPos = 0;
+    }
     WH1602_WriteChar(I2C1, ch);
     I2C_Stop(I2C1);
+    diplPrintPos++;
   }
   
   if (ch == 0x0a) FLAG_SET(&_DSPLREG_, 0);
