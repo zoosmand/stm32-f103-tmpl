@@ -12,11 +12,8 @@
 .include "local.inc"
 
 
-
-@ .equ I2c2_BAUDRATE,         115200
-@ .equ I2c2_FRACTION,         0x0001 /* Baudrate = 9600 -> Fractual = 0x0120 */
-@ .equ I2c2_BAUDRATE_CALC,    ((SystemCoreClock / (I2c2_BAUDRATE * 16)) << 4) | I2c2_FRACTION
-
+.equ I2C_CCR_VAL, ((I2C_TRISE_SM/2)/(1000/(APB1_FREQ/1000000)))+1
+.equ I2C1_TRISE_VAL, (1000/(1000/(APB1_FREQ/1000000)))+1
 
 
 /**
@@ -50,14 +47,12 @@ I2c1Init:
 
   /* CCR calculating */
   ldr tmpa, =I2C1_CCR
-  .equ I2C_CCR_VAL, ((I2C_TRISE_SM/2)/(1000/(APB1_FREQ/1000000)))+1
   ldr tmpd, =I2C_CCR_VAL
   @ movs tmpd, #180
   str tmpd, [tmpa]
 
   /* TRISE calculating */
   ldr tmpa, =I2C1_TRISE
-  .equ I2C1_TRISE_VAL, (1000/(1000/(APB1_FREQ/1000000)))+1
   movs tmpd, #I2C1_TRISE_VAL
   @ movs tmpd, #37
   str tmpd, [tmpa]
