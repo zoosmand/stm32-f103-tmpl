@@ -28,6 +28,10 @@ _ON_    .req v7
 .equ _SystemStackSize_,       256
 
 
+.equ APB2_FREQ,               72000000
+.equ APB1_FREQ,               APB2_FREQ/2
+
+
 /* ------------------------------------------------------------------------- */
 /*                            Critical values                                */
 /* ------------------------------------------------------------------------- */
@@ -181,3 +185,13 @@ _ON_    .req v7
 .equ _IN_FL,                  0b0100 /* Input floating point */
 .equ _IN_PD,                  0b1000 /* correspondent ODR register pin has to be 0 */
 .equ _IN_PU,                  0b1000 /* correspondent ODR register pin has to be 1 */
+
+
+
+/* I2C */
+.equ I2C_SM_FREQ,             100
+.equ I2C_FM_FREQ,             400
+
+.equ I2C_TRISE_SM,            1000000/I2C_SM_FREQ /* 10000ns */
+.equ I2C_TRISE_FM,            1000000/I2C_FM_FREQ /* 2500ns */
+

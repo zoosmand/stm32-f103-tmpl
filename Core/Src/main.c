@@ -5,7 +5,7 @@
   ******************************************************************************
   * @attention
   *
-  * Copyright (c) 2025 STMicroelectronics.
+  * Copyright (c) 2025 Askug Ltd.
   * All rights reserved.
   *
   * This software is licensed under terms that can be found in the LICENSE file
@@ -48,7 +48,8 @@ int main(void) {
   // __NVIC_SetPriorityGrouping(NVIC_PRIORITYGROUP_4);
   
   if (CRON_SEC_EVENT) {
-    printf("The long test message, that might stuck the program but now it does not at all...\n");
+    // printf("The long test message, that might stuck the program but now it does not at all...\n");
+    printf("second:%li\n", secCnt);
   }
 
   Led_Handler();
@@ -61,6 +62,9 @@ int main(void) {
  * @retval none
  */
 void Cron_Handler(void) {
+  WH1602_I2C_Init(I2C1);
+
+  
   while (1) {
     __disable_irq();
     
@@ -92,3 +96,19 @@ void Scheduler_Handler(task_scheduler_t *scheduler) {
 
   __enable_irq();
 }
+
+
+
+// void SimpleDelay(uint32_t __us_delay){
+//   __asm__ __volatile__ (
+//     // "ldr r0, #%__us_delay\n"
+//     "mul r0, r0, 1\n"
+//     "_LOOP_: \n"
+//     "subs r0, r0, 1\n"
+//     "bpl _LOOP_\n"
+//     // : //"=r" (__us_delay)
+//     // :
+//     // : "r0"
+//   );
+// }
+

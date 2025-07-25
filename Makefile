@@ -34,17 +34,18 @@ BUILD_DIR = build
 # C sources
 C_SOURCES =  \
 $(wildcard Core/Src/*.c) \
+$(wildcard Periph/Src/*.c) \
 $(wildcard Tasks/Led/Src/*.c)
 
 # ASM sources
 ASM_SOURCES =  \
 startup_stm32f103xb.s \
-$(wildcard Core/Src/*.s) \
+$(wildcard Core/*.s) \
 $(wildcard Periph/*.s)
 
 # ASM sources
 ASMM_SOURCES = \
-$(wildcard Core/Src/*.S) \
+$(wildcard Core/*.S) \
 $(wildcard Periph/*.S)
 
 
@@ -105,6 +106,7 @@ AS_DEFS = $(C_DEFS) \
 # C includes
 C_INCLUDES =  \
 -ICore/Inc \
+-IPeriph/Inc \
 -ITasks/Led/Inc \
 -IDrivers/CMSIS/Device/ST/STM32F1xx/Include \
 -IDrivers/CMSIS/Include

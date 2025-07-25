@@ -43,7 +43,7 @@
 .equ GPIOB_BRR,         GPIOB + GPIO_BRR_Offset
 .equ GPIOB_LCKR,        GPIOB + GPIO_LCKR_Offset
 
-.equ GPIOC_CRL,         0x40011000
+.equ GPIOC,             0x40011000
 .equ GPIOC_CRL,         GPIOC + GPIO_CRL_Offset
 .equ GPIOC_CRH,         GPIOC + GPIO_CRH_Offset
 .equ GPIOC_IDR,         GPIOC + GPIO_IDR_Offset
@@ -52,7 +52,7 @@
 .equ GPIOC_BRR,         GPIOC + GPIO_BRR_Offset
 .equ GPIOC_LCKR,        GPIOC + GPIO_LCKR_Offset
 
-.equ GPIOD_CRL,         0x40011400
+.equ GPIOD,             0x40011400
 .equ GPIOD_CRL,         GPIOD + GPIO_CRL_Offset
 .equ GPIOD_CRH,         GPIOD + GPIO_CRH_Offset
 .equ GPIOD_IDR,         GPIOD + GPIO_IDR_Offset
@@ -61,7 +61,7 @@
 .equ GPIOD_BRR,         GPIOD + GPIO_BRR_Offset
 .equ GPIOD_LCKR,        GPIOD + GPIO_LCKR_Offset
 
-.equ GPIOE_CRL,         0x40011800
+.equ GPIOE,             0x40011800
 .equ GPIOE_CRL,         GPIOE + GPIO_CRL_Offset
 .equ GPIOE_CRH,         GPIOE + GPIO_CRH_Offset
 .equ GPIOE_IDR,         GPIOE + GPIO_IDR_Offset
@@ -70,7 +70,7 @@
 .equ GPIOE_BRR,         GPIOE + GPIO_BRR_Offset
 .equ GPIOE_LCKR,        GPIOE + GPIO_LCKR_Offset
 
-.equ GPIOF_CRL,         0x40011c00
+.equ GPIOF,             0x40011c00
 .equ GPIOF_CRL,         GPIOF + GPIO_CRL_Offset
 .equ GPIOF_CRH,         GPIOF + GPIO_CRH_Offset
 .equ GPIOF_IDR,         GPIOF + GPIO_IDR_Offset
@@ -79,7 +79,7 @@
 .equ GPIOF_BRR,         GPIOF + GPIO_BRR_Offset
 .equ GPIOF_LCKR,        GPIOF + GPIO_LCKR_Offset
 
-.equ GPIOG_CRL,         0x40012000
+.equ GPIOG,             0x40012000
 .equ GPIOG_CRL,         GPIOG + GPIO_CRL_Offset
 .equ GPIOG_CRH,         GPIOG + GPIO_CRH_Offset
 .equ GPIOG_IDR,         GPIOG + GPIO_IDR_Offset
@@ -417,6 +417,7 @@
 .equ CAN_F12R2,         0x400066A4
 .equ CAN_F13R1,         0x400066A8
 .equ CAN_F13R2,         0x400066AC
+
 .equ I2C1_CR1,          0x40005400
 .equ I2C1_CR2,          0x40005404
 .equ I2C1_OAR1,         0x40005408
@@ -426,6 +427,7 @@
 .equ I2C1_SR2,          0x40005418
 .equ I2C1_CCR,          0x4000541C
 .equ I2C1_TRISE,        0x40005420
+
 .equ I2C2_CR1,          0x40005800
 .equ I2C2_CR2,          0x40005804
 .equ I2C2_OAR1,         0x40005808
@@ -435,6 +437,7 @@
 .equ I2C2_SR2,          0x40005818
 .equ I2C2_CCR,          0x4000581C
 .equ I2C2_TRISE,        0x40005820
+
 .equ SPI1_CR1,          0x40013000
 .equ SPI1_CR2,          0x40013004
 .equ SPI1_SR,           0x40013008

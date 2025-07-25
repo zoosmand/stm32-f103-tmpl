@@ -44,6 +44,7 @@ SystemInit:
   @ bl WWatchdogInit
   bl LedInit
   bl Usart1Init
+  bl I2c1Init
 
   pop {pc}
   .size SystemInit, .-SystemInit
@@ -131,6 +132,7 @@ PeripheralInit:
   STRW \
     RCC_APB1ENR_WWDGEN \
   | RCC_APB1ENR_PWREN \
+  | RCC_APB1ENR_I2C1EN \
   , RCC_APB1ENR
 
   pop {pc}
@@ -208,6 +210,27 @@ WWatchdogInit:
   STRP one, WWDG_CR_WDGA_Pos
 
   pop {pc}
+
+
+
+/**
+  * System initialization.
+  *
+  */
+  .section .text.SimpleDelay
+  .global SimpleDelay
+  .type SimpleDelay, %function
+
+SimpleDelay:
+  push {r0, r1, lr}
+  mov r1, 24
+  muls r0, r0, r1
+  mov r1, 1
+  _SimpleDelay_loop_:
+    subs r0, r0, r1
+    bpl _SimpleDelay_loop_
+  pop {r0, r1, pc}
+  .size SimpleDelay, .-SimpleDelay
 
 
   .end
