@@ -45,6 +45,7 @@ SystemInit:
   bl LedInit
   bl Usart1Init
   bl I2c1Init
+  bl OwInit
 
   pop {pc}
   .size SystemInit, .-SystemInit

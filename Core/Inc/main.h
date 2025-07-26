@@ -39,6 +39,7 @@ extern "C" {
 /* Private includes ----------------------------------------------------------*/
 #include "i2c.h"
 #include "display.h"
+#include "ow.h"
 
 #if defined(USE_FULL_ASSERT)
 #include "stm32_assert.h"

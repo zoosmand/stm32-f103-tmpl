@@ -63,6 +63,7 @@ int main(void) {
  */
 void Cron_Handler(void) {
   WH1602_I2C_Init(I2C1);
+  OW_Search();
 
   
   while (1) {
