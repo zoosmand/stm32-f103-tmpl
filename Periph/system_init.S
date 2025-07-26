@@ -224,10 +224,13 @@ WWatchdogInit:
 
 SimpleDelay:
   push {r0, r1, lr}
-  mov r1, 24
+  mov r1, 5
   muls r0, r0, r1
+  adds r0, r0, #8
+  @ nop
   mov r1, 1
   _SimpleDelay_loop_:
+    @ nop
     subs r0, r0, r1
     bpl _SimpleDelay_loop_
   pop {r0, r1, pc}

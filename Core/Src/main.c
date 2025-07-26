@@ -64,7 +64,14 @@ int main(void) {
 void Cron_Handler(void) {
   WH1602_I2C_Init(I2C1);
   OW_Search();
+  DS18B20_ConvertT();
 
+  // while (1) {
+  //   PIN_H(GPIOB, GPIO_PIN_12_Pos);
+  //   SimpleDelay(1000);
+  //   PIN_L(GPIOB, GPIO_PIN_12_Pos);
+  //   SimpleDelay(1000);
+  // }
   
   while (1) {
     __disable_irq();

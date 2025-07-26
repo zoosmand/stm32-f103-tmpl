@@ -40,6 +40,7 @@ extern "C" {
 #include "i2c.h"
 #include "display.h"
 #include "ow.h"
+#include "ds18b20.h"
 
 #if defined(USE_FULL_ASSERT)
 #include "stm32_assert.h"

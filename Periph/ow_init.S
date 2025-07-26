@@ -27,7 +27,7 @@ OwInit:
   ldr tmpd, [tmpa]
   ldr tmp, =(~PIN_12_Mask)
   and tmpd, tmp
-  ldr tmp, =((_IOS_50 | _GPO_PP) << ((PIN_12_Pos - 8) * 4))
+  ldr tmp, =((_IOS_50 | _GPO_OD) << ((PIN_12_Pos - 8) * 4))
   orr tmpd, tmp
   str tmpd, [tmpa]
 

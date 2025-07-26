@@ -27,18 +27,20 @@ void OW_Reset(void) {
   FLAG_CLR(&_OWREG_, _OLF_);
 
   OW_High;
-  SimpleDelay(48000);
+  SimpleDelay(480);
   OW_Low;
-  SimpleDelay(7000);
+  SimpleDelay(15);
   
   int i = 0;
-  while (i++ < 41) {
+  while (i++ < 240) {
     if (!OW_Level) {
       FLAG_SET(&_OWREG_, _OLF_);
       break;
     }
-    SimpleDelay(1000);
+    SimpleDelay(1);
   }
+
+  SimpleDelay(480 - i);
 }
 
 
@@ -131,7 +133,7 @@ uint8_t OW_Enumerate(uint8_t* addr) {
 	if (!lastfork) return (0);
   
 	OW_Reset();
-  SimpleDelay(100000);  
+  // SimpleDelay(100000);  
 
   if (!FLAG_CHECK(&_OWREG_, _OLF_)) return (0);
   
@@ -220,9 +222,11 @@ uint8_t OW_Enumerate(uint8_t* addr) {
 void OW_Search(void) {
   lastfork = 65;
   uint64_t* address = malloc(8);
-  // *address = 0;
-  // OW_Enumerate((uint8_t*)address);
+  *address = 0;
+  OW_Enumerate((uint8_t*)address);
+  printf("f\n");
   printf("%08x%08x\n", *(uint32_t*)((uint32_t)address+4), (uint32_t)*address);
+
   
 }
 
