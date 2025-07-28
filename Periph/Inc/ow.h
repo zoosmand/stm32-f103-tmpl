@@ -28,6 +28,7 @@ void OW_Read(uint8_t*);
 void OW_CRC8(uint8_t*, uint8_t);
 void OW_Search(void);
 int8_t OW_Error_Handler(void);
+uint8_t* Get_AddrBuf(void);
 
 /* Private defines -----------------------------------------------------------*/
 #define SearchROM       0xf0

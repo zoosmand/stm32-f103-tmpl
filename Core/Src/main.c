@@ -46,10 +46,18 @@ static __attribute__((section(".cron"))) uint32_t secCntCache    = 0;
 int main(void) {
 
   // __NVIC_SetPriorityGrouping(NVIC_PRIORITYGROUP_4);
+
+  static uint32_t tmpCnt = 0;
   
   if (CRON_SEC_EVENT) {
     // printf("The long test message, that might stuck the program but now it does not at all...\n");
-    printf("second:%li\n", secCnt);
+    // printf("second:%li\n", secCnt);
+
+    
+    if (tmpCnt <= secCnt ) {
+      DS18B20_ConvertT();
+      tmpCnt = secCnt + 2;
+    }
   }
 
   Led_Handler();
@@ -64,13 +72,13 @@ int main(void) {
 void Cron_Handler(void) {
   WH1602_I2C_Init(I2C1);
   OW_Search();
-  DS18B20_ConvertT();
+  // DS18B20_ConvertT();
 
   // while (1) {
   //   PIN_H(GPIOB, GPIO_PIN_12_Pos);
-  //   SimpleDelay(1000);
+  //   _delay_us(750);
   //   PIN_L(GPIOB, GPIO_PIN_12_Pos);
-  //   SimpleDelay(1000);
+  //   _delay_us(1000);
   // }
   
   while (1) {
@@ -107,7 +115,7 @@ void Scheduler_Handler(task_scheduler_t *scheduler) {
 
 
 
-// void SimpleDelay(uint32_t __us_delay){
+// void _delay_us(uint32_t __us_delay){
 //   __asm__ __volatile__ (
 //     // "ldr r0, #%__us_delay\n"
 //     "mul r0, r0, 1\n"

@@ -12,6 +12,7 @@
 /* Global variables ----------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
+static uint8_t spad[9];
 
 
 
@@ -58,7 +59,7 @@ int8_t DS18B20_ReadScratchpad(uint8_t* scratchpad, uint8_t* address) {
   DS18B20_Command(MatchROM);
   DS18B20_Write(8, address);
   DS18B20_Command(ReadScratchpad);
-  SimpleDelay(2000);  
+  _delay_us(3000);  
   DS18B20_Read(9, scratchpad, 0);
   
   return (1);
@@ -68,20 +69,22 @@ int8_t DS18B20_ReadScratchpad(uint8_t* scratchpad, uint8_t* address) {
 // -------------------------------------------------------------  
 int8_t DS18B20_ConvertT(void) {
 
-  uint8_t scratchpad[9];
   OW_Reset();
   if (!(FLAG_CHECK(&_OWREG_, _OLF_))) return (0);
   
-  DS18B20_Command(SkipROM);
+  uint8_t* addr = Get_AddrBuf();
+
+  DS18B20_Command(MatchROM);
+  DS18B20_Write(8, addr);
   DS18B20_Command(ConvertT);
-  SimpleDelay(850000);
-
-  DS18B20_Command(ReadScratchpad);
-  SimpleDelay(4000);  
-  DS18B20_Read(9, scratchpad, 0);
-
-  printf("T:%s\n", scratchpad);
+  _delay_us(750000);
   
+  
+  DS18B20_ReadScratchpad(spad, addr);
+  int32_t* tmp = (int32_t*)&spad;
+  // int32_t temper = (((*tmp & 0x0000fff0) >> 4) * 10000) + (((*tmp & 0x0000000f) * 10000) >> 4);
+  // printf("T: %.2f\n", (float)(temper * 0.0001));
+  printf("T:%d.%02d\n", (int8_t)((*tmp & 0x0000fff0) >> 4), (uint8_t)(((*tmp & 0x0000000f) * 100) >> 4));
   return (1);
 }
 

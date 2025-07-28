@@ -15,6 +15,9 @@
 
 /* Global variables ----------------------------------------------------------*/
 __attribute__((section(".cron"))) uint32_t _OWREG_ = 0;
+static uint8_t lastfork;
+static uint8_t addr_buf[8];
+
 
 /* Private variables ---------------------------------------------------------*/
 
@@ -27,9 +30,9 @@ void OW_Reset(void) {
   FLAG_CLR(&_OWREG_, _OLF_);
 
   OW_High;
-  SimpleDelay(480);
+  _delay_us(580);
   OW_Low;
-  SimpleDelay(15);
+  _delay_us(15);
   
   int i = 0;
   while (i++ < 240) {
@@ -37,10 +40,10 @@ void OW_Reset(void) {
       FLAG_SET(&_OWREG_, _OLF_);
       break;
     }
-    SimpleDelay(1);
+    _delay_us(1);
   }
 
-  SimpleDelay(480 - i);
+  _delay_us(580 - i);
 }
 
 
@@ -48,13 +51,13 @@ void OW_Reset(void) {
 void OW_WriteBit(uint8_t bit) {
   OW_High;
   if (bit) {
-    SimpleDelay(6);
+    _delay_us(6);
     OW_Low;
-    SimpleDelay(64);
+    _delay_us(64);
   } else {
-    SimpleDelay(60);
+    _delay_us(60);
     OW_Low;
-    SimpleDelay(10);
+    _delay_us(10);
   }
 }
 
@@ -72,11 +75,11 @@ void OW_Write(uint8_t* data) {
 // -------------------------------------------------------------  
 uint8_t OW_ReadBit(void) {
   OW_High;
-  SimpleDelay(6);
+  _delay_us(6);
   OW_Low;
-  SimpleDelay(9);
+  _delay_us(9);
   uint8_t level = OW_Level;
-  SimpleDelay(55);
+  _delay_us(55);
   
   return level;
 }
@@ -125,7 +128,6 @@ int8_t OW_Error_Handler(void) {
 
 
 
-uint8_t lastfork;
 
 
 
@@ -133,7 +135,7 @@ uint8_t OW_Enumerate(uint8_t* addr) {
 	if (!lastfork) return (0);
   
 	OW_Reset();
-  // SimpleDelay(100000);  
+  // _delay_us(100000);  
 
   if (!FLAG_CHECK(&_OWREG_, _OLF_)) return (0);
   
@@ -221,13 +223,16 @@ uint8_t OW_Enumerate(uint8_t* addr) {
 
 void OW_Search(void) {
   lastfork = 65;
-  uint64_t* address = malloc(8);
-  *address = 0;
-  OW_Enumerate((uint8_t*)address);
-  printf("f\n");
-  printf("%08x%08x\n", *(uint32_t*)((uint32_t)address+4), (uint32_t)*address);
+  OW_Enumerate(addr_buf);
+  // printf("f\n");
+  // printf("%08x%08x\n", *(uint8_t*)(&addr_buf));
 
   
+}
+
+
+uint8_t* Get_AddrBuf(void) {
+  return addr_buf;
 }
 
 

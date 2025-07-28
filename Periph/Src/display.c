@@ -51,7 +51,7 @@ void WH1602_I2C_ReadByte(I2C_TypeDef*, uint8_t);
 void WH1602_I2C_Init(I2C_TypeDef* I2Cx) {
   
   /* Initial delay according 1602a documentation */
-  SimpleDelay(15000);
+  _delay_us(15000);
  
   /* Initial parameter-delay pairs */
   uint16_t params[14] = {
@@ -72,7 +72,7 @@ void WH1602_I2C_Init(I2C_TypeDef* I2Cx) {
     I2C_WriteByte(I2Cx, _WR2NCMD((uint8_t)params[i]));
     I2C_WriteByte(I2Cx, _WR1NCMD(((uint8_t)params[i] << 4)));
     I2C_WriteByte(I2Cx, _WR2NCMD(((uint8_t)params[i] << 4)));
-    SimpleDelay(params[i++]);
+    _delay_us(params[i++]);
   }
   I2C_Stop(I2Cx);
 }
@@ -89,7 +89,7 @@ void WH1602_WriteChar(I2C_TypeDef* I2Cx, uint8_t ch) {
   I2C_WriteByte(I2Cx, _WR2NCHAR(ch));
   I2C_WriteByte(I2Cx, _WR1NCHAR(ch << 4));
   I2C_WriteByte(I2Cx, _WR2NCHAR(ch << 4));
-  SimpleDelay(40);
+  _delay_us(40);
 }
 
 
@@ -105,7 +105,7 @@ void WH1602_WriteCommand(I2C_TypeDef* I2Cx, uint8_t cmd, uint32_t delay) {
   I2C_WriteByte(I2Cx, _WR2NCMD(cmd));
   I2C_WriteByte(I2Cx, _WR1NCMD(cmd << 4));
   I2C_WriteByte(I2Cx, _WR2NCMD(cmd << 4));
-  SimpleDelay(delay);
+  _delay_us(delay);
 }
 
 

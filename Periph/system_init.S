@@ -218,23 +218,23 @@ WWatchdogInit:
   * System initialization.
   *
   */
-  .section .text.SimpleDelay
-  .global SimpleDelay
-  .type SimpleDelay, %function
+  .section .text._delay_us
+  .global _delay_us
+  .type _delay_us, %function
 
-SimpleDelay:
+_delay_us:
   push {r0, r1, lr}
-  mov r1, 5
+  mov r1, 98
   muls r0, r0, r1
-  adds r0, r0, #8
+  @ adds r0, r0, #2
   @ nop
-  mov r1, 1
-  _SimpleDelay_loop_:
+  mov r1, 10
+  __delay_us_loop_:
     @ nop
     subs r0, r0, r1
-    bpl _SimpleDelay_loop_
+    bpl __delay_us_loop_
   pop {r0, r1, pc}
-  .size SimpleDelay, .-SimpleDelay
+  .size _delay_us, .-_delay_us
 
 
   .end

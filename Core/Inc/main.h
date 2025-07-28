@@ -95,7 +95,7 @@ typedef struct {
 /* Exported functions prototypes ---------------------------------------------*/
 void Error_Handler(void);
 void Scheduler_Handler(task_scheduler_t*);
-void SimpleDelay(uint32_t);
+void _delay_us(uint32_t);
 
 
 #ifdef __cplusplus
