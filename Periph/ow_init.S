@@ -32,7 +32,6 @@ OwInit:
   str tmpd, [tmpa]
 
 	STRPB 1, GPIOB_BSRR, PIN_12_Pos
-  @ FLSP GPIOB_BSRR, PIN_12_Pos
 
   pop {pc}
     .size OwInit, .-OwInit

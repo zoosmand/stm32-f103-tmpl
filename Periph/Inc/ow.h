@@ -11,6 +11,11 @@
 /* Private includes ----------------------------------------------------------*/
 
 /* Private typedef -----------------------------------------------------------*/
+typedef struct {
+  uint8_t   addr[8];
+  uint8_t   spad[9];
+} ow_device_t;
+
 
 /* Exported types ------------------------------------------------------------*/
 
@@ -29,6 +34,7 @@ void OW_CRC8(uint8_t*, uint8_t);
 void OW_Search(void);
 int8_t OW_Error_Handler(void);
 uint8_t* Get_AddrBuf(void);
+ow_device_t* Get_OwDevices(void);
 
 /* Private defines -----------------------------------------------------------*/
 #define SearchROM       0xf0

@@ -59,7 +59,7 @@ int8_t DS18B20_ReadScratchpad(uint8_t* scratchpad, uint8_t* address) {
   DS18B20_Command(MatchROM);
   DS18B20_Write(8, address);
   DS18B20_Command(ReadScratchpad);
-  _delay_us(3000);  
+  _delay_us(2000);  
   DS18B20_Read(9, scratchpad, 0);
   
   return (1);
@@ -72,38 +72,25 @@ int8_t DS18B20_ConvertT(void) {
   OW_Reset();
   if (!(FLAG_CHECK(&_OWREG_, _OLF_))) return (0);
   
-  uint8_t* addr = Get_AddrBuf();
+  // uint8_t* addr = Get_AddrBuf();
+    DS18B20_Command(SkipROM);
+    DS18B20_Command(ConvertT);
+    _delay_us(750000);
+    while(!OW_ReadBit());
 
-  DS18B20_Command(MatchROM);
-  DS18B20_Write(8, addr);
-  DS18B20_Command(ConvertT);
-  _delay_us(750000);
-  
-  
-  DS18B20_ReadScratchpad(spad, addr);
-  int32_t* tmp = (int32_t*)&spad;
-  // int32_t temper = (((*tmp & 0x0000fff0) >> 4) * 10000) + (((*tmp & 0x0000000f) * 10000) >> 4);
-  // printf("T: %.2f\n", (float)(temper * 0.0001));
-  printf("T:%d.%02d\n", (int8_t)((*tmp & 0x0000fff0) >> 4), (uint8_t)(((*tmp & 0x0000000f) * 100) >> 4));
+  ow_device_t* ow_devices = Get_OwDevices();
+
+  for (uint8_t i = 0; i < 2; i++) {
+
+    
+    DS18B20_ReadScratchpad(ow_devices[i].spad, ow_devices[i].addr);
+    while(!OW_ReadBit());
+  }
+  uint32_t* t1 = (int32_t*)&ow_devices[0].spad;
+  uint32_t* t2 = (int32_t*)&ow_devices[1].spad;
+  printf("%d.%02d %d.%02d\n", 
+    (int8_t)((*t1 & 0x0000fff0) >> 4), (uint8_t)(((*t1 & 0x0000000f) * 100) >> 4),
+    (int8_t)((*t2 & 0x0000fff0) >> 4), (uint8_t)(((*t2 & 0x0000000f) * 100) >> 4)
+  );
   return (1);
 }
-
-// void TempCollect(void) {
-//   uint8_t scratchpad[8];
-//   int32_t* tmp;
-//   int32_t temper = 0;
-  
-//   if (DS18B20_ConvertT()) {
-//     for (int i = 0; i < owDevices.size; i++) {
-//       printf("address: %llx\n", *(uint64_t*)arrayElement(&owDevices, i));
-//       if (DS18B20_ReadScratchpad(scratchpad, (uint8_t*)arrayElement(&owDevices, i))) {
-//         tmp = (int32_t*)&scratchpad;
-//         temper = (((*tmp & 0x0000fff0) >> 4) * 10000) + (((*tmp & 0x0000000f) * 10000) >> 4);
-//         printf("T: %f\n", (temper * 0.0001));
-//       } else {
-//         printf("No data!\n");
-//       }
-//     }
-//   }
-// //   printf("------------------\n");
-// }

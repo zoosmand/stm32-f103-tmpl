@@ -56,7 +56,7 @@ int main(void) {
     
     if (tmpCnt <= secCnt ) {
       DS18B20_ConvertT();
-      tmpCnt = secCnt + 2;
+      tmpCnt = secCnt + 4;
     }
   }
 

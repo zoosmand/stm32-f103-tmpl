@@ -16,7 +16,8 @@
 /* Global variables ----------------------------------------------------------*/
 __attribute__((section(".cron"))) uint32_t _OWREG_ = 0;
 static uint8_t lastfork;
-static uint8_t addr_buf[8];
+// static uint8_t addr_buf[8];
+static ow_device_t ow_devices[2];
 
 
 /* Private variables ---------------------------------------------------------*/
@@ -105,8 +106,6 @@ void OW_CRC8(uint8_t* __crc, uint8_t __byte) {
 
 // -------------------------------------------------------------  
 int8_t OW_Error_Handler(void) {
-  if (_OWREG_ & 0x00000001) printf("Nobody is on-line\n");
-  if (_OWREG_ & 0x00000002) printf("Global Error!\n");
   return (-1);
 }
 
@@ -195,44 +194,18 @@ uint8_t OW_Enumerate(uint8_t* addr) {
 }
 
 
-
-
-
-//uint64_t addresses[5];
-
-//void OW_Search(void){
-//  uint64_t* address = malloc(8);
-//  lastfork = 65; // ������ �������
-//  *address = 0;
-//  uint16_t z = 0;
-
-//  for (;;) {
-//    uint8_t p = OW_Enumerate((uint8_t*)address);
-//    if (!p) break;
-//    addresses[z] = *address;
-//    printf("address: %llx\n", addresses[z]);
-//    z++;
-//  }
-//  
-//  free(address);
-//}
-
-
-
-
-
 void OW_Search(void) {
   lastfork = 65;
-  OW_Enumerate(addr_buf);
-  // printf("f\n");
-  // printf("%08x%08x\n", *(uint8_t*)(&addr_buf));
-
+  for (uint8_t i = 0; i < 2; i++) {
+    uint8_t p = OW_Enumerate(ow_devices[i].addr);
+    if (!p) break;
+  }
   
 }
 
 
-uint8_t* Get_AddrBuf(void) {
-  return addr_buf;
+ow_device_t* Get_OwDevices(void) {
+  return ow_devices;
 }
 
 
