@@ -50,12 +50,12 @@ int main(void) {
   static uint32_t tmpCnt = 0;
   
   if (CRON_SEC_EVENT) {
-    // printf("The long test message, that might stuck the program but now it does not at all...\n");
+    printf("The long test message, that might stuck the program but now it does not at all...\n");
     // printf("second:%li\n", secCnt);
 
     
     if (tmpCnt <= secCnt ) {
-      DS18B20_ConvertT();
+      // DS18B20_ConvertT();
       tmpCnt = secCnt + 4;
     }
   }
@@ -70,8 +70,8 @@ int main(void) {
  * @retval none
  */
 void Cron_Handler(void) {
-  WH1602_I2C_Init(I2C1);
-  OW_Search();
+  // WH1602_I2C_Init(I2C1);
+  // OW_Search();
   // DS18B20_ConvertT();
 
   // while (1) {
