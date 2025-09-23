@@ -69,6 +69,7 @@ int DS18B20_ReadScratchpad(uint8_t* buf, uint8_t* addr) {
   
   // return (1);
   if (OW_MatchROM(addr)) return 1;
+  DS18B20_ConvertT(addr);
   OW_Write(ReadScratchpad);
 
   uint8_t crc = 0;
@@ -153,7 +154,7 @@ int DS18B20_ShowTemperatureMeasurment() {
 
   ow_device_t* ow_devices = Get_OwDevices();
 
-  for (uint8_t i = 0; i < 2; i++) {
+  for (uint8_t i = 0; i < 1; i++) {
     DS18B20_ReadScratchpad(ow_devices[i].spad, ow_devices[i].addr);
     while(!OW_ReadBit());
   }

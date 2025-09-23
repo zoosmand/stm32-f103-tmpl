@@ -49,7 +49,7 @@ SystemInit:
   bl OwInit
 
   @ Set up CoreDebug_DEMCR_TRCENA_Msk
-  @ STRW 1<<24, CoreDebug_DEMCR
+  @ STRW 1<<0, CoreDebug_DEMCR
 
   pop {pc}
   .size SystemInit, .-SystemInit

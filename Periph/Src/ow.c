@@ -16,7 +16,7 @@
 // __attribute__((section(".cron"))) uint32_t _OWREG_ = 0;
 static uint8_t lastfork;
 // static uint8_t addr_buf[8];
-static ow_device_t ow_devices[2];
+static ow_device_t ow_devices[1];
 
 
 /* Private function prototypes -----------------------------------------------*/
@@ -48,17 +48,18 @@ int OW_Reset(void) {
   _delay_us(15);
   
   int i = 0;
+  int k = 1;
   while (i++ < 240) {
     if (!PIN_Level) {
       // FLAG_SET(&_OWREG_, _OLF_);
-      // break;
-      return 1; // error on the bus
+      k = 0;
+      break;
     }
     _delay_us(1);
   }
 
   _delay_us(580 - i);
-  return 0; // no error on the bus
+  return k; // no error on the bus
 }
 
 
@@ -233,9 +234,9 @@ int OW_MatchROM(uint8_t* addr) {
 
 int OW_Search(void) {
   lastfork = 65;
-  for (uint8_t i = 0; i < 2; i++) {
+  for (uint8_t i = 0; i < 1; i++) {
     uint8_t p = OW_Enumerate(ow_devices[i].addr);
-    if (!p) break;
+    if (p) break;
   }
   return 0;
 }

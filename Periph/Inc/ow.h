@@ -23,6 +23,10 @@ typedef struct {
 extern __attribute__((section(".cron"))) uint32_t _OWREG_;
 
 /* Exported macro ------------------------------------------------------------*/
+#define OW_PORT   GPIOB
+#define OW_PIN    GPIO_PIN_12
+
+
 #define PIN_Low  PIN_H(OW_PORT, OW_PIN)
 #define PIN_High PIN_L(OW_PORT, OW_PIN)
 #define PIN_Level (PIN_LEVEL(OW_PORT, OW_PIN))
@@ -92,11 +96,8 @@ ow_device_t* Get_OwDevices(void);
 #define MatchROM        0x55
 #define SkipROM         0xcc
 
-#define OW_PORT   GPIOB
-#define OW_PIN    GPIO_PIN_9_Pos
-
-#define _OLF_     0 // On-Line Flag, i.e. an OW device answered on reset 
-#define _CRCERF_  1 // CRC Error Flag 
+// #define _OLF_     0 // On-Line Flag, i.e. an OW device answered on reset 
+// #define _CRCERF_  1 // CRC Error Flag 
 
 
 #ifdef __cplusplus

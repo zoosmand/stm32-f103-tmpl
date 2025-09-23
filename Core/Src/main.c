@@ -70,6 +70,8 @@ int main(void) {
  * @retval none
  */
 void Cron_Handler(void) {
+
+  SET_BIT(CoreDebug->DEMCR, CoreDebug_DEMCR_TRCENA_Msk);
   // WH1602_I2C_Init(I2C1);
   OW_Search();
   // DS18B20_ConvertT();
