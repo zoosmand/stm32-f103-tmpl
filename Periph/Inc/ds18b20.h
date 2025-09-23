@@ -22,7 +22,7 @@
 
 
 /* Exported types ------------------------------------------------------------*/
-extern uint32_t _OWREG_;
+// extern uint32_t _OWREG_;
 
 /* Exported constants --------------------------------------------------------*/
 
@@ -30,9 +30,14 @@ extern uint32_t _OWREG_;
 
 /* Exported functions prototypes ---------------------------------------------*/
 //int8_t DS18B20_Search(uint8_t *addresses);
-int8_t DS18B20_ConvertT(void);
-int8_t DS18B20_ReadScratchpad(uint8_t*, uint8_t*);
-int8_t DS18B20_Error_Handler(void);
+
+int DS18B20_ConvertT(uint8_t*);
+
+int DS18B20_ReadScratchpad(uint8_t*, uint8_t*);
+
+int DS18B20_ShowTemperatureMeasurment(void);
+
+// int8_t DS18B20_Error_Handler(void);
 
 /* Private defines -----------------------------------------------------------*/
 #define AlarmSearch     0xec

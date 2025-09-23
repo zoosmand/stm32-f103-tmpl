@@ -5,7 +5,7 @@
   ******************************************************************************
   */
 
-  /* Includes ------------------------------------------------------------------*/
+/* Includes ------------------------------------------------------------------*/
 #include "main.h"
 
 
@@ -73,6 +73,26 @@ int _write(int32_t file, char *ptr, int32_t len) {
  }
  return len;
 }
+
+
+
+static void dwt_init(void) {
+    DWT->CTRL, 0;
+    DWT->CYCCNT = 0;
+    SET_BIT(DWT->CTRL, DWT_CTRL_CYCEVTENA_Msk);
+    __DSB();
+    __ISB();
+}
+
+
+void _delay_us(uint32_t us) {
+  dwt_init();
+  uint32_t const start = READ_REG(DWT->CYCCNT);
+  uint32_t const ticks = us * (APB2_FREQ / 1000000u);
+  while ((READ_REG(DWT->CYCCNT) - start) < ticks) { __asm volatile("nop"); }
+  CLEAR_BIT(DWT->CTRL, DWT_CTRL_CYCEVTENA_Msk);
+}
+
 
 
 

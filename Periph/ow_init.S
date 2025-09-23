@@ -25,13 +25,13 @@ OwInit:
   /** PB12 Output max 50 MHz, open-drain */
   ldr tmpa, =GPIOB_CRH
   ldr tmpd, [tmpa]
-  ldr tmp, =(~PIN_12_Mask)
+  ldr tmp, =(~PIN_9_Mask)
   and tmpd, tmp
-  ldr tmp, =((_IOS_50 | _GPO_OD) << ((PIN_12_Pos - 8) * 4))
+  ldr tmp, =((_IOS_50 | _GPO_OD) << ((PIN_9_Pos - 8) * 4))
   orr tmpd, tmp
   str tmpd, [tmpa]
 
-	STRPB 1, GPIOB_BSRR, PIN_12_Pos
+	STRPB 1, GPIOB_BSRR, PIN_9_Pos
 
   pop {pc}
     .size OwInit, .-OwInit

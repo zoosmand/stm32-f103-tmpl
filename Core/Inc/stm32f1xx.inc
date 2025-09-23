@@ -652,6 +652,12 @@
 .equ MMFAR,             0xE000ED34
 .equ BFAR,              0xE000ED38
 .equ STIR,              0xE000EF00
+
+
+.equ ITM,               0xe0000000
+.equ TPI,               0xe0040000
+
+
 .equ FLASH_ACR,         0x40022000
 .equ FLASH_KEYR,        0x40022004
 .equ FLASH_OPTKEYR,     0x40022008
@@ -663,33 +669,72 @@
 
 
 
+/** Core debug  */
+.equ CoreDebug,             0xe000edf0
+.equ CoreDebug_DHCSR,       CoreDebug + 0x0000
+.equ CoreDebug_DCRSR,       CoreDebug + 0x0004
+.equ CoreDebug_DCRDR,       CoreDebug + 0x0008
+.equ CoreDebug_DEMCR,       CoreDebug + 0x000c
+.equ CoreDebug_RESERVED4,   CoreDebug + 0x0010
+.equ CoreDebug_DAUTHCTRL,   CoreDebug + 0x0014
+.equ CoreDebug_DSCSR,       CoreDebug + 0x0018
+
+
+/** DWT */
+.equ DWT,               0xe0001000
+.equ DWT_CTRL,          DWT + 0x0000
+.equ DWT_CYCCNT,        DWT + 0x0004
+.equ DWT_CPICNT,        DWT + 0x0008
+.equ DWT_EXCCNT,        DWT + 0x000c
+.equ DWT_SLEEPCNT,      DWT + 0x0010
+.equ DWT_LSUCNT,        DWT + 0x0114
+.equ DWT_FOLDCNT,       DWT + 0x0018
+.equ DWT_PCSR,          DWT + 0x001c
+.equ DWT_COMP0,         DWT + 0x0020
+.equ DWT_MASK0,         DWT + 0x0024
+.equ DWT_FUNCTION0,     DWT + 0x0028
+.equ DWT_RESERVED0,     DWT + 0x002f
+.equ DWT_COMP1,         DWT + 0x0030
+.equ DWT_MASK1,         DWT + 0x0034
+.equ DWT_FUNCTION1,     DWT + 0x0038
+.equ DWT_RESERVED1,     DWT + 0x003f
+.equ DWT_COMP2,         DWT + 0x0040
+.equ DWT_MASK2,         DWT + 0x0044
+.equ DWT_FUNCTION2,     DWT + 0x0048
+.equ DWT_RESERVED2,     DWT + 0x004f
+.equ DWT_COMP3,         DWT + 0x0050
+.equ DWT_MASK3,         DWT + 0x0054
+.equ DWT_FUNCTION3,     DWT + 0x0058
+
+
 /** Nested Vector Interrupt Controller */
-.equ NVIC,              0xe000e000
-.equ NVIC_ICTR,          NVIC + 0x0000
-.equ NVIC_ISER0,         NVIC + 0x0100
-.equ NVIC_ISER1,         NVIC + 0x0104
-.equ NVIC_ICER0,         NVIC + 0x0180
-.equ NVIC_ICER1,         NVIC + 0x0184
-.equ NVIC_ISPR0,         NVIC + 0x0200
-.equ NVIC_ISPR1,         NVIC + 0x0204
-.equ NVIC_ICPR0,         NVIC + 0x0280
-.equ NVIC_ICPR1,         NVIC + 0x0284
-.equ NVIC_IABR0,         NVIC + 0x0300
-.equ NVIC_IABR1,         NVIC + 0x0304
-.equ NVIC_IPR0,          NVIC + 0x0400
-.equ NVIC_IPR1,          NVIC + 0x0404
-.equ NVIC_IPR2,          NVIC + 0x0408
-.equ NVIC_IPR3,          NVIC + 0x040c
-.equ NVIC_IPR4,          NVIC + 0x0410
-.equ NVIC_IPR5,          NVIC + 0x0414
-.equ NVIC_IPR6,          NVIC + 0x0418
-.equ NVIC_IPR7,          NVIC + 0x041c
-.equ NVIC_IPR8,          NVIC + 0x0420
-.equ NVIC_IPR9,          NVIC + 0x0424
-.equ NVIC_IPR10,         NVIC + 0x0428
-.equ NVIC_IPR11,         NVIC + 0x042c
-.equ NVIC_IPR12,         NVIC + 0x0430
-.equ NVIC_IPR13,         NVIC + 0x0434
-.equ NVIC_IPR14,         NVIC + 0x0438
-.equ NVIC_STIR,          NVIC + 0x0f00
+.equ SCS,               0xe000e000
+.equ NVIC,              SCS
+.equ NVIC_ICTR,         NVIC + 0x0000
+.equ NVIC_ISER0,        NVIC + 0x0100
+.equ NVIC_ISER1,        NVIC + 0x0104
+.equ NVIC_ICER0,        NVIC + 0x0180
+.equ NVIC_ICER1,        NVIC + 0x0184
+.equ NVIC_ISPR0,        NVIC + 0x0200
+.equ NVIC_ISPR1,        NVIC + 0x0204
+.equ NVIC_ICPR0,        NVIC + 0x0280
+.equ NVIC_ICPR1,        NVIC + 0x0284
+.equ NVIC_IABR0,        NVIC + 0x0300
+.equ NVIC_IABR1,        NVIC + 0x0304
+.equ NVIC_IPR0,         NVIC + 0x0400
+.equ NVIC_IPR1,         NVIC + 0x0404
+.equ NVIC_IPR2,         NVIC + 0x0408
+.equ NVIC_IPR3,         NVIC + 0x040c
+.equ NVIC_IPR4,         NVIC + 0x0410
+.equ NVIC_IPR5,         NVIC + 0x0414
+.equ NVIC_IPR6,         NVIC + 0x0418
+.equ NVIC_IPR7,         NVIC + 0x041c
+.equ NVIC_IPR8,         NVIC + 0x0420
+.equ NVIC_IPR9,         NVIC + 0x0424
+.equ NVIC_IPR10,        NVIC + 0x0428
+.equ NVIC_IPR11,        NVIC + 0x042c
+.equ NVIC_IPR12,        NVIC + 0x0430
+.equ NVIC_IPR13,        NVIC + 0x0434
+.equ NVIC_IPR14,        NVIC + 0x0438
+.equ NVIC_STIR,         NVIC + 0x0f00
 

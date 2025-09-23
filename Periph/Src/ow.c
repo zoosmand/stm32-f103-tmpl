@@ -9,77 +9,91 @@
 /* Private define ------------------------------------------------------------*/
 
 /* Private macro -------------------------------------------------------------*/
-#define OW_Low  PIN_H(OW_PORT, OW_PIN)
-#define OW_High PIN_L(OW_PORT, OW_PIN)
-#define OW_Level (PIN_LEVEL(OW_PORT, OW_PIN))
 
 /* Global variables ----------------------------------------------------------*/
-__attribute__((section(".cron"))) uint32_t _OWREG_ = 0;
+
+/* Private variables ---------------------------------------------------------*/
+// __attribute__((section(".cron"))) uint32_t _OWREG_ = 0;
 static uint8_t lastfork;
 // static uint8_t addr_buf[8];
 static ow_device_t ow_devices[2];
 
 
-/* Private variables ---------------------------------------------------------*/
+/* Private function prototypes -----------------------------------------------*/
 
+/**
+ * @brief   Write a bit into OneWire bus.
+ * @param   bit a bit to write
+ * @retval  none
+ */
+static void OW_WriteBit(uint8_t);
+
+/**
+ * @brief   Enumerates OneWire device addresses. Realizes BTREE traversal method.
+ * @param   addr OneWire device address
+ * @retval  (int) status of operation
+ */
+static int OW_Enumerate(uint8_t* addr);
 
 
 
 
 // -------------------------------------------------------------  
-void OW_Reset(void) {
-  FLAG_CLR(&_OWREG_, _OLF_);
+int OW_Reset(void) {
+  // FLAG_CLR(&_OWREG_, _OLF_);
 
-  OW_High;
+  PIN_High;
   _delay_us(580);
-  OW_Low;
+  PIN_Low;
   _delay_us(15);
   
   int i = 0;
   while (i++ < 240) {
-    if (!OW_Level) {
-      FLAG_SET(&_OWREG_, _OLF_);
-      break;
+    if (!PIN_Level) {
+      // FLAG_SET(&_OWREG_, _OLF_);
+      // break;
+      return 1; // error on the bus
     }
     _delay_us(1);
   }
 
   _delay_us(580 - i);
+  return 0; // no error on the bus
 }
 
 
 // -------------------------------------------------------------  
-void OW_WriteBit(uint8_t bit) {
-  OW_High;
+static void OW_WriteBit(uint8_t bit) {
+  PIN_High;
   if (bit) {
     _delay_us(6);
-    OW_Low;
+    PIN_Low;
     _delay_us(64);
   } else {
     _delay_us(60);
-    OW_Low;
+    PIN_Low;
     _delay_us(10);
   }
 }
 
 
 // -------------------------------------------------------------  
-void OW_Write(uint8_t* data) {
-  uint8_t _byte_ = *data;
+void OW_Write(uint8_t data) {
+  uint8_t byte = data;
   for (int i = 0; i < 8; i++) {
-    OW_WriteBit(_byte_ & 0x01);
-    _byte_ >>= 1;
+    OW_WriteBit(byte & 0x01);
+    byte >>= 1;
   }
 }
 
 
 // -------------------------------------------------------------  
 uint8_t OW_ReadBit(void) {
-  OW_High;
+  PIN_High;
   _delay_us(6);
-  OW_Low;
+  PIN_Low;
   _delay_us(9);
-  uint8_t level = OW_Level;
+  uint8_t level = PIN_Level;
   _delay_us(55);
   
   return level;
@@ -87,25 +101,28 @@ uint8_t OW_ReadBit(void) {
 
 
 // -------------------------------------------------------------  
-void OW_Read(uint8_t* data) {
+uint8_t OW_Read(void) {
+  uint8_t byte = 0;
   for (int i = 0; i < 8; i++) {
-    *data >>= 1;
-    *data |= (OW_ReadBit()) ? 0x80 : 0;
+    byte >>= 1;
+    byte |= (OW_ReadBit()) ? 0x80 : 0;
   }
+  return byte;
 }
 
 
 // -------------------------------------------------------------  
-void OW_CRC8(uint8_t* __crc, uint8_t __byte) {
+uint8_t OW_CRC8(uint8_t crc, uint8_t byte) {
   // 0x8c - it is a bit reverse of OneWire polinom of 0x31
   for (uint8_t i = 0; i < 8; i++) {
-		*__crc = ((*__crc ^ (__byte >> i)) & 0x01) ? ((*__crc >> 1) ^ 0x8c) : (*__crc >> 1);
+		crc = ((crc ^ (byte >> i)) & 0x01) ? ((crc >> 1) ^ 0x8c) : (crc >> 1);
 	}
+  return crc;
 }
 
 
 // -------------------------------------------------------------  
-int8_t OW_Error_Handler(void) {
+int OW_Error_Handler(void) {
   return (-1);
 }
 
@@ -129,14 +146,13 @@ int8_t OW_Error_Handler(void) {
 
 
 
-
-uint8_t OW_Enumerate(uint8_t* addr) {
-	if (!lastfork) return (0);
+static int OW_Enumerate(uint8_t* addr) {
+	if (!lastfork) return 1;
   
-	OW_Reset();
+	if (OW_Reset()) return 1;
   // _delay_us(100000);  
 
-  if (!FLAG_CHECK(&_OWREG_, _OLF_)) return (0);
+  // if (!FLAG_CHECK(&_OWREG_, _OLF_)) return (0);
   
   //addr += 7;
   uint8_t bp = 7;
@@ -146,32 +162,31 @@ uint8_t OW_Enumerate(uint8_t* addr) {
 	uint8_t bit0 = 0;
 	uint8_t bit1 = 0;
   
-  uint8_t cmd = SearchROM;
-	OW_Write(&cmd);
+	OW_Write(SearchROM);
 
 	for(uint8_t i = 1; i < 65; i++) {
     bit0 = OW_ReadBit();
     bit1 = OW_ReadBit();
 
-		if (!bit0) { // ���� ������������ � ������� ��� ����
-			if (!bit1) { // �� ����� ������������� ��� 1 (�����)
-				if (i < lastfork) { // ���� �� ����� �������� ������� ������������ ����,
+		if (!bit0) {
+			if (!bit1) {
+				if (i < lastfork) {
 					if (prev & 1) {
-						curr |= 0x80; // �� �������� �������� ���� �� �������� �������
+						curr |= 0x80;
 					} else {
-						fork = i; // ���� ����, �� �������� ����������� �����
+						fork = i;
 					}
 				} else if (i == lastfork) {
-            curr |= 0x80; // ���� �� ���� ����� � ������� ��� ��� ������ �������� � ����, ������� 1
+            curr |= 0x80;
 					} else {
-            fork = i; // ������ - ������� ���� � ���������� ����������� �����
+            fork = i;
           }
-			} // � ��������� ������ ���, ������� ���� � ������
+			}
 		} else {
-			if (!bit1) { // ������������ �������
+			if (!bit1) {
 				curr |= 0x80;
-			} else { // ��� �� ����� �� ������ - ��������� ��������
-				return 0;
+			} else {
+				return 1;
 			}
 		}
       
@@ -190,17 +205,39 @@ uint8_t OW_Enumerate(uint8_t* addr) {
       bp--;
 	}
 	lastfork = fork;
-  return (1);  
+  return 0;  
 }
 
 
-void OW_Search(void) {
+
+
+uint8_t OW_ReadPowerSupply(uint8_t* addr) {
+  OW_MatchROM(addr);
+  OW_Write(ReadPowerSupply);
+  
+  return !OW_ReadBit();
+}
+
+
+int OW_MatchROM(uint8_t* addr) {
+  if (OW_Reset()) return 1;
+  
+  OW_Write(MatchROM);
+  for (uint8_t i = 0; i < 8; i++) {
+    OW_Write(addr[i]);
+  }
+
+  return 0;
+}
+
+
+int OW_Search(void) {
   lastfork = 65;
   for (uint8_t i = 0; i < 2; i++) {
     uint8_t p = OW_Enumerate(ow_devices[i].addr);
     if (!p) break;
   }
-  
+  return 0;
 }
 
 

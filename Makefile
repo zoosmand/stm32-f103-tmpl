@@ -20,7 +20,9 @@ TARGET = F103C8T6_tmpl
 DEBUG = 1
 # optimization
 OPT = -Og
-
+# platform
+ARCH := $(shell uname -m)
+SYS := $(shell uname -s)
 
 #######################################
 # paths
@@ -120,11 +122,22 @@ ASFLAGS = $(MCU) $(AS_DEFS) $(AS_INCLUDES) $(OPT) -Wall -fdata-sections -ffuncti
 
 CFLAGS += $(MCU) $(C_DEFS) $(C_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections
 
+
 ifeq ($(DEBUG), 1)
 # CFLAGS += -g -gdwarf-2 -D CMAKE_CXX_FLAGS_RELEASE="-Wa,-mimplicit-it=thumb"
-CFLAGS += -g -gdwarf-2 -Wall -Wextra -pedantic
-ASFLAGS += $(CFLAGS)
+# CFLAGS += -g -gdwarf-2 -Wextra -pedantic
+CFLAGS += -g -gdwarf-2 -DDEBUG
+ASFLAGS += -g -gdwarf-2 -DDEBUG
 endif
+
+ifeq ($(SYS), Darwin)
+CFLAGS += -DSWO_ITM=0
+ASFLAGS += -DSWO_ITM=0
+else ifeq ($(SYS), Linux)
+CFLAGS += -DSWO_USART=USART1
+ASFLAGS += -DSWO_USART=USART1
+endif
+
 
 
 # Generate dependency information
