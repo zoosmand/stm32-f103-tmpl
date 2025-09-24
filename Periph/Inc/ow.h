@@ -14,7 +14,7 @@
 typedef struct {
   uint8_t   addr[8];
   uint8_t   spad[9];
-} ow_device_t;
+} OneWireDevice_t;
 
 
 /* Exported types ------------------------------------------------------------*/
@@ -25,16 +25,24 @@ extern __attribute__((section(".cron"))) uint32_t _OWREG_;
 /* Exported macro ------------------------------------------------------------*/
 
 /* Exported functions prototypes ---------------------------------------------*/
-int OW_Reset(void);
-void OW_WriteBit(uint8_t);
-void OW_Write(uint8_t*);
-uint8_t OW_ReadBit(void);
-void OW_Read(uint8_t*);
-void OW_CRC8(uint8_t*, uint8_t);
-void OW_Search(void);
-int8_t OW_Error_Handler(void);
+
+int OneWire_Reset(void);
+
+void OneWire_WriteBit(uint8_t);
+
+void OneWire_WriteByte(uint8_t*);
+
+uint8_t OneWire_ReadBit(void);
+
+void OneWire_ReadByte(uint8_t*);
+
+
+void OneWire_CRC8(uint8_t*, uint8_t);
+void OneWire_Search(void);
+int8_t OneWire_ErrorHandler(void);
 uint8_t* Get_AddrBuf(void);
-ow_device_t* Get_OwDevices(void);
+OneWireDevice_t* Get_OwDevices(void);
+
 
 /* Private defines -----------------------------------------------------------*/
 #define SearchROM       0xf0
@@ -42,11 +50,13 @@ ow_device_t* Get_OwDevices(void);
 #define MatchROM        0x55
 #define SkipROM         0xcc
 
-#define OW_PORT   GPIOB
-#define OW_PIN    GPIO_PIN_12_Pos
+#define OneWire_PORT   GPIOB
+#define OneWire_PIN    GPIO_PIN_9_Pos
 
-// #define _OLF_     0 // On-Line Flag, i.e. an OW device answered on reset 
-// #define _CRCERF_  1 // CRC Error Flag 
+#define OneWire_Low  PIN_H(OneWire_PORT, OneWire_PIN)
+#define OneWire_High PIN_L(OneWire_PORT, OneWire_PIN)
+#define OneWire_Level (PIN_LEVEL(OneWire_PORT, OneWire_PIN))
+
 
 
 #ifdef __cplusplus

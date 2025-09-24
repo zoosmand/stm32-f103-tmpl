@@ -9,15 +9,10 @@
 /* Private define ------------------------------------------------------------*/
 
 /* Private macro -------------------------------------------------------------*/
-#define OW_Low  PIN_H(OW_PORT, OW_PIN)
-#define OW_High PIN_L(OW_PORT, OW_PIN)
-#define OW_Level (PIN_LEVEL(OW_PORT, OW_PIN))
 
 /* Global variables ----------------------------------------------------------*/
-__attribute__((section(".cron"))) uint32_t _OWREG_ = 0;
 static uint8_t lastfork;
-// static uint8_t addr_buf[8];
-static ow_device_t ow_devices[2];
+static OneWireDevice_t oneWireDevices[2];
 
 
 /* Private variables ---------------------------------------------------------*/
@@ -27,62 +22,60 @@ static ow_device_t ow_devices[2];
 
 
 // -------------------------------------------------------------  
-int OW_Reset(void) {
-  // FLAG_CLR(&_OWREG_, _OLF_);
+int OneWire_Reset(void) {
 
-  OW_High;
+  OneWire_High;
   _delay_us(580);
-  OW_Low;
+  OneWire_Low;
   _delay_us(15);
   
   int i = 0;
-  int k = 1;
+  int status = 1;
   while (i++ < 240) {
-    if (!OW_Level) {
-      // FLAG_SET(&_OWREG_, _OLF_);
-      k = 0;
+    if (!OneWire_Level) {
+      status = 0;
       break;
     }
     _delay_us(1);
   }
 
   _delay_us(580 - i);
-  return k;
+  return status;
 }
 
 
 // -------------------------------------------------------------  
-void OW_WriteBit(uint8_t bit) {
-  OW_High;
+void OneWire_WriteBit(uint8_t bit) {
+  OneWire_High;
   if (bit) {
     _delay_us(6);
-    OW_Low;
+    OneWire_Low;
     _delay_us(64);
   } else {
     _delay_us(60);
-    OW_Low;
+    OneWire_Low;
     _delay_us(10);
   }
 }
 
 
 // -------------------------------------------------------------  
-void OW_Write(uint8_t* data) {
+void OneWire_WriteByte(uint8_t* data) {
   uint8_t _byte_ = *data;
   for (int i = 0; i < 8; i++) {
-    OW_WriteBit(_byte_ & 0x01);
+    OneWire_WriteBit(_byte_ & 0x01);
     _byte_ >>= 1;
   }
 }
 
 
 // -------------------------------------------------------------  
-uint8_t OW_ReadBit(void) {
-  OW_High;
+uint8_t OneWire_ReadBit(void) {
+  OneWire_High;
   _delay_us(6);
-  OW_Low;
+  OneWire_Low;
   _delay_us(9);
-  uint8_t level = OW_Level;
+  uint8_t level = OneWire_Level;
   _delay_us(55);
   
   return level;
@@ -90,16 +83,16 @@ uint8_t OW_ReadBit(void) {
 
 
 // -------------------------------------------------------------  
-void OW_Read(uint8_t* data) {
+void OneWire_ReadByte(uint8_t* data) {
   for (int i = 0; i < 8; i++) {
     *data >>= 1;
-    *data |= (OW_ReadBit()) ? 0x80 : 0;
+    *data |= (OneWire_ReadBit()) ? 0x80 : 0;
   }
 }
 
 
 // -------------------------------------------------------------  
-void OW_CRC8(uint8_t* __crc, uint8_t __byte) {
+void OneWire_CRC8(uint8_t* __crc, uint8_t __byte) {
   // 0x8c - it is a bit reverse of OneWire polinom of 0x31
   for (uint8_t i = 0; i < 8; i++) {
 		*__crc = ((*__crc ^ (__byte >> i)) & 0x01) ? ((*__crc >> 1) ^ 0x8c) : (*__crc >> 1);
@@ -108,7 +101,7 @@ void OW_CRC8(uint8_t* __crc, uint8_t __byte) {
 
 
 // -------------------------------------------------------------  
-int8_t OW_Error_Handler(void) {
+int8_t OneWire_ErrorHandler(void) {
   return (-1);
 }
 
@@ -133,14 +126,11 @@ int8_t OW_Error_Handler(void) {
 
 
 
-uint8_t OW_Enumerate(uint8_t* addr) {
+uint8_t OneWire_Enumerate(uint8_t* addr) {
 	if (!lastfork) return (0);
   
-	if (OW_Reset()) return 0;
-  // _delay_us(100000);  
+	if (OneWire_Reset()) return 0;
 
-  // if (!FLAG_CHECK(&_OWREG_, _OLF_)) return (0);
-  
   //addr += 7;
   uint8_t bp = 7;
 	uint8_t prev = *addr;
@@ -150,11 +140,11 @@ uint8_t OW_Enumerate(uint8_t* addr) {
 	uint8_t bit1 = 0;
   
   uint8_t cmd = SearchROM;
-	OW_Write(&cmd);
+	OneWire_WriteByte(&cmd);
 
 	for(uint8_t i = 1; i < 65; i++) {
-    bit0 = OW_ReadBit();
-    bit1 = OW_ReadBit();
+    bit0 = OneWire_ReadBit();
+    bit1 = OneWire_ReadBit();
 
 		if (!bit0) { // ���� ������������ � ������� ��� ����
 			if (!bit1) { // �� ����� ������������� ��� 1 (�����)
@@ -178,7 +168,7 @@ uint8_t OW_Enumerate(uint8_t* addr) {
 			}
 		}
       
-		OW_WriteBit(curr & 0x80);
+		OneWire_WriteBit(curr & 0x80);
     
 		if (!bp) {
 			*addr = curr;
@@ -197,18 +187,18 @@ uint8_t OW_Enumerate(uint8_t* addr) {
 }
 
 
-void OW_Search(void) {
+void OneWire_Search(void) {
   lastfork = 65;
   for (uint8_t i = 0; i < 2; i++) {
-    uint8_t p = OW_Enumerate(ow_devices[i].addr);
+    uint8_t p = OneWire_Enumerate(oneWireDevices[i].addr);
     if (!p) break;
   }
   
 }
 
 
-ow_device_t* Get_OwDevices(void) {
-  return ow_devices;
+OneWireDevice_t* Get_OwDevices(void) {
+  return oneWireDevices;
 }
 
 
