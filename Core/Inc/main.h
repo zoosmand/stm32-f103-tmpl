@@ -102,6 +102,7 @@ typedef struct {
 void Error_Handler(void);
 void Scheduler_Handler(task_scheduler_t*);
 void _delay_us(uint32_t);
+void _delay_ms(uint32_t);
 
 
 #ifdef __cplusplus

@@ -95,6 +95,14 @@ void _delay_us(uint32_t us) {
 
 
 
+void _delay_ms(uint32_t ms) {
+  uint32_t delay_threshold = sysCnt + ms;
+  while (delay_threshold >= sysCnt) {__asm volatile("nop");};
+}
+
+
+
+
 
 
 #ifdef  USE_FULL_ASSERT

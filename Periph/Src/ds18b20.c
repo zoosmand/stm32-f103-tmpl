@@ -104,8 +104,7 @@ static int dS18B20_ConvertTemperature(uint8_t* addr) {
     if (pps) {
       PIN_H(OneWire_PORT, OneWire_PIN);
       
-      uint32_t delay_threshold = sysCnt + 750;
-      while (delay_threshold >= sysCnt) {__asm volatile("nop");};
+      _delay_ms(750);
 
       PIN_L(OneWire_PORT, OneWire_PIN);
     } else {
@@ -151,12 +150,9 @@ static void dS18B20_ErrorHandler(void) {
 // -------------------------------------------------------------  
 int DS18B20_GetTemperatureMeasurment(OneWireDevice_t *dev) {
 
-  // OneWireDevice_t* devs = Get_OwDevices();
-
   dS18B20_ConvertTemperature(dev->addr);
   
-  uint32_t delay_threshold = sysCnt + 3;
-  while (delay_threshold >= sysCnt) {__asm volatile("nop");};
+  _delay_ms(2);
   
   dS18B20_ReadScratchpad(dev->spad, dev->addr);
   dS18B20_WaitStatus(3);
