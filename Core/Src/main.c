@@ -55,7 +55,8 @@ int main(void) {
 
     
     if (tmpCnt <= secCnt ) {
-      DS18B20_ShowTemperatureMeasurment();
+      // DS18B20_ShowTemperatureMeasurment();
+      DS18B20_ConvertT();
       tmpCnt = secCnt + 4;
     }
   }
