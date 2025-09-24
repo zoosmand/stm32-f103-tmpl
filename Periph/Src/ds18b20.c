@@ -33,7 +33,6 @@ void DS18B20_Write(uint8_t num_bytes, uint8_t* data) {
 // -------------------------------------------------------------  
 void DS18B20_Read(uint8_t num_bytes, uint8_t* data, uint8_t reverse) {
   uint8_t crc = 0;
-  // FLAG_CLR(&_OWREG_, _CRCERF_);
 
   if (reverse){
     for (int i = (num_bytes - 1); i >= 0; i--){
@@ -47,7 +46,6 @@ void DS18B20_Read(uint8_t num_bytes, uint8_t* data, uint8_t reverse) {
     }
   }
   
-  // if (crc) FLAG_SET(&_OWREG_, _CRCERF_);
 }
 
 

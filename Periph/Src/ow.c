@@ -2,21 +2,30 @@
 #include "ow.h"
 
 /* Private includes ----------------------------------------------------------*/
-//OneWireDevTypeDef OneWireSet[3];
 
 /* Private typedef -----------------------------------------------------------*/
 
 /* Private define ------------------------------------------------------------*/
 
 /* Private macro -------------------------------------------------------------*/
+#define OneWire_PORT    GPIOB
+#define OneWire_PIN     GPIO_PIN_9_Pos
+
+#define OneWire_Low     PIN_H(OneWire_PORT, OneWire_PIN)
+#define OneWire_High    PIN_L(OneWire_PORT, OneWire_PIN)
+#define OneWire_Level   (PIN_LEVEL(OneWire_PORT, OneWire_PIN))
+
 
 /* Global variables ----------------------------------------------------------*/
 static uint8_t lastfork;
 static OneWireDevice_t oneWireDevices[2];
 
-
 /* Private variables ---------------------------------------------------------*/
 
+/* Private function prototypes -----------------------------------------------*/
+__STATIC_INLINE int OneWire_ErrorHandler(void);
+
+__STATIC_INLINE void OneWire_WriteBit(uint8_t);
 
 
 
@@ -45,7 +54,7 @@ int OneWire_Reset(void) {
 
 
 // -------------------------------------------------------------  
-void OneWire_WriteBit(uint8_t bit) {
+__STATIC_INLINE void OneWire_WriteBit(uint8_t bit) {
   OneWire_High;
   if (bit) {
     _delay_us(6);
@@ -101,7 +110,7 @@ void OneWire_CRC8(uint8_t* __crc, uint8_t __byte) {
 
 
 // -------------------------------------------------------------  
-int8_t OneWire_ErrorHandler(void) {
+int OneWire_ErrorHandler(void) {
   return (-1);
 }
 
@@ -126,12 +135,11 @@ int8_t OneWire_ErrorHandler(void) {
 
 
 
-uint8_t OneWire_Enumerate(uint8_t* addr) {
-	if (!lastfork) return (0);
+__STATIC_INLINE int OneWire_Enumerate(uint8_t* addr) {
+	if (!lastfork) return (1);
   
-	if (OneWire_Reset()) return 0;
+	if (OneWire_Reset()) return (1);
 
-  //addr += 7;
   uint8_t bp = 7;
 	uint8_t prev = *addr;
 	uint8_t curr = 0;
@@ -146,25 +154,25 @@ uint8_t OneWire_Enumerate(uint8_t* addr) {
     bit0 = OneWire_ReadBit();
     bit1 = OneWire_ReadBit();
 
-		if (!bit0) { // ���� ������������ � ������� ��� ����
-			if (!bit1) { // �� ����� ������������� ��� 1 (�����)
-				if (i < lastfork) { // ���� �� ����� �������� ������� ������������ ����,
+		if (!bit0) {
+			if (!bit1) {
+				if (i < lastfork) {
 					if (prev & 1) {
-						curr |= 0x80; // �� �������� �������� ���� �� �������� �������
+						curr |= 0x80;
 					} else {
-						fork = i; // ���� ����, �� �������� ����������� �����
+						fork = i;
 					}
 				} else if (i == lastfork) {
-            curr |= 0x80; // ���� �� ���� ����� � ������� ��� ��� ������ �������� � ����, ������� 1
+            curr |= 0x80;
 					} else {
-            fork = i; // ������ - ������� ���� � ���������� ����������� �����
+            fork = i;
           }
-			} // � ��������� ������ ���, ������� ���� � ������
+			}
 		} else {
-			if (!bit1) { // ������������ �������
+			if (!bit1) {
 				curr |= 0x80;
-			} else { // ��� �� ����� �� ������ - ��������� ��������
-				return 0;
+			} else {
+				return (1);
 			}
 		}
       
@@ -183,15 +191,14 @@ uint8_t OneWire_Enumerate(uint8_t* addr) {
       bp--;
 	}
 	lastfork = fork;
-  return (1);  
+  return (0);  
 }
 
 
 void OneWire_Search(void) {
   lastfork = 65;
   for (uint8_t i = 0; i < 2; i++) {
-    uint8_t p = OneWire_Enumerate(oneWireDevices[i].addr);
-    if (!p) break;
+    if (OneWire_Enumerate(oneWireDevices[i].addr)) break;
   }
   
 }
