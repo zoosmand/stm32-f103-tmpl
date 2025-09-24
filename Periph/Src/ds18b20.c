@@ -23,6 +23,8 @@ static int dS18B20_Read(uint8_t, uint8_t*, uint8_t);
 
 static int dS18B20_ReadScratchpad(uint8_t*, uint8_t*);
 
+static int DS18B20_CopyScratchpad(uint8_t*);
+
 static void dS18B20_ErrorHandler(void);
 
 static int dS18B20_ConvertTemperature(uint8_t*);
@@ -110,7 +112,6 @@ static int dS18B20_ConvertTemperature(uint8_t* addr) {
     } else {
       dS18B20_WaitStatus(3);
     }
-
   } else {
     if (OneWire_Reset()) return (1);
 
@@ -118,9 +119,29 @@ static int dS18B20_ConvertTemperature(uint8_t* addr) {
     dS18B20_Command(ConvertT);
     dS18B20_WaitStatus(3);
   }
-  
   return 0;
+}
 
+
+
+static int DS18B20_CopyScratchpad(uint8_t* addr) {
+
+  if (OneWire_MatchROM(addr)) return 1;
+  uint8_t pps = OneWire_ReadPowerSupply(addr);
+
+  if (OneWire_MatchROM(addr)) return 1;
+  OneWire_WriteByte(CopyScratchpad);
+
+  if (pps) {
+    PIN_H(OneWire_PORT, OneWire_PIN);
+    
+    _delay_ms(2);
+
+    PIN_L(OneWire_PORT, OneWire_PIN);
+  } else {
+    dS18B20_WaitStatus(3);
+  }
+  return 0;
 }
 
 
