@@ -52,7 +52,7 @@
 
 
 // -------------------------------------------------------------  
-int DS18B20_ReadScratchpad(uint8_t* buf, uint8_t* addr) {
+int DS18B20_ReadScratchpad(uint8_t* addr, uint8_t* buf) {
   // OW_Reset();
   // if (!(FLAG_CHECK(&_OWREG_, _OLF_))) return (0);
   
@@ -60,11 +60,7 @@ int DS18B20_ReadScratchpad(uint8_t* buf, uint8_t* addr) {
   // DS18B20_Write(8, address);
   // DS18B20_Command(ReadScratchpad);
 
-  // uint32_t __delay = sysCnt + 2;
-  // while (__delay >= sysCnt) {
-  //   __asm volatile("nop");
-  // };
-
+  
   // DS18B20_Read(9, scratchpad, 0);
   
   // return (1);
@@ -72,6 +68,9 @@ int DS18B20_ReadScratchpad(uint8_t* buf, uint8_t* addr) {
   DS18B20_ConvertT(addr);
   OW_Write(ReadScratchpad);
 
+  uint32_t __delay = sysCnt + 2;
+  while (__delay >= sysCnt) {__asm volatile("nop");};
+  
   uint8_t crc = 0;
   for (int8_t i = 0; i < 9; i++) {
     buf[i] = OW_Read();
@@ -143,7 +142,7 @@ int DS18B20_ConvertT(uint8_t* addr) {
     PIN_High;
   } else {
     /* TDOD implement timeout, handle independently */
-    while(!OW_ReadBit());
+    while(!OW_ReadBit()) {__asm volatile("nop");};
   }
   
   return 0;
@@ -155,15 +154,10 @@ int DS18B20_ShowTemperatureMeasurment() {
   ow_device_t* ow_devices = Get_OwDevices();
 
   for (uint8_t i = 0; i < 1; i++) {
-    DS18B20_ReadScratchpad(ow_devices[i].spad, ow_devices[i].addr);
-    while(!OW_ReadBit());
+    DS18B20_ReadScratchpad(ow_devices[i].addr, ow_devices[i].spad);
   }
   int32_t* t1 = (int32_t*)&ow_devices[0].spad;
-  int32_t* t2 = (int32_t*)&ow_devices[1].spad;
-  printf("%d.%02d %d.%02d\n", 
-    (int8_t)((*t1 & 0x0000fff0) >> 4), (uint8_t)(((*t1 & 0x0000000f) * 100) >> 4),
-    (int8_t)((*t2 & 0x0000fff0) >> 4), (uint8_t)(((*t2 & 0x0000000f) * 100) >> 4)
-  );
+  printf("%d.%02d\n", (int8_t)((*t1 & 0x0000fff0) >> 4), (uint8_t)(((*t1 & 0x0000000f) * 100) >> 4));
   return 0;
 
 }

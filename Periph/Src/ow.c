@@ -151,9 +151,6 @@ static int OW_Enumerate(uint8_t* addr) {
 	if (!lastfork) return 1;
   
 	if (OW_Reset()) return 1;
-  // _delay_us(100000);  
-
-  // if (!FLAG_CHECK(&_OWREG_, _OLF_)) return (0);
   
   //addr += 7;
   uint8_t bp = 7;

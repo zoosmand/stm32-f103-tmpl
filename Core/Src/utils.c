@@ -90,7 +90,8 @@ void _delay_us(uint32_t us) {
   uint32_t const start = DWT->CYCCNT;
   uint32_t const ticks = us * (APB2_FREQ / 1000000u);
   while ((READ_REG(DWT->CYCCNT) - start) < ticks) { __asm volatile("nop"); }
-  CLEAR_BIT(DWT->CTRL, DWT_CTRL_CYCEVTENA_Msk);
+  // CLEAR_BIT(DWT->CTRL, DWT_CTRL_CYCEVTENA_Msk);
+  DWT->CTRL &= ~(DWT_CTRL_CYCEVTENA_Msk | DWT_CTRL_CYCCNTENA_Msk);
 }
 
 
