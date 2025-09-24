@@ -29,10 +29,8 @@ extern uint32_t _OWREG_;
 /* Exported macro ------------------------------------------------------------*/
 
 /* Exported functions prototypes ---------------------------------------------*/
-//int8_t DS18B20_Search(uint8_t *addresses);
-int8_t DS18B20_ConvertT(void);
-int8_t DS18B20_ReadScratchpad(uint8_t*, uint8_t*);
-int8_t DS18B20_Error_Handler(void);
+
+int DS18B20_GetTemperatureMeasurment(void);
 
 /* Private defines -----------------------------------------------------------*/
 #define AlarmSearch     0xec

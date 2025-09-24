@@ -8,13 +8,6 @@
 /* Private define ------------------------------------------------------------*/
 
 /* Private macro -------------------------------------------------------------*/
-#define OneWire_PORT    GPIOB
-#define OneWire_PIN     GPIO_PIN_9_Pos
-
-#define OneWire_Low     PIN_H(OneWire_PORT, OneWire_PIN)
-#define OneWire_High    PIN_L(OneWire_PORT, OneWire_PIN)
-#define OneWire_Level   (PIN_LEVEL(OneWire_PORT, OneWire_PIN))
-
 
 /* Global variables ----------------------------------------------------------*/
 static uint8_t lastfork;
@@ -69,11 +62,11 @@ __STATIC_INLINE void OneWire_WriteBit(uint8_t bit) {
 
 
 // -------------------------------------------------------------  
-void OneWire_WriteByte(uint8_t* data) {
-  uint8_t _byte_ = *data;
+void OneWire_WriteByte(uint8_t byte) {
+  // uint8_t _byte_ = *data;
   for (int i = 0; i < 8; i++) {
-    OneWire_WriteBit(_byte_ & 0x01);
-    _byte_ >>= 1;
+    OneWire_WriteBit(byte & 0x01);
+    byte >>= 1;
   }
 }
 
@@ -101,11 +94,13 @@ void OneWire_ReadByte(uint8_t* data) {
 
 
 // -------------------------------------------------------------  
-void OneWire_CRC8(uint8_t* __crc, uint8_t __byte) {
+uint8_t OneWire_CRC8(uint8_t crc, uint8_t byte) {
   // 0x8c - it is a bit reverse of OneWire polinom of 0x31
   for (uint8_t i = 0; i < 8; i++) {
-		*__crc = ((*__crc ^ (__byte >> i)) & 0x01) ? ((*__crc >> 1) ^ 0x8c) : (*__crc >> 1);
+		crc = ((crc ^ (byte >> i)) & 0x01) ? ((crc >> 1) ^ 0x8c) : (crc >> 1);
 	}
+
+  return crc;
 }
 
 
@@ -127,7 +122,7 @@ int OneWire_ErrorHandler(void) {
 // -------------------------------------------------------------  
 // -------------------------------------------------------------  
 // -------------------------------------------------------------  
-// -------------------------------------------------------------  
+// -------------------------------------------------------------
 
 
 
@@ -136,10 +131,10 @@ int OneWire_ErrorHandler(void) {
 
 
 __STATIC_INLINE int OneWire_Enumerate(uint8_t* addr) {
-	if (!lastfork) return (1);
+  if (!lastfork) return (1);
   
 	if (OneWire_Reset()) return (1);
-
+  
   uint8_t bp = 7;
 	uint8_t prev = *addr;
 	uint8_t curr = 0;
@@ -147,63 +142,89 @@ __STATIC_INLINE int OneWire_Enumerate(uint8_t* addr) {
 	uint8_t bit0 = 0;
 	uint8_t bit1 = 0;
   
-  uint8_t cmd = SearchROM;
-	OneWire_WriteByte(&cmd);
-
+	OneWire_WriteByte(SearchROM);
+  
 	for(uint8_t i = 1; i < 65; i++) {
     bit0 = OneWire_ReadBit();
     bit1 = OneWire_ReadBit();
-
+    
 		if (!bit0) {
-			if (!bit1) {
-				if (i < lastfork) {
-					if (prev & 1) {
-						curr |= 0x80;
-					} else {
-						fork = i;
-					}
-				} else if (i == lastfork) {
+      if (!bit1) {
+        if (i < lastfork) {
+          if (prev & 1) {
             curr |= 0x80;
 					} else {
             fork = i;
-          }
+					}
+				} else if (i == lastfork) {
+          curr |= 0x80;
+        } else {
+          fork = i;
+        }
 			}
 		} else {
-			if (!bit1) {
-				curr |= 0x80;
+      if (!bit1) {
+        curr |= 0x80;
 			} else {
-				return (1);
+        return (1);
 			}
 		}
-      
+    
 		OneWire_WriteBit(curr & 0x80);
     
 		if (!bp) {
-			*addr = curr;
+      *addr = curr;
 			curr = 0;
 			addr++;
 			prev = *addr;
 			bp = 8;
 		} else {
-			prev >>= 1;
+      prev >>= 1;
 			curr >>= 1;
 		}
-      bp--;
+    bp--;
 	}
 	lastfork = fork;
   return (0);  
 }
 
 
+// -------------------------------------------------------------
 void OneWire_Search(void) {
   lastfork = 65;
   for (uint8_t i = 0; i < 2; i++) {
     if (OneWire_Enumerate(oneWireDevices[i].addr)) break;
   }
-  
 }
 
 
+// -------------------------------------------------------------
+uint8_t OneWire_ReadPowerSupply(uint8_t* addr) {
+  OneWire_MatchROM(addr);
+  OneWire_WriteByte(ReadPowerSupply);
+  
+  return !OneWire_ReadBit();
+}
+
+
+/**
+ * @brief   Determines the existent of the device with given address, on the bus.
+ * @param   addr pointer to OneWire device address
+ * @retval  (uint8_t) status of operation
+ */
+int OneWire_MatchROM(uint8_t* addr) {
+  if (OneWire_Reset()) return 1;
+  
+  OneWire_WriteByte(MatchROM);
+  for (uint8_t i = 0; i < 8; i++) {
+    OneWire_WriteByte(addr[i]);
+  }
+
+  return 0;
+}
+
+
+// -------------------------------------------------------------
 OneWireDevice_t* Get_OwDevices(void) {
   return oneWireDevices;
 }
