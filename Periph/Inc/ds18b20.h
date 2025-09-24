@@ -6,23 +6,13 @@
 #endif 
 
 /* Includes ------------------------------------------------------------------*/
-//#include "main.h"
+#include "main.h"
 
 /* Private includes ----------------------------------------------------------*/
-#include "ow.h"
 
 /* Private typedef -----------------------------------------------------------*/
-//typedef struct {
-//  struct OneWireDevTypeDef  *ow_common;
-//  uint16_t                  ts_temp_data;
-//  uint16_t                  ts_ub_data;
-//  uint8_t                   ts_conf_data;
-//  uint8_t                   ts_crc_data;
-//} TempDevTypeDef;
-
 
 /* Exported types ------------------------------------------------------------*/
-extern uint32_t _OWREG_;
 
 /* Exported constants --------------------------------------------------------*/
 
@@ -30,7 +20,7 @@ extern uint32_t _OWREG_;
 
 /* Exported functions prototypes ---------------------------------------------*/
 
-int DS18B20_GetTemperatureMeasurment(void);
+int DS18B20_GetTemperatureMeasurment(OneWireDevice_t*);
 
 /* Private defines -----------------------------------------------------------*/
 #define AlarmSearch     0xec
@@ -41,8 +31,6 @@ int DS18B20_GetTemperatureMeasurment(void);
 #define RecallE         0xb8
 #define ReadPowerSupply 0xb4
 
-/* temperature.c -------------------------------------------------------------*/
-void TempCollect(void);
 
 #ifdef __cplusplus
 }

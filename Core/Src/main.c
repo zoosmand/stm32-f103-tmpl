@@ -55,7 +55,20 @@ int main(void) {
 
     
     if (tmpCnt <= secCnt ) {
-      DS18B20_GetTemperatureMeasurment();
+
+      OneWireDevice_t* devs = Get_OwDevices();
+
+      for (uint8_t i = 0; i < 2; i++) {
+        DS18B20_GetTemperatureMeasurment(&devs[i]);
+      }
+
+      uint32_t* t1 = (int32_t*)&devs[0].spad;
+      uint32_t* t2 = (int32_t*)&devs[1].spad;
+      printf("%d.%02d %d.%02d\n", 
+        (int8_t)((*t1 & 0x0000fff0) >> 4), (uint8_t)(((*t1 & 0x0000000f) * 100) >> 4),
+        (int8_t)((*t2 & 0x0000fff0) >> 4), (uint8_t)(((*t2 & 0x0000000f) * 100) >> 4)
+      );
+
       tmpCnt = secCnt + 4;
     }
   }

@@ -104,8 +104,8 @@ static int dS18B20_ConvertTemperature(uint8_t* addr) {
     if (pps) {
       PIN_H(OneWire_PORT, OneWire_PIN);
       
-      uint32_t __delay = sysCnt + 750;
-      dS18B20_WaitStatus(3);
+      uint32_t delay_threshold = sysCnt + 750;
+      while (delay_threshold >= sysCnt) {__asm volatile("nop");};
 
       PIN_L(OneWire_PORT, OneWire_PIN);
     } else {
@@ -149,25 +149,17 @@ static void dS18B20_ErrorHandler(void) {
 
 
 // -------------------------------------------------------------  
-int DS18B20_GetTemperatureMeasurment(void) {
+int DS18B20_GetTemperatureMeasurment(OneWireDevice_t *dev) {
 
-  OneWireDevice_t* oneWireDevices = Get_OwDevices();
+  // OneWireDevice_t* devs = Get_OwDevices();
 
-  for (uint8_t i = 0; i < 2; i++) {
-    dS18B20_ConvertTemperature(oneWireDevices[i].addr);
-    
-    uint32_t __delay = sysCnt + 3;
-    while (__delay >= sysCnt) {__asm volatile("nop");};
-    
-    dS18B20_ReadScratchpad(oneWireDevices[i].spad, oneWireDevices[i].addr);
-    while(!OneWire_ReadBit()) {__asm volatile("nop");};
-  }
-  uint32_t* t1 = (int32_t*)&oneWireDevices[0].spad;
-  uint32_t* t2 = (int32_t*)&oneWireDevices[1].spad;
-  printf("%d.%02d %d.%02d\n", 
-    (int8_t)((*t1 & 0x0000fff0) >> 4), (uint8_t)(((*t1 & 0x0000000f) * 100) >> 4),
-    (int8_t)((*t2 & 0x0000fff0) >> 4), (uint8_t)(((*t2 & 0x0000000f) * 100) >> 4)
-  );
+  dS18B20_ConvertTemperature(dev->addr);
+  
+  uint32_t delay_threshold = sysCnt + 3;
+  while (delay_threshold >= sysCnt) {__asm volatile("nop");};
+  
+  dS18B20_ReadScratchpad(dev->spad, dev->addr);
+  dS18B20_WaitStatus(3);
 
   return 0;
 }

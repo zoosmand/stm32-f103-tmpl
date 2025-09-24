@@ -39,8 +39,7 @@ extern "C" {
 /* Private includes ----------------------------------------------------------*/
 #include "i2c.h"
 #include "display.h"
-#include "ow.h"
-#include "ds18b20.h"
+
 
 #if defined(USE_FULL_ASSERT)
 #include "stm32_assert.h"
@@ -85,9 +84,18 @@ typedef struct {
 } task_scheduler_t;
 
 
+typedef struct {
+  uint8_t   addr[8];
+  uint8_t   spad[9];
+} OneWireDevice_t;
+
+
 /* Private includes ----------------------------------------------------------*/
 #include "common.h"
 #include "led.h"
+#include "ow.h"
+#include "ds18b20.h"
+
 
 
 /* Exported functions prototypes ---------------------------------------------*/
