@@ -40,10 +40,15 @@ const static uint8_t ssd13xxClrDspl[8] = {
 };
 
 const static uint8_t ssd13xxInitCurPosParams[8] = {
-  0x20, 0x01, 
-  0x21, 0x00, 0x0b, 
-  0x22, 0x05, 0x06
+  0x20, 0x00, 
+  0x21, 0x00, 0x05, 
+  0x22, 0x06, 0x06
 };
+// const static uint8_t ssd13xxInitCurPosParams[8] = {
+//   0x20, 0x01, 
+//   0x21, 0x00, 0x0b, 
+//   0x22, 0x05, 0x06
+// };
 
 // const static uint8_t ssd13xxInitCurPosParams[8] = {
 //   0x20, 0x00, 
@@ -176,15 +181,24 @@ static int sSD13xx_WriteBuf(const uint8_t* buf, uint16_t len, uint8_t* pos) {
     if (sSD13xx_WriteCommand(pos[i])) return (1);
   }
   
-  if (((pos[4] + 12) & 0x7f) < pos[3]) {
+  if (((pos[4] + 6) & 0x7f) < pos[3]) {
     pos[3] = 0x00;
-    pos[4] = 0x0b;
-    pos[6] = (pos[6] - 2) & 0x07;
-    pos[7] = (pos[7] - 2) & 0x07;
+    pos[4] = 0x06;
+    pos[6] = (pos[6] - 1) & 0x07;
+    pos[7] = (pos[7] - 1) & 0x07;
   } else {
     pos[3] = pos[4] + 1;
-    pos[4] = pos[4] + 12;
+    pos[4] = pos[4] + 6;
   }
+  // if (((pos[4] + 12) & 0x7f) < pos[3]) {
+  //   pos[3] = 0x00;
+  //   pos[4] = 0x0b;
+  //   pos[6] = (pos[6] - 2) & 0x07;
+  //   pos[7] = (pos[7] - 2) & 0x07;
+  // } else {
+  //   pos[3] = pos[4] + 1;
+  //   pos[4] = pos[4] + 12;
+  // }
 
   /* --- Write the buffer --- */
   if (I2C_Start(I2C_Instance)) return (1);
@@ -214,7 +228,8 @@ static int sSD13xx_WriteBuf(const uint8_t* buf, uint16_t len, uint8_t* pos) {
  */
 int __attribute__((weak)) putc_dspl(char ch) {
   if ((ch != 0x0a) && (ch != 0x0d)) {
-    sSD13xx_WriteBuf(font_dot_10x14[(((uint8_t)ch) - 32)], sizeof(font_dot_10x14_t), ssd13xxCurrentCurPosParams);
+    // sSD13xx_WriteBuf(font_dot_10x14[(((uint8_t)ch) - 32)], sizeof(font_dot_10x14_t), ssd13xxCurrentCurPosParams);
+    sSD13xx_WriteBuf(font_dot_5x7[(((uint8_t)ch) - 32)], sizeof(font_dot_5x7_t), ssd13xxCurrentCurPosParams);
   } else {
     for (uint8_t i = 0; i < sizeof(ssd13xxInitCurPosParams); i++) {
       ssd13xxCurrentCurPosParams[i] = ssd13xxInitCurPosParams[i];

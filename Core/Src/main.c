@@ -51,7 +51,7 @@ int main(void) {
   
   if (CRON_SEC_EVENT) {
     // printf("The long test message, that might stuck the program but now it does not at all...\n");
-    printf("secondas:%li\n", secCnt);
+    printf("secondados:%li\n", secCnt);
 
     
     // if (tmpCnt <= secCnt ) {
@@ -120,19 +120,4 @@ void Scheduler_Handler(task_scheduler_t *scheduler) {
 
   __enable_irq();
 }
-
-
-
-// void _delay_us(uint32_t __us_delay){
-//   __asm__ __volatile__ (
-//     // "ldr r0, #%__us_delay\n"
-//     "mul r0, r0, 1\n"
-//     "_LOOP_: \n"
-//     "subs r0, r0, 1\n"
-//     "bpl _LOOP_\n"
-//     // : //"=r" (__us_delay)
-//     // :
-//     // : "r0"
-//   );
-// }
 
