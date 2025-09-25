@@ -54,23 +54,23 @@ int main(void) {
     printf("second:%li\n", secCnt);
 
     
-    if (tmpCnt <= secCnt ) {
+    // if (tmpCnt <= secCnt ) {
 
-      OneWireDevice_t* devs = Get_OwDevices();
+    //   OneWireDevice_t* devs = Get_OwDevices();
 
-      for (uint8_t i = 0; i < 2; i++) {
-        DS18B20_GetTemperatureMeasurment(&devs[i]);
-      }
+    //   for (uint8_t i = 0; i < 2; i++) {
+    //     DS18B20_GetTemperatureMeasurment(&devs[i]);
+    //   }
 
-      uint32_t* t1 = (int32_t*)&devs[0].spad;
-      uint32_t* t2 = (int32_t*)&devs[1].spad;
-      printf("%d.%02d %d.%02d\n", 
-        (int8_t)((*t1 & 0x0000fff0) >> 4), (uint8_t)(((*t1 & 0x0000000f) * 100) >> 4),
-        (int8_t)((*t2 & 0x0000fff0) >> 4), (uint8_t)(((*t2 & 0x0000000f) * 100) >> 4)
-      );
+    //   uint32_t* t1 = (int32_t*)&devs[0].spad;
+    //   uint32_t* t2 = (int32_t*)&devs[1].spad;
+    //   printf("%d.%02d %d.%02d\n", 
+    //     (int8_t)((*t1 & 0x0000fff0) >> 4), (uint8_t)(((*t1 & 0x0000000f) * 100) >> 4),
+    //     (int8_t)((*t2 & 0x0000fff0) >> 4), (uint8_t)(((*t2 & 0x0000000f) * 100) >> 4)
+    //   );
 
-      tmpCnt = secCnt + 4;
-    }
+    //   tmpCnt = secCnt + 4;
+    // }
   }
 
   Led_Handler();
@@ -86,15 +86,8 @@ void Cron_Handler(void) {
 
   SET_BIT(CoreDebug->DEMCR, CoreDebug_DEMCR_TRCENA_Msk);
   // WH1602_I2C_Init(I2C1);
-  OneWire_Search();
-  // DS18B20_ConvertT();
-
-  // while (1) {
-  //   PIN_H(GPIOB, GPIO_PIN_12_Pos);
-  //   _delay_us(750);
-  //   PIN_L(GPIOB, GPIO_PIN_12_Pos);
-  //   _delay_us(1000);
-  // }
+  // OneWire_Search();
+  if (SSD13xx_Init(I2C1)) printf("SSD13xx hasn't been initialized!\n");
   
   while (1) {
     __disable_irq();

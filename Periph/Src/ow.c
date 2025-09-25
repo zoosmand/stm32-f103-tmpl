@@ -11,7 +11,7 @@
 
 /* Global variables ----------------------------------------------------------*/
 static uint8_t lastfork;
-static OneWireDevice_t oneWireDevices[2];
+static OneWireDevice_t oneWireDevices[16];
 
 /* Private variables ---------------------------------------------------------*/
 

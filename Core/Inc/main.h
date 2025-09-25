@@ -39,6 +39,7 @@ extern "C" {
 /* Private includes ----------------------------------------------------------*/
 #include "i2c.h"
 #include "display.h"
+#include "ssd13xx.h"
 
 
 #if defined(USE_FULL_ASSERT)
