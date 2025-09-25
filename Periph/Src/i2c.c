@@ -19,6 +19,9 @@
 #include "i2c.h"
 
 
+
+
+
 /**
  * @brief  Starts (sends start condition) to the given I2C peripherals
  * @param  I2Cx: pointer to the I2C peripherals
@@ -26,26 +29,26 @@
  */
 int I2C_Start(I2C_TypeDef* I2Cx){
 
-  uint32_t timeout_threshold = sysCnt + I2C_BUS_TMOUT;
-
+  
   /* Stast I2C Peripherals enable */
   PREG_SET(I2Cx->CR1, I2C_CR1_PE_Pos);
   /* Generate start condition */
   PREG_SET(I2Cx->CR1, I2C_CR1_START_Pos);
-
+  
   /* Wait until the start bit is set*/
+  uint32_t tmout = I2C_BUS_TMOUT;
   while(!(PREG_CHECK(I2Cx->SR1, I2C_SR1_SB_Pos))) {
-    if (sysCnt >= timeout_threshold) {
-      PREG_CLR(I2Cx->CR1, I2C_CR1_PE_Pos);
+    if (!(--tmout)) {
+      I2C_Stop(I2Cx);
       return (1);
     }
   }
   
-  timeout_threshold = sysCnt + I2C_BUS_TMOUT;
   /* Verify master mode*/
+  tmout = I2C_BUS_TMOUT;
   while(!(PREG_CHECK(I2Cx->SR1, I2C_SR2_MSL_Pos))) {
-    if (sysCnt >= timeout_threshold) {
-      PREG_CLR(I2Cx->CR1, I2C_CR1_PE_Pos);
+    if (!(--tmout)) {
+      I2C_Stop(I2Cx);
       return (1);
     }
   }
@@ -61,18 +64,26 @@ int I2C_Start(I2C_TypeDef* I2Cx){
  */
 int I2C_SendAddress(I2C_TypeDef* I2Cx, uint8_t addr){
 
-  uint32_t timeout_threshold = sysCnt + I2C_BUS_TMOUT;
-
+  
   /* Send the slave address into the bus */
   I2Cx->DR = addr<<1;
   
   /* Wait until address is sent */
+  uint32_t tmout = I2C_BUS_TMOUT;
   while(!(PREG_CHECK(I2Cx->SR1, I2C_SR1_ADDR_Pos))) {
-    if (sysCnt >= timeout_threshold) return (1);
+    if (!(--tmout)) {
+      I2C_Stop(I2Cx);
+      return (1);
+    }
   }
+
   /* Verify before transferring if trasmit buffer is empty */
+  tmout = I2C_BUS_TMOUT;
   while(!(PREG_CHECK(I2Cx->SR1, I2C_SR1_TXE_Pos))) {
-    if (sysCnt >= timeout_threshold) return (1);
+    if (!(--tmout)) {
+      I2C_Stop(I2Cx);
+      return (1);
+    }
   }
   
   /* Clear status registers */
@@ -108,17 +119,26 @@ void I2C_Stop(I2C_TypeDef* I2Cx){
  */
 int I2C_WriteByte(I2C_TypeDef* I2Cx, uint8_t txByte){
 
-  uint32_t timeout_threshold = sysCnt + I2C_BUS_TMOUT;
-
+  
   /* Send data byte to the couterpart */
   I2Cx->DR = txByte;
+
   /* Verify if byte transfer finished */
+  uint32_t tmout = I2C_BUS_TMOUT;
   while(!(PREG_CHECK(I2Cx->SR1, I2C_SR1_BTF_Pos))) {
-    if (sysCnt >= timeout_threshold) return (1);
+    if (!(--tmout)) {
+      I2C_Stop(I2Cx);
+      return (1);
+    }
   }
+  
   /* Verify after transferring if trasmit buffer is empty */
+  tmout = I2C_BUS_TMOUT;
   while(!(PREG_CHECK(I2Cx->SR1, I2C_SR1_TXE_Pos))) {
-    if (sysCnt >= timeout_threshold) return (1);
+    if (!(--tmout)) {
+      I2C_Stop(I2Cx);
+      return (1);
+    }
   }
   return (0);  
 }
@@ -131,17 +151,26 @@ int I2C_WriteByte(I2C_TypeDef* I2Cx, uint8_t txByte){
  */
 uint8_t I2C_ReadByte(I2C_TypeDef* I2Cx){
 
-  uint32_t timeout_threshold = sysCnt + I2C_BUS_TMOUT;
-
+  
   /* Receive data byte from the couterpart */
   uint8_t rxByte = I2Cx->DR;
+  
   /* Verify if byte transfer finished */
+  uint32_t tmout = I2C_BUS_TMOUT;
   while(!(PREG_CHECK(I2Cx->SR1, I2C_SR1_BTF_Pos))) {
-    if (sysCnt >= timeout_threshold) return (0xff);
+    if (!(--tmout)) {
+      I2C_Stop(I2Cx);
+      return (1);
+    }
   }
+
   /* Verify after transferring if trasmit buffer is empty */
+  tmout = I2C_BUS_TMOUT;
   while(PREG_CHECK(I2Cx->SR1, I2C_SR1_RXNE_Pos)) {
-    if (sysCnt >= timeout_threshold) return (0xff);
+    if (!(--tmout)) {
+      I2C_Stop(I2Cx);
+      return (1);
+    }
   }
   
   return rxByte;

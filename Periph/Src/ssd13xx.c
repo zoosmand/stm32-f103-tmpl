@@ -116,7 +116,16 @@ int SSD13xx_Init(I2C_TypeDef* i2c) {
       if (sSD13xx_WriteDataByte(0x00)) return (1);
     }
   }
-  I2C_Stop(I2C_Instance);  
+  I2C_Stop(I2C_Instance);
+
+  // _delay_ms(10);
+
+  // for (uint8_t i = 0; i < sizeof(ssd13xxInitCurPosParams); i++) {
+  //   ssd13xxCurrentCurPosParams[i] = ssd13xxInitCurPosParams[i];
+  // }
+
+  // char ch = 'D';
+  // sSD13xx_WriteBuf(font_dot_10x14[(((uint8_t)ch) - 32)], sizeof(font_dot_10x14_t), ssd13xxCurrentCurPosParams);
  
   return (0);
 }

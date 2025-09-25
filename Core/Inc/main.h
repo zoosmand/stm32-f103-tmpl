@@ -40,6 +40,7 @@ extern "C" {
 #include "i2c.h"
 #include "display.h"
 #include "ssd13xx.h"
+#include "fonts.h"
 
 
 #if defined(USE_FULL_ASSERT)

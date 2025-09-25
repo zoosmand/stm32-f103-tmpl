@@ -26,7 +26,7 @@
 
 
 /* Private defines -----------------------------------------------------------*/
-#define I2C_BUS_TMOUT   100 /* 100 ms timeout on I2C bus operations */
+#define I2C_BUS_TMOUT   10000 /* cycles timeout on I2C bus operations */
 
 /* Exported functions prototypes ---------------------------------------------*/
 int I2C_Start(I2C_TypeDef*);

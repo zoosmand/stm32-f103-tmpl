@@ -22,7 +22,6 @@
 __attribute__((section(".cron"))) uint32_t _GEREG_               = 0;
 __attribute__((section(".cron"))) uint32_t sysCnt                = 0;
 __attribute__((section(".cron"))) uint32_t secCnt                = 0;
-static __attribute__((section(".cron"))) uint32_t secCntCache    = 0;
 
 /* Private includes ----------------------------------------------------------*/
 
@@ -33,6 +32,7 @@ static __attribute__((section(".cron"))) uint32_t secCntCache    = 0;
 /* Private macro -------------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
+static __attribute__((section(".cron"))) uint32_t secCntCache    = 0;
 
 /* Private function prototypes -----------------------------------------------*/
 
