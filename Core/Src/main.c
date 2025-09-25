@@ -51,7 +51,7 @@ int main(void) {
   
   if (CRON_SEC_EVENT) {
     // printf("The long test message, that might stuck the program but now it does not at all...\n");
-    printf("second:%li\n", secCnt);
+    printf("secondas:%li\n", secCnt);
 
     
     // if (tmpCnt <= secCnt ) {

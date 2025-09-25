@@ -61,7 +61,7 @@ extern uint32_t secCnt;
 
 
 /* Exported constants --------------------------------------------------------*/
-
+#define SWO_DSPL
 
 /** Global Events Register Flags */
 #define _SYSSECF_                     1

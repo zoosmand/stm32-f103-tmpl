@@ -48,7 +48,7 @@ __STATIC_INLINE void _putc(uint8_t ch) {
  #endif
 
  #ifdef SWO_DSPL
-    PrintCharDisplay(ch, SWO_DSPL);
+    putc_dspl(ch);
  #endif
 
  #ifdef SWO_USART
