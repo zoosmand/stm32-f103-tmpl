@@ -52,7 +52,7 @@ int main(void) {
   if (CRON_SEC_EVENT) {
     
     // printf("The long test message, that might stuck the program but now it does not at all...\n");
-    printf("sec:%li\n", secCnt);
+    // printf("sec:%li\n", secCnt);
     
     if (FLAG_CHECK(&_ASREG_, OneWireBus_flag)) {
       if (tmpCnt <= secCnt ) {
@@ -60,7 +60,11 @@ int main(void) {
         OneWireDevice_t* devs = Get_OwDevices();
 
         for (uint8_t i = 0; i < 2; i++) {
-          DS18B20_GetTemperatureMeasurment(&devs[i]);
+          if (DS18B20_GetTemperatureMeasurment(&devs[i])) {
+            /* --- on error, set up -128.00 C --- */
+            devs[i].spad[0] = 0x00;
+            devs[i].spad[1] = 0x08;
+          }
         }
 
         uint32_t* t1 = (int32_t*)&devs[0].spad;
