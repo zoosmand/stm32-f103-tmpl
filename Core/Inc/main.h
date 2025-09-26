@@ -56,6 +56,7 @@ extern "C" {
 
 /* Exported variables --------------------------------------------------------*/
 extern uint32_t _GEREG_;
+extern uint32_t _ASREG_;
 extern uint32_t sysCnt;
 extern uint32_t secCnt;
 
@@ -64,7 +65,13 @@ extern uint32_t secCnt;
 
 
 /** Global Events Register Flags */
-#define _SYSSECF_                     1
+#define _SYSSECF_         1
+
+
+/** Active Service Register Flags */
+#define OneWireBus_flag   0
+#define SSDDisplay_flag   1
+#define WHDisplay_flag    2
 
 
 /* Exported macro ------------------------------------------------------------*/

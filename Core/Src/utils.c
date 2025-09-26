@@ -44,18 +44,20 @@
 __STATIC_INLINE void _putc(uint8_t ch) {
  if (ch == '\n') _putc('\r');
 
- #ifdef SWO_ITM
+  #ifdef SWO_ITM
     ITM_SendCharChannel(ch, SWO_ITM);
- #endif
+  #endif
 
- #ifdef DSPL_OUT
-    putc_dspl(ch);
- #endif
+  #ifdef DSPL_OUT
+    if (FLAG_CHECK(&_ASREG_, SSDDisplay_flag) || FLAG_CHECK(&_ASREG_, WHDisplay_flag)) {
+      putc_dspl(ch);
+    }
+  #endif
 
- #ifdef USART_OUT
+  #ifdef USART_OUT
     while (!(PREG_CHECK(USART_OUT->SR, USART_SR_TXE_Pos)));
     USART_OUT->DR = ch;
- #endif
+  #endif
 }
 
 

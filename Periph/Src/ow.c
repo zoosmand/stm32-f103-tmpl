@@ -41,7 +41,13 @@ int OneWire_Reset(void) {
     _delay_us(1);
   }
 
-  _delay_us(580 - i);
+  /* to prevent non pulled-up pin to response */
+  if (i == 1) {
+    status = 1;
+  } else {
+    _delay_us(580 - i);
+  }
+
   return status;
 }
 
@@ -186,11 +192,16 @@ __STATIC_INLINE int OneWire_Enumerate(uint8_t* addr) {
 
 
 // -------------------------------------------------------------
-void OneWire_Search(void) {
+int OneWire_Search(void) {
+
+  if (OneWire_Reset()) return (1);
+
   lastfork = 65;
   for (uint8_t i = 0; i < 2; i++) {
     if (OneWire_Enumerate(oneWireDevices[i].addr)) break;
   }
+
+  return (0);
 }
 
 
@@ -209,14 +220,14 @@ uint8_t OneWire_ReadPowerSupply(uint8_t* addr) {
  * @retval  (uint8_t) status of operation
  */
 int OneWire_MatchROM(uint8_t* addr) {
-  if (OneWire_Reset()) return 1;
+  if (OneWire_Reset()) return (1);
   
   OneWire_WriteByte(MatchROM);
   for (uint8_t i = 0; i < 8; i++) {
     OneWire_WriteByte(addr[i]);
   }
 
-  return 0;
+  return (0);
 }
 
 

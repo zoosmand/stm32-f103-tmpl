@@ -119,7 +119,7 @@ static int dS18B20_ConvertTemperature(uint8_t* addr) {
     dS18B20_Command(ConvertT);
     dS18B20_WaitStatus(3);
   }
-  return 0;
+  return (0);
 }
 
 
@@ -171,11 +171,11 @@ static void dS18B20_ErrorHandler(void) {
 // -------------------------------------------------------------  
 int DS18B20_GetTemperatureMeasurment(OneWireDevice_t *dev) {
 
-  dS18B20_ConvertTemperature(dev->addr);
+  if (dS18B20_ConvertTemperature(dev->addr)) return (1);
   
   _delay_ms(2);
   
-  dS18B20_ReadScratchpad(dev->spad, dev->addr);
+  if (dS18B20_ReadScratchpad(dev->spad, dev->addr)) return (1);
   dS18B20_WaitStatus(3);
 
   return 0;

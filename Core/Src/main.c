@@ -19,9 +19,10 @@
 #include "main.h"
 
 /* Global variables ---------------------------------------------------------*/
-__attribute__((section(".cron"))) uint32_t _GEREG_               = 0;
-__attribute__((section(".cron"))) uint32_t sysCnt                = 0;
-__attribute__((section(".cron"))) uint32_t secCnt                = 0;
+__attribute__((section(".cron"))) uint32_t _GEREG_              = 0;
+__attribute__((section(".cron"))) uint32_t _ASREG_       = 0;
+__attribute__((section(".cron"))) uint32_t sysCnt               = 0;
+__attribute__((section(".cron"))) uint32_t secCnt               = 0;
 
 /* Private includes ----------------------------------------------------------*/
 
@@ -32,7 +33,7 @@ __attribute__((section(".cron"))) uint32_t secCnt                = 0;
 /* Private macro -------------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
-static __attribute__((section(".cron"))) uint32_t secCntCache    = 0;
+static __attribute__((section(".cron"))) uint32_t secCntCache   = 0;
 
 /* Private function prototypes -----------------------------------------------*/
 
@@ -45,32 +46,33 @@ static __attribute__((section(".cron"))) uint32_t secCntCache    = 0;
  */
 int main(void) {
 
-  // __NVIC_SetPriorityGrouping(NVIC_PRIORITYGROUP_4);
 
   static uint32_t tmpCnt = 0;
   
   if (CRON_SEC_EVENT) {
-    // printf("The long test message, that might stuck the program but now it does not at all...\n");
-    printf("secondariodantatiss:%li\n", secCnt);
-
     
-    // if (tmpCnt <= secCnt ) {
+    // printf("The long test message, that might stuck the program but now it does not at all...\n");
+    printf("sec:%li\n", secCnt);
+    
+    if (FLAG_CHECK(&_ASREG_, OneWireBus_flag)) {
+      if (tmpCnt <= secCnt ) {
 
-    //   OneWireDevice_t* devs = Get_OwDevices();
+        OneWireDevice_t* devs = Get_OwDevices();
 
-    //   for (uint8_t i = 0; i < 2; i++) {
-    //     DS18B20_GetTemperatureMeasurment(&devs[i]);
-    //   }
+        for (uint8_t i = 0; i < 2; i++) {
+          DS18B20_GetTemperatureMeasurment(&devs[i]);
+        }
 
-    //   uint32_t* t1 = (int32_t*)&devs[0].spad;
-    //   uint32_t* t2 = (int32_t*)&devs[1].spad;
-    //   printf("%d.%02d %d.%02d\n", 
-    //     (int8_t)((*t1 & 0x0000fff0) >> 4), (uint8_t)(((*t1 & 0x0000000f) * 100) >> 4),
-    //     (int8_t)((*t2 & 0x0000fff0) >> 4), (uint8_t)(((*t2 & 0x0000000f) * 100) >> 4)
-    //   );
+        uint32_t* t1 = (int32_t*)&devs[0].spad;
+        uint32_t* t2 = (int32_t*)&devs[1].spad;
+        printf("%d.%02d %d.%02d\n", 
+          (int8_t)((*t1 & 0x0000fff0) >> 4), (uint8_t)(((*t1 & 0x0000000f) * 100) >> 4),
+          (int8_t)((*t2 & 0x0000fff0) >> 4), (uint8_t)(((*t2 & 0x0000000f) * 100) >> 4)
+        );
 
-    //   tmpCnt = secCnt + 4;
-    // }
+        tmpCnt = secCnt + 4;
+      }
+    }
   }
 
   Led_Handler();
@@ -84,10 +86,12 @@ int main(void) {
  */
 void Cron_Handler(void) {
 
+  __NVIC_SetPriorityGrouping(NVIC_PRIORITYGROUP_4);
   SET_BIT(CoreDebug->DEMCR, CoreDebug_DEMCR_TRCENA_Msk);
-  // OneWire_Search();
-  if (SSD13xx_Init(I2C1)) __NOP();
-  if (WHxxxx_Init(I2C1)) __NOP();
+
+  if (!OneWire_Search())    FLAG_SET(&_ASREG_, OneWireBus_flag);
+  if (!SSD13xx_Init(I2C1))  FLAG_SET(&_ASREG_, SSDDisplay_flag);
+  if (!WHxxxx_Init(I2C1))   FLAG_SET(&_ASREG_, WHDisplay_flag);
 
   
   while (1) {
