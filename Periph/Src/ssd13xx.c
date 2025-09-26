@@ -39,16 +39,16 @@ const static uint8_t ssd13xxClrDspl[8] = {
   0x22, 0x00, 0x07  // set page address from 0 to 7
 };
 
-const static uint8_t ssd13xxInitCurPosParams[8] = {
+const static uint8_t ssd13xxInitCurPosParams_5x7[8] = {
   0x20, 0x00, 
   0x21, 0x00, 0x05, 
   0x22, 0x06, 0x06
 };
-// const static uint8_t ssd13xxInitCurPosParams[8] = {
-//   0x20, 0x01, 
-//   0x21, 0x00, 0x0b, 
-//   0x22, 0x05, 0x06
-// };
+const static uint8_t ssd13xxInitCurPosParams_10x14[8] = {
+  0x20, 0x01, 
+  0x21, 0x00, 0x0b, 
+  0x22, 0x05, 0x06
+};
 
 // const static uint8_t ssd13xxInitCurPosParams[8] = {
 //   0x20, 0x00, 
@@ -123,15 +123,9 @@ int SSD13xx_Init(I2C_TypeDef* i2c) {
   }
   I2C_Stop(I2C_Instance);
 
-  // _delay_ms(10);
+  // /* --- Initialize the init cursor position --- */
 
-  /* --- Initialize the init cursor position --- */
-  for (uint8_t i = 0; i < sizeof(ssd13xxInitCurPosParams); i++) {
-    ssd13xxCurrentCurPosParams[i] = ssd13xxInitCurPosParams[i];
-  }
-
-  // char ch = 'D';
-  // sSD13xx_WriteBuf(font_dot_10x14[(((uint8_t)ch) - 32)], sizeof(font_dot_10x14_t), ssd13xxCurrentCurPosParams);
+  putc_dspl('\n');
  
   return (0);
 }
@@ -181,14 +175,29 @@ static int sSD13xx_WriteBuf(const uint8_t* buf, uint16_t len, uint8_t* pos) {
     if (sSD13xx_WriteCommand(pos[i])) return (1);
   }
   
+  uint8_t step_left = 6;
+  uint8_t step_up = 1;
+
+  switch (len) {
+  case 24:
+    step_left = 12;
+    step_up = 2;
+    break;
+  
+  default:
+    // step_left = 6;
+    // step_up = 1;
+    break;
+  }
+
   if (((pos[4] + 6) & 0x7f) < pos[3]) {
     pos[3] = 0x00;
-    pos[4] = 0x06;
-    pos[6] = (pos[6] - 1) & 0x07;
-    pos[7] = (pos[7] - 1) & 0x07;
+    pos[4] = step_left;
+    pos[6] = (pos[6] - step_up) & 0x07;
+    pos[7] = (pos[7] - step_up) & 0x07;
   } else {
     pos[3] = pos[4] + 1;
-    pos[4] = pos[4] + 6;
+    pos[4] = pos[4] + step_left;
   }
   // if (((pos[4] + 12) & 0x7f) < pos[3]) {
   //   pos[3] = 0x00;
@@ -226,13 +235,30 @@ static int sSD13xx_WriteBuf(const uint8_t* buf, uint16_t len, uint8_t* pos) {
  * @param  ch: character to write
  * @retval (int) status of operation
  */
-int __attribute__((weak)) putc_dspl(char ch) {
+int __attribute__((weak)) putc_dspl_5x7(char ch) {
   if ((ch != 0x0a) && (ch != 0x0d)) {
-    // sSD13xx_WriteBuf(font_dot_10x14[(((uint8_t)ch) - 32)], sizeof(font_dot_10x14_t), ssd13xxCurrentCurPosParams);
     sSD13xx_WriteBuf(font_dot_5x7[(((uint8_t)ch) - 32)], sizeof(font_dot_5x7_t), ssd13xxCurrentCurPosParams);
   } else {
-    for (uint8_t i = 0; i < sizeof(ssd13xxInitCurPosParams); i++) {
-      ssd13xxCurrentCurPosParams[i] = ssd13xxInitCurPosParams[i];
+    for (uint8_t i = 0; i < sizeof(ssd13xxInitCurPosParams_5x7); i++) {
+      ssd13xxCurrentCurPosParams[i] = ssd13xxInitCurPosParams_5x7[i];
+    }
+  }
+  return (0);
+}
+
+
+
+/**
+ * @brief  Writes/Sends character to the given display
+ * @param  ch: character to write
+ * @retval (int) status of operation
+ */
+int __attribute__((weak)) putc_dspl_10x14(char ch) {
+  if ((ch != 0x0a) && (ch != 0x0d)) {
+    sSD13xx_WriteBuf(font_dot_10x14[(((uint8_t)ch) - 32)], sizeof(font_dot_10x14_t), ssd13xxCurrentCurPosParams);
+  } else {
+    for (uint8_t i = 0; i < sizeof(ssd13xxInitCurPosParams_10x14); i++) {
+      ssd13xxCurrentCurPosParams[i] = ssd13xxInitCurPosParams_10x14[i];
     }
   }
   return (0);

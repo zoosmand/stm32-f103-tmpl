@@ -51,7 +51,7 @@ int main(void) {
   
   if (CRON_SEC_EVENT) {
     // printf("The long test message, that might stuck the program but now it does not at all...\n");
-    printf("secondados:%li\n", secCnt);
+    printf("secondariodantatiss:%li\n", secCnt);
 
     
     // if (tmpCnt <= secCnt ) {
@@ -85,9 +85,10 @@ int main(void) {
 void Cron_Handler(void) {
 
   SET_BIT(CoreDebug->DEMCR, CoreDebug_DEMCR_TRCENA_Msk);
-  // WH1602_I2C_Init(I2C1);
   // OneWire_Search();
-  if (SSD13xx_Init(I2C1)) printf("SSD13xx hasn't been initialized!\n");
+  if (SSD13xx_Init(I2C1)) __NOP();
+  if (WHxxxx_Init(I2C1)) __NOP();
+
   
   while (1) {
     __disable_irq();

@@ -38,7 +38,7 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 #include "i2c.h"
-#include "display.h"
+#include "whxxxx.h"
 #include "ssd13xx.h"
 #include "fonts.h"
 
@@ -61,13 +61,14 @@ extern uint32_t secCnt;
 
 
 /* Exported constants --------------------------------------------------------*/
-#define SWO_DSPL
+
 
 /** Global Events Register Flags */
 #define _SYSSECF_                     1
 
 
 /* Exported macro ------------------------------------------------------------*/
+#define putc_dspl(ch) DSPL_OUT(ch);
 
 
 /* Private definitions ---------------------------------------------------------*/

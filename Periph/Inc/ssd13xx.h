@@ -21,9 +21,11 @@
 #define SSD13xx_DC_BIT      6 // DC bit (1 - data, 0 - command)
 
 
+
 //////////////////////////////////////////////////////////////////////////
 int SSD13xx_Init(I2C_TypeDef*);
-int __attribute__((weak)) putc_dspl(char);
+int __attribute__((weak)) putc_dspl_5x7(char);
+int __attribute__((weak)) putc_dspl_10x14(char);
 
 
 #ifdef __cplusplus

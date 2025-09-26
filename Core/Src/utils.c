@@ -13,6 +13,7 @@
 /********************************************************************************/
 /*                         printf() output supply block                         */
 /********************************************************************************/
+
 /**
   * @brief  Sends a symbol into ITM channel. It could be cought with SWO pin on an MC. 
   * @param ch: a symbol to be output
@@ -47,13 +48,13 @@ __STATIC_INLINE void _putc(uint8_t ch) {
     ITM_SendCharChannel(ch, SWO_ITM);
  #endif
 
- #ifdef SWO_DSPL
+ #ifdef DSPL_OUT
     putc_dspl(ch);
  #endif
 
- #ifdef SWO_USART
-    while (!(PREG_CHECK(SWO_USART->SR, USART_SR_TXE_Pos)));
-    USART1->DR = ch;
+ #ifdef USART_OUT
+    while (!(PREG_CHECK(USART_OUT->SR, USART_SR_TXE_Pos)));
+    USART_OUT->DR = ch;
  #endif
 }
 
