@@ -20,7 +20,11 @@ TARGET = F103C8T6_tmpl
 DEBUG = 1
 # optimization
 OPT = -Og
-
+# platform
+ARCH := $(shell uname -m)
+SYS := $(shell uname -s)
+# output
+OUTPUT = 1
 
 #######################################
 # paths
@@ -120,10 +124,24 @@ ASFLAGS = $(MCU) $(AS_DEFS) $(AS_INCLUDES) $(OPT) -Wall -fdata-sections -ffuncti
 
 CFLAGS += $(MCU) $(C_DEFS) $(C_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections
 
+
 ifeq ($(DEBUG), 1)
 # CFLAGS += -g -gdwarf-2 -D CMAKE_CXX_FLAGS_RELEASE="-Wa,-mimplicit-it=thumb"
-CFLAGS += -g -gdwarf-2 -Wall -Wextra -pedantic
-ASFLAGS += $(CFLAGS)
+# CFLAGS += -g -gdwarf-2 -Wextra -pedantic
+DEBUGFLAGS = -g -gdwarf-2 -DDEBUG
+CFLAGS += $(DEBUGFLAGS)
+ASFLAGS += $(DEBUGFLAGS)
+endif
+
+ifeq ($(OUTPUT), 1)
+OUTPUTFLAGS = -DDSPL_OUT=putc_dspl_wh2004
+ifeq ($(SYS), Darwin)
+OUTPUTFLAGS += -DSWO_ITM=0 
+else ifeq ($(SYS), Linux)
+OUTPUTFLAGS += -DUSART_OUT=USART1
+endif
+CFLAGS += $(OUTPUTFLAGS)
+ASFLAGS += $(OUTPUTFLAGS)
 endif
 
 

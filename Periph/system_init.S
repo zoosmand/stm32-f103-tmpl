@@ -6,6 +6,7 @@
   .thumb
 
 #include <stm32f103xb.h>
+#include <core_cm3.h>
 .include "stm32f1xx.inc"
 .include "macroses.inc"
 .include "local.inc"
@@ -45,6 +46,10 @@ SystemInit:
   bl LedInit
   bl Usart1Init
   bl I2c1Init
+  bl OwInit
+
+  @ Set up CoreDebug_DEMCR_TRCENA_Msk
+  @ STRW 1<<0, CoreDebug_DEMCR
 
   pop {pc}
   .size SystemInit, .-SystemInit
@@ -213,24 +218,27 @@ WWatchdogInit:
 
 
 
-/**
-  * System initialization.
-  *
-  */
-  .section .text.SimpleDelay
-  .global SimpleDelay
-  .type SimpleDelay, %function
+@ /**
+@   * System initialization.
+@   *
+@   */
+@   .section .text._delay_us
+@   .global _delay_us
+@   .type _delay_us, %function
 
-SimpleDelay:
-  push {r0, r1, lr}
-  mov r1, 24
-  muls r0, r0, r1
-  mov r1, 1
-  _SimpleDelay_loop_:
-    subs r0, r0, r1
-    bpl _SimpleDelay_loop_
-  pop {r0, r1, pc}
-  .size SimpleDelay, .-SimpleDelay
+@ _delay_us:
+@   push {r0, r1, lr}
+@   mov r1, 98
+@   muls r0, r0, r1
+@   @ adds r0, r0, #2
+@   @ nop
+@   mov r1, 10
+@   __delay_us_loop_:
+@     @ nop
+@     subs r0, r0, r1
+@     bpl __delay_us_loop_
+@   pop {r0, r1, pc}
+@   .size _delay_us, .-_delay_us
 
 
   .end

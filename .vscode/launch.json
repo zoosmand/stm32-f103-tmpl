@@ -7,6 +7,35 @@
     {
       "type": "cortex-debug",
       "request": "launch",
+      "servertype": "jlink",
+      "cwd": "${workspaceRoot}",
+      "executable": "./build/vsarm_firmware.elf",
+      "name": "Debug (Jlink)",
+      "device": "STM32F103xB",
+      "interface": "swd",
+      // "ipAddress": null,
+      // "serialNumber": null,
+      "v1": false,
+      "svdFile": "${workspaceRoot}/STM32F103xx.svd",
+      "armToolchainPath": "${env:VSARM}/arm-gcc/bin",
+      "swoConfig": {
+        "enabled": true,
+        "source": "probe",
+        "swoFrequency": 6000000,
+        "cpuFrequency": 72000000,
+        "decoders": [
+          {
+            "port": 0,
+            "label": "SWO output",
+            "encoding": "utf8",
+            "type": "console"
+          }
+        ]
+      }
+    },
+    {
+      "type": "cortex-debug",
+      "request": "launch",
       "servertype": "openocd",
       "serverpath": "openocd",
       "cwd": "${workspaceRoot}",

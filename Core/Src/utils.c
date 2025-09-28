@@ -5,7 +5,7 @@
   ******************************************************************************
   */
 
-  /* Includes ------------------------------------------------------------------*/
+/* Includes ------------------------------------------------------------------*/
 #include "main.h"
 
 
@@ -13,6 +13,7 @@
 /********************************************************************************/
 /*                         printf() output supply block                         */
 /********************************************************************************/
+
 /**
   * @brief  Sends a symbol into ITM channel. It could be cought with SWO pin on an MC. 
   * @param ch: a symbol to be output
@@ -43,18 +44,20 @@
 __STATIC_INLINE void _putc(uint8_t ch) {
  if (ch == '\n') _putc('\r');
 
- #ifdef SWO_ITM
+  #ifdef SWO_ITM
     ITM_SendCharChannel(ch, SWO_ITM);
- #endif
+  #endif
 
- #ifdef SWO_DSPL
-    PrintCharDisplay(ch, SWO_DSPL);
- #endif
+  #ifdef DSPL_OUT
+    if (FLAG_CHECK(&_ASREG_, SSDDisplay_flag) || FLAG_CHECK(&_ASREG_, WHDisplay_flag)) {
+      putc_dspl(ch);
+    }
+  #endif
 
- #ifdef SWO_USART
-    while (!(PREG_CHECK(SWO_USART->SR, USART_SR_TXE_Pos)));
-    USART1->DR = ch;
- #endif
+  #ifdef USART_OUT
+    while (!(PREG_CHECK(USART_OUT->SR, USART_SR_TXE_Pos)));
+    USART_OUT->DR = ch;
+  #endif
 }
 
 
@@ -73,6 +76,33 @@ int _write(int32_t file, char *ptr, int32_t len) {
  }
  return len;
 }
+
+
+
+__STATIC_INLINE void _DWT_Init(void) {
+  DWT->CYCCNT = 0;
+  DWT->CTRL |= DWT_CTRL_CYCEVTENA_Msk | DWT_CTRL_CYCCNTENA_Msk;
+  __DSB();
+  __ISB();
+}
+
+
+void _delay_us(uint32_t us) {
+  _DWT_Init();
+  uint32_t const start = DWT->CYCCNT;
+  uint32_t const ticks = us * (APB2_FREQ / 1000000U);
+  while ((READ_REG(DWT->CYCCNT) - start) < ticks) { __asm volatile("nop"); }
+  DWT->CTRL &= ~(DWT_CTRL_CYCEVTENA_Msk | DWT_CTRL_CYCCNTENA_Msk);
+}
+
+
+
+
+void _delay_ms(uint32_t ms) {
+  uint32_t delay_threshold = sysCnt + ms;
+  while (delay_threshold >= sysCnt) {__asm volatile("nop");};
+}
+
 
 
 

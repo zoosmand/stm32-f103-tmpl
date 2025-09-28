@@ -190,5 +190,5 @@ void SPI1_IRQHandler(void) {
   */
 void USART1_IRQHandler(void) {
   PREG_CLR(USART1->SR, USART_SR_RXNE_Pos);
-  uint16_t q = USART1->DR;
+  (void) USART1->DR;
 }

@@ -25,11 +25,14 @@
 #include "main.h"
 
 
+/* Private defines -----------------------------------------------------------*/
+#define I2C_BUS_TMOUT   10000 /* cycles timeout on I2C bus operations */
+
 /* Exported functions prototypes ---------------------------------------------*/
-void I2C_Start(I2C_TypeDef*);
+int I2C_Start(I2C_TypeDef*);
 void I2C_Stop(I2C_TypeDef*);
-void I2C_SendAddress(I2C_TypeDef*, uint8_t);
-void I2C_WriteByte(I2C_TypeDef*, uint8_t);
+int I2C_SendAddress(I2C_TypeDef*, uint8_t);
+int I2C_WriteByte(I2C_TypeDef*, uint8_t);
 uint8_t I2C_ReadByte(I2C_TypeDef*);
 
 

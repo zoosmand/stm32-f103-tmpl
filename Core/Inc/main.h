@@ -38,7 +38,10 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 #include "i2c.h"
-#include "display.h"
+#include "whxxxx.h"
+#include "ssd13xx.h"
+#include "fonts.h"
+
 
 #if defined(USE_FULL_ASSERT)
 #include "stm32_assert.h"
@@ -49,12 +52,11 @@ extern "C" {
 #define APB1_FREQ   APB2_FREQ/2
 
 /* Exported types ------------------------------------------------------------*/
-// #define SWO_USART USART1
-// #define SWO_ITM 0
-#define SWO_DSPL 0
+
 
 /* Exported variables --------------------------------------------------------*/
 extern uint32_t _GEREG_;
+extern uint32_t _ASREG_;
 extern uint32_t sysCnt;
 extern uint32_t secCnt;
 
@@ -63,8 +65,17 @@ extern uint32_t secCnt;
 
 
 /** Global Events Register Flags */
-#define _SYSSECF_                     1
+#define _SYSSECF_         1
 
+
+/** Active Service Register Flags */
+#define OneWireBus_flag   0
+#define SSDDisplay_flag   1
+#define WHDisplay_flag    2
+
+
+/* Exported defines -----------------------------------------------------------*/
+#define putc_dspl(ch) DSPL_OUT(ch);
 
 /* Exported macro ------------------------------------------------------------*/
 
@@ -85,15 +96,26 @@ typedef struct {
 } task_scheduler_t;
 
 
+typedef struct {
+  uint8_t   addr[8];
+  uint8_t   spad[9];
+} OneWireDevice_t;
+
+
 /* Private includes ----------------------------------------------------------*/
 #include "common.h"
 #include "led.h"
+#include "ow.h"
+#include "ds18b20.h"
+
 
 
 /* Exported functions prototypes ---------------------------------------------*/
-void Error_Handler(void);
+void __attribute__((weak)) Error_Handler(void);
+int __attribute__((weak)) putc_dspl(char);
 void Scheduler_Handler(task_scheduler_t*);
-void SimpleDelay(uint32_t);
+void _delay_us(uint32_t);
+void _delay_ms(uint32_t);
 
 
 #ifdef __cplusplus
