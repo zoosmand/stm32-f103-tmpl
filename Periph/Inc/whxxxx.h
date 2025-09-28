@@ -47,7 +47,7 @@ int WHxxxx_Init(I2C_TypeDef*);
 #define WHxxxx_DSPL_SW	      0x0c // Display on, cursor off, blink off
 #define WHxxxx_CLR_DSLP       0x01 // Clear display
 #define WHxxxx_POS_1LS        0x80 // Position at 1-st line, start 
-#define WHxxxx_POS_2LS        0xc0 // Position ar 2-nd line, start
+#define WHxxxx_POS_2LS        0xc0 // Position at 2-nd line, start
 #define WHxxxx_NOCMD          0x00 // No command
 
 
