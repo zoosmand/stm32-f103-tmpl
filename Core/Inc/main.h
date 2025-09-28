@@ -74,8 +74,10 @@ extern uint32_t secCnt;
 #define WHDisplay_flag    2
 
 
-/* Exported macro ------------------------------------------------------------*/
+/* Exported defines -----------------------------------------------------------*/
 #define putc_dspl(ch) DSPL_OUT(ch);
+
+/* Exported macro ------------------------------------------------------------*/
 
 
 /* Private definitions ---------------------------------------------------------*/
@@ -109,7 +111,8 @@ typedef struct {
 
 
 /* Exported functions prototypes ---------------------------------------------*/
-void Error_Handler(void);
+void __attribute__((weak)) Error_Handler(void);
+int __attribute__((weak)) putc_dspl(char);
 void Scheduler_Handler(task_scheduler_t*);
 void _delay_us(uint32_t);
 void _delay_ms(uint32_t);

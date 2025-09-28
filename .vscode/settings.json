@@ -1,14 +1,10 @@
 {
   "files.associations": {
-    "*.dbclient-js": "javascript",
     "*.c": "c",
     "*.h": "c",
     "*.s": "arm",
     "*.S": "arm",
-    "*.inc": "arm",
-    "fstream": "c",
-    "ostream": "c",
-    "*.def": "c"
+    "*.inc": "arm"
   },
   "cortex-debug.variableUseNaturalFormat": false,
   "makefile.configureOnOpen": false
