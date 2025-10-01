@@ -164,7 +164,7 @@ SECTIONS
     KEEP(*(.cron*))
     . = ALIGN(4);
     _ecron = .;
-  } >CRON AT> FLASH
+  } >CRON
   
  
   /* Uninitialized data section */
