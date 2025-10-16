@@ -1,7 +1,8 @@
 /**
   ******************************************************************************
-  * @file           : i2c.h
-  * @brief          : This file contains header definitions for I2C peripherals code
+  * @file           : spi.h
+  * @brief          : This file contains header definitions for SPI peripherals 
+  *                   code
   ******************************************************************************
   * @attention
   *
@@ -14,8 +15,8 @@
   *
   ******************************************************************************
   */
-#ifndef __I2C_H
-#define __I2C_H
+#ifndef __SPI_H
+#define __SPI_H
 
 #ifdef __cplusplus
  extern "C" {
@@ -26,18 +27,31 @@
 
 
 /* Private defines -----------------------------------------------------------*/
-#define I2C_BUS_TMOUT   10000 /* cycles timeout on I2C bus operations */
+#define SPI_BUS_TMOUT   10000 /* cycles timeout on SPI bus operations */
+#define NSS_0_Pin       GPIO_PIN_4
+#define NSS_0_Pin_Pos   GPIO_PIN_4_Pos
+#define NSS_0_Pin_Mask  GPIO_PIN_4_Mask
+#define SCK_Pin         GPIO_PIN_5
+#define SCK_Pin_Pos     GPIO_PIN_5_Pos
+#define SCK_Pin_Mask    GPIO_PIN_5_Mask
+#define MISO_Pin        GPIO_PIN_6
+#define MISO_Pin_Pos    GPIO_PIN_6_Pos
+#define MISO_Pin_Mask   GPIO_PIN_6_Mask
+#define MOSI_Pin        GPIO_PIN_7
+#define MOSI_Pin_Pos    GPIO_PIN_7_Pos
+#define MOSI_Pin_Mask   GPIO_PIN_7_Mask
+#define SPI_Port        GPIOA
+
+#define NSS_0_H         PIN_H(SPI_Port, NSS_0_Pin_Pos)
+#define NSS_0_L         PIN_L(SPI_Port, NSS_0_Pin_Pos)
+
+
 
 /* Exported functions prototypes ---------------------------------------------*/
-int I2C_Start(I2C_TypeDef*);
-void I2C_Stop(I2C_TypeDef*);
-int I2C_SendAddress(I2C_TypeDef*, uint8_t);
-int I2C_WriteByte(I2C_TypeDef*, uint8_t);
-uint8_t I2C_ReadByte(I2C_TypeDef*);
 
 
 
 #ifdef __cplusplus
 }
 #endif
-#endif // __I2C_H
+#endif // __SPI_H

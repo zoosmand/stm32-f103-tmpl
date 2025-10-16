@@ -25,7 +25,7 @@
 /**
  * @brief  Starts (sends start condition) to the given I2C peripherals
  * @param  I2Cx: pointer to the I2C peripherals
- * @retval None
+ * @retval (int) status of operation
  */
 int I2C_Start(I2C_TypeDef* I2Cx){
 
@@ -60,7 +60,7 @@ int I2C_Start(I2C_TypeDef* I2Cx){
  * @brief  Sends slave's address to the given I2C bus
  * @param  I2Cx: pointer to the I2C peripherals
  * @param  addr: slave address
- * @retval None
+ * @retval (int) status of operation
  */
 int I2C_SendAddress(I2C_TypeDef* I2Cx, uint8_t addr){
 
@@ -115,7 +115,7 @@ void I2C_Stop(I2C_TypeDef* I2Cx){
  * @brief  Writes a byte value to the given I2C bus
  * @param  I2Cx: pointer to the I2C peripherals
  * @param  txByte: byte to send to the given bus
- * @retval None
+ * @retval (int) status of operation
  */
 int I2C_WriteByte(I2C_TypeDef* I2Cx, uint8_t txByte){
 

@@ -20,7 +20,7 @@
 
 /* Global variables ---------------------------------------------------------*/
 __attribute__((section(".cron"))) uint32_t _GEREG_              = 0;
-__attribute__((section(".cron"))) uint32_t _ASREG_       = 0;
+__attribute__((section(".cron"))) uint32_t _ASREG_              = 0;
 __attribute__((section(".cron"))) uint32_t sysCnt               = 0;
 __attribute__((section(".cron"))) uint32_t secCnt               = 0;
 
@@ -52,7 +52,7 @@ int main(void) {
   if (CRON_SEC_EVENT) {
     
     // printf("The long test message, that might stuck the program but now it does not at all...\n");
-    // printf("sec:%li\n", secCnt);
+    printf("sec:%li\n", secCnt);
     
     if (FLAG_CHECK(&_ASREG_, OneWireBus_flag)) {
       if (tmpCnt <= secCnt ) {
@@ -96,6 +96,9 @@ void Cron_Handler(void) {
   if (!OneWire_Search())    FLAG_SET(&_ASREG_, OneWireBus_flag);
   if (!SSD13xx_Init(I2C1))  FLAG_SET(&_ASREG_, SSDDisplay_flag);
   if (!WHxxxx_Init(I2C1))   FLAG_SET(&_ASREG_, WHDisplay_flag);
+  
+  /* Display calibration */
+  printf("\n");
 
   
   while (1) {

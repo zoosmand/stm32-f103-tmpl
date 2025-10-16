@@ -38,6 +38,7 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 #include "i2c.h"
+#include "spi.h"
 #include "whxxxx.h"
 #include "ssd13xx.h"
 #include "fonts.h"
