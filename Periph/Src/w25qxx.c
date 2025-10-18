@@ -269,6 +269,7 @@ int W25qxx_Init(SPI_TypeDef *SPIx) {
   NSS_0_H;
   _delay_ms(1);
 
+  SPI_Enable(SPIx, SPIBufLen_8bit);
 
   uint8_t buf[12];
 
@@ -296,6 +297,7 @@ int W25qxx_Init(SPI_TypeDef *SPIx) {
   // SPI_Transfer(W25Qxx_Read_StatusRegister_1, -1, 1, READ, 0, &stub);
   // printf("%x\n", ddd);
 
+  SPI_Disable(SPIx);
   return (1);
 }
 
@@ -307,6 +309,9 @@ int W25qxx_Init(SPI_TypeDef *SPIx) {
 
 // -------------------------------------------------------------  
 int W25qxx_Read(SPI_TypeDef *SPIx, const uint32_t addr, const uint16_t cnt, uint8_t *buf) {
+
+  SPI_Enable(SPIx, SPIBufLen_8bit);
+
   uint32_t phy_addr = 0;
   if (W25qxx_IsBusy(SPIx)) return (1);
   
@@ -316,6 +321,7 @@ int W25qxx_Read(SPI_TypeDef *SPIx, const uint32_t addr, const uint16_t cnt, uint
   
   if (SPI_Transfer(SPIx, W25Qxx_FastRead, (phy_addr << 8), cnt, READ, 0, buf)) return (1);
 
+  SPI_Disable(SPIx);
   return (0);
 }
 
@@ -327,6 +333,8 @@ int W25qxx_Read(SPI_TypeDef *SPIx, const uint32_t addr, const uint16_t cnt, uint
 int W25qxx_Write(SPI_TypeDef *SPIx, uint32_t addr, uint16_t cnt, uint8_t *buf) {
   uint8_t pump = 0;
   uint32_t phy_addr = 0;
+
+  SPI_Enable(SPIx, SPIBufLen_8bit);
 
   if (W25qxx_IsBusy(SPIx)) return (1);
   
@@ -349,6 +357,7 @@ int W25qxx_Write(SPI_TypeDef *SPIx, uint32_t addr, uint16_t cnt, uint8_t *buf) {
     if (W25qxx_IsBusy(SPIx)) return (1);
   }
 
+  SPI_Disable(SPIx);
   return (0);
 }
 
@@ -362,6 +371,8 @@ int W25qxx_Erase(SPI_TypeDef *SPIx, uint32_t addr, uint16_t sectors) {
   uint8_t pump = 0;
   uint32_t phy_addr = 0;
   phy_addr = W25Qxx_BLOCK_SIZE * ((addr >> 8) & 0xffff);
+  
+  SPI_Enable(SPIx, SPIBufLen_8bit);
   
   if (sectors > 8) {
     if (sectors > 16) {
@@ -410,6 +421,7 @@ int W25qxx_Erase(SPI_TypeDef *SPIx, uint32_t addr, uint16_t sectors) {
     // *******************************  
   }
 
+  SPI_Disable(SPIx);
   return (0);
 }
 
@@ -419,11 +431,15 @@ int W25qxx_Erase(SPI_TypeDef *SPIx, uint32_t addr, uint16_t sectors) {
 
 int W25qxx_IsBusy(SPI_TypeDef *SPIx) {
   uint8_t pump = 0;
+
+  SPI_Enable(SPIx, SPIBufLen_8bit);
+
   pump = W25Qxx_BUSY_;
   while (pump & W25Qxx_BUSY_) {
     if (SPI_Transfer(SPIx, W25Qxx_Read_StatusRegister_1, -1, 1, READ, 0, &pump)) return (1);
   }
 
+  SPI_Disable(SPIx);
   return (0);
 }
 
@@ -435,11 +451,14 @@ int W25qxx_IsBusy(SPI_TypeDef *SPIx) {
 int W25qxx_Reset(SPI_TypeDef *SPIx) {
   uint8_t pump = 0;
 
+  SPI_Enable(SPIx, SPIBufLen_8bit);
+
   if (SPI_Transfer(SPIx, W25Qxx_EnableReset, -1, 0, NEUTRAL, 0, &pump)) return (1);
   if (SPI_Transfer(SPIx, W25Qxx_ResetProccess, -1, 0, NEUTRAL, 0, &pump)) return (1);
   _delay_ms(10);
   if (SPI_Transfer(SPIx, W25Qxx_ReleasePowerDown, -1, 0, NEUTRAL, 0, &pump)) return (1);
 
+  SPI_Disable(SPIx);
   return (0);
 }
 
@@ -448,6 +467,9 @@ int W25qxx_Reset(SPI_TypeDef *SPIx) {
 /* type: 0 - non-volatile bits, 1 - volatile bits*/
 uint8_t W25qxx_WriteStatusRegister(SPI_TypeDef *SPIx, uint8_t type, uint8_t status) {
   uint8_t pump = 0;
+
+  SPI_Enable(SPIx, SPIBufLen_8bit);
+
   if (type) {
     if (SPI_Transfer(SPIx, W25Qxx_Write_StatusNVRegEnable, -1, 0, NEUTRAL, 0, &pump)) return (1);
   } else {
@@ -455,8 +477,8 @@ uint8_t W25qxx_WriteStatusRegister(SPI_TypeDef *SPIx, uint8_t type, uint8_t stat
   }
   
   if (SPI_Transfer(SPIx, W25Qxx_Write_StatusRegister_1, -1, 1, WRITE, 0, &status)) return (1);
+
   /* Skip one trash bytes */
-  // while (!(READ_BIT(SPI1->SR, SPI_SR_RXNE)));
   uint32_t tmout = SPI_BUS_TMOUT;
   while(!(PREG_CHECK(SPIx->SR, SPI_SR_RXNE_Pos))) {
     if (!(--tmout)) {
@@ -472,6 +494,7 @@ uint8_t W25qxx_WriteStatusRegister(SPI_TypeDef *SPIx, uint8_t type, uint8_t stat
   if (SPI_Transfer(SPIx, W25Qxx_Read_StatusRegister_1, -1, 1, READ, 0, &pump)) return (1);
 
 
+  SPI_Disable(SPIx);
   return (pump);
 }
 

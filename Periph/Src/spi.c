@@ -53,7 +53,8 @@ int SPI_Init(SPI_TypeDef* SPIx) {
   /* Set baud rate fPCLK/4, 18Mb/s */
   /* Enbale master SPI */
   /* Enbale SPI */
-  SET_BIT(SPIx->CR1, (SPI_CR1_SSM | SPI_CR1_BR_0 | SPI_CR1_MSTR | SPI_CR1_SPE));
+  // SET_BIT(SPIx->CR1, (SPI_CR1_SSM | SPI_CR1_BR_0 | SPI_CR1_MSTR | SPI_CR1_SPE));
+  SET_BIT(SPIx->CR1, (SPI_CR1_SSM | SPI_CR1_BR_0 | SPI_CR1_MSTR));
 
   /* Another variant to run SPI - clear (or not set) CR2_SSOE and set CR1_SSI */
 
@@ -93,7 +94,7 @@ int SPI_Init(SPI_TypeDef* SPIx) {
 
 
 
-int SPI_Enable(SPI_TypeDef* SPIx) {
+int SPI_Enable(SPI_TypeDef* SPIx, SPIBufLen_TypeDef dataBufLen) {
 
   uint32_t tmout = SPI_BUS_TMOUT;
 
@@ -104,6 +105,12 @@ int SPI_Enable(SPI_TypeDef* SPIx) {
     }
   }
 
+  if (dataBufLen == 1) {
+    PREG_SET(SPIx->CR1, SPI_CR1_DFF_Pos); // set 16-bit buffer length, otherwise 8-bit
+  } else {
+    PREG_CLR(SPIx->CR1, SPI_CR1_DFF_Pos); // otherwise set buffer to 8-bit
+  }
+  
   PREG_SET(SPIx->CR1, SPI_CR1_SPE_Pos);
   return (0);
 }
@@ -130,13 +137,13 @@ int SPI_Disable(SPI_TypeDef* SPIx) {
 
 
 /**
-  * @brief  Reads data from SPI bus
+  * @brief  Reads data from SPI bus with 8-bit data buffer length
   * @param  buf: pointer to buffer to read, the first item of buffer could contain
   *              a command data. Beginning iteration reads a dummy byte.
   *         cnt: count of bytes to read.
   * @retval none
   */
-int SPI_Read(SPI_TypeDef* SPIx, uint8_t *buf, uint8_t cnt) {
+int SPI_Read_8b(SPI_TypeDef* SPIx, uint8_t *buf, uint8_t cnt) {
   uint32_t tmout = 0;
 
   while (cnt--) {
@@ -169,16 +176,90 @@ int SPI_Read(SPI_TypeDef* SPIx, uint8_t *buf, uint8_t cnt) {
 
 
 /**
-  * @brief  Writes data into SPI bus
+  * @brief  Writes data into SPI bus with 8-bit data buffer length
   * @param  buf: pointer to buffer to write.
   *         cnt: count of bytes to write.
   * @retval none
   */
-int SPI_Write(SPI_TypeDef* SPIx, uint8_t *buf, uint8_t cnt) {
+int SPI_Write_8b(SPI_TypeDef* SPIx, const uint8_t *buf, uint8_t cnt) {
   uint32_t tmout = 0;
 
   while (cnt--) {
     *(__IO uint8_t*)&SPIx->DR = *buf++;
+
+    tmout = SPI_BUS_TMOUT;
+    while(!(PREG_CHECK(SPIx->SR, SPI_SR_TXE_Pos))) {
+      if (!(--tmout)) {
+        return (1);
+      }
+    }
+
+    tmout = SPI_BUS_TMOUT;
+    while(!(PREG_CHECK(SPIx->SR, SPI_SR_RXNE_Pos))) {
+      if (!(--tmout)) {
+        return (1);
+      }
+    }
+
+    SPIx->DR;
+  }
+
+  return (0);
+}
+
+
+
+
+/**
+  * @brief  Reads data from SPI bus with 16-bit data buffer length
+  * @param  buf: pointer to buffer to read, the first item of buffer could contain
+  *              a command data. Beginning iteration reads a dummy byte.
+  *         cnt: count of bytes to read.
+  * @retval none
+  */
+int SPI_Read_16b(SPI_TypeDef* SPIx, uint16_t *buf, uint8_t cnt) {
+  uint32_t tmout = 0;
+
+  while (cnt--) {
+    *(__IO uint16_t*)&SPIx->DR = 0;
+
+
+    tmout = SPI_BUS_TMOUT;
+    while(!(PREG_CHECK(SPIx->SR, SPI_SR_TXE_Pos))) {
+      if (!(--tmout)) {
+        return (1);
+      }
+    }
+
+    tmout = SPI_BUS_TMOUT;
+    while(!(PREG_CHECK(SPIx->SR, SPI_SR_RXNE_Pos))) {
+      if (!(--tmout)) {
+        return (1);
+      }
+    }
+
+    *buf++ = (uint16_t)SPIx->DR;
+  }
+
+  return (0);
+}
+
+
+
+
+
+
+/**
+  * @brief  Writes data into SPI bus with 8-bit data buffer length
+  * @param  buf: pointer to buffer to write.
+  *         cnt: count of bytes to write.
+  * @retval none
+  */
+int SPI_Write_16b(SPI_TypeDef* SPIx, const uint16_t *buf, uint8_t cnt) {
+  uint32_t tmout = 0;
+
+  while (cnt--) {
+    *(__IO uint16_t*)&SPIx->DR = *buf++;
 
     tmout = SPI_BUS_TMOUT;
     while(!(PREG_CHECK(SPIx->SR, SPI_SR_TXE_Pos))) {

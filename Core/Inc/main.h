@@ -43,6 +43,7 @@ extern "C" {
 #include "ssd13xx.h"
 #include "fonts.h"
 #include "w25qxx.h"
+#include "max7219.h"
 
 
 #if defined(USE_FULL_ASSERT)
@@ -76,6 +77,7 @@ extern uint32_t secCnt;
 #define WHDisplay_RF    2
 #define SPI1_RF         3
 #define W25QXX_RF       4
+#define MAX7219_RF      5
 
 
 /* Exported defines -----------------------------------------------------------*/

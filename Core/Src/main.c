@@ -100,6 +100,7 @@ void Cron_Handler(void) {
   
   if (FLAG_CHECK(&_ASREG_, SPI1_RF)) {
     if (!W25qxx_Init(SPI1)) FLAG_SET(&_ASREG_, W25QXX_RF);
+    if (!MAX7219_Init(SPI1)) FLAG_SET(&_ASREG_, MAX7219_RF);
   }
   
   /* Display calibration */
