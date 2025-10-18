@@ -36,10 +36,10 @@ int SPI_Init(SPI_TypeDef* SPIx) {
   if (SPIx == SPI1) {
     MODIFY_REG(SPI_Port->CRL,
       (NSS_0_Pin_Mask | SCK_Pin_Mask | MISO_Pin_Mask | MOSI_Pin_Mask), (
-        ((GPIO_AF_PP | GPIO_IOS_50) << (SCK_Pin_Pos * 4U))
-      | ((GPIO_AF_PP | GPIO_IOS_50) << (MISO_Pin_Pos * 4U))
-      | ((GPIO_AF_PP | GPIO_IOS_50) << (MOSI_Pin_Pos * 4U))
-      | ((GPIO_GPO_PP | GPIO_IOS_50) << (NSS_0_Pin_Pos * 4U))
+        ((GPIO_AF_PP | GPIO_IOS_10) << (SCK_Pin_Pos * 4U))
+      | ((GPIO_AF_PP | GPIO_IOS_10) << (MISO_Pin_Pos * 4U))
+      | ((GPIO_AF_PP | GPIO_IOS_10) << (MOSI_Pin_Pos * 4U))
+      | ((GPIO_GPO_PP | GPIO_IOS_2) << (NSS_0_Pin_Pos * 4U))
     ));
   }
 
@@ -98,14 +98,14 @@ int SPI_Enable(SPI_TypeDef* SPIx, SPIBufLen_TypeDef dataBufLen) {
 
   uint32_t tmout = SPI_BUS_TMOUT;
 
-  while(!(PREG_CHECK(SPIx->SR, SPI_SR_BSY_Pos))) {
+  while(PREG_CHECK(SPIx->SR, SPI_SR_BSY_Pos)) {
     if (!(--tmout)) {
       SPI_Disable(SPIx);
       return (1);
     }
   }
 
-  if (dataBufLen == 1) {
+  if (dataBufLen == SPIBufLen_16bit) {
     PREG_SET(SPIx->CR1, SPI_CR1_DFF_Pos); // set 16-bit buffer length, otherwise 8-bit
   } else {
     PREG_CLR(SPIx->CR1, SPI_CR1_DFF_Pos); // otherwise set buffer to 8-bit
@@ -122,7 +122,7 @@ int SPI_Enable(SPI_TypeDef* SPIx, SPIBufLen_TypeDef dataBufLen) {
 int SPI_Disable(SPI_TypeDef* SPIx) {
   uint32_t tmout = SPI_BUS_TMOUT;
   
-  while(!(PREG_CHECK(SPIx->SR, SPI_SR_BSY_Pos))) {
+  while(PREG_CHECK(SPIx->SR, SPI_SR_BSY_Pos)) {
     if (!(--tmout)) {
       return (1);
     }

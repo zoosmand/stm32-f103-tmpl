@@ -48,11 +48,14 @@ int MAX7219_Init(SPI_TypeDef* SPIx) {
   
   _delay_ms(5);
   
-  const uint16_t maxInit[15] = {
+  // const uint16_t maxInit[1] = {
+  //   0x0c00, // 0x0c - Shutdown,     0x00 - Shutdown, 0x01 - Run 
+  // };
+  const uint16_t maxInit[17] = {
     0x0c00, // 0x0c - Shutdown,     0x00 - Shutdown, 0x01 - Run 
     0x0f00, // 0x0f - DisplayTest,  0x00 - Off, 0x01 - On
     0x0900, // 0x09 - Decode Mode,  0x00 - No decode for digits 7�0, 0xff - Code B decode for digits 7�0
-    0x0a00, // 0x0a - Intensity,    0x00 - lowest, 0x0f - highest
+    0x0f00, // 0x0a - Intensity,    0x00 - lowest, 0x0f - highest
     0x0b07, // 0x0b - Scan-Limit,   0x07 - Display digits 0 1 2 3 4 5 6 7
     0x0100, // 0x01 - Line 1
     0x0200,
@@ -66,16 +69,16 @@ int MAX7219_Init(SPI_TypeDef* SPIx) {
     0x0000  // 0x00 - NOP
   };
   
-  SPI_Enable(SPIx, SPIBufLen_16bit);
+  if (SPI_Enable(SPIx, SPIBufLen_16bit)) return (1);
 
-  uint8_t seg = 0xff;
+  uint8_t seg = MAX7219_SEG_CNT_;
   
-  for (uint8_t i = 0; i < 15; i++) {
+  for (uint8_t i = 0; i < sizeof(maxInit); i++) {
     // _NSS_L(SPInss);
 
     NSS_0_L;
     while (seg--) {
-      if (MAX7219_WriteBus(SPIx, maxInit[i])) return (1);
+      if (SPI_Write_16b(SPIx, &maxInit[i], 1)) return (1);
     }
     // _NSS_H(SPInss);
     NSS_0_H;
@@ -84,13 +87,13 @@ int MAX7219_Init(SPI_TypeDef* SPIx) {
 
   
   
-//  Delay_us(10);
-//  _NSS_L;
-//  MAX7219_WriteBus(0x0101);
-//  MAX7219_WriteBus(0x0102);
-//  MAX7219_WriteBus(0x0103);
-//  MAX7219_WriteBus(0x0104);
-//  _NSS_H;
+ _delay_ms(10);
+ NSS_0_L;
+ SPI_Write_16b(SPIx, (uint16_t*)0x0302, 1);
+ SPI_Write_16b(SPIx, (uint16_t*)0x0303, 1);
+ SPI_Write_16b(SPIx, (uint16_t*)0x0304, 1);
+ SPI_Write_16b(SPIx, (uint16_t*)0x0304, 1);
+ NSS_0_H;
 
 //  Delay_us(10);
 //  _NSS_L;
@@ -109,7 +112,7 @@ int MAX7219_Init(SPI_TypeDef* SPIx) {
   // MAX7219_Draw("1234567890");
   // MAX7219_Draw("0987654321");
 
-  SPI_Disable(SPIx);
+  if (SPI_Disable(SPIx)) return (1);
 
 
   return (0);
@@ -118,21 +121,21 @@ int MAX7219_Init(SPI_TypeDef* SPIx) {
 
 
 
-/*
- *
- */
-static int MAX7219_WriteBus(SPI_TypeDef* SPIx, const uint16_t data) {
-  // SPI_I2S_SendData(SPI_Entry, data);
-  // while (!SPI_I2S_GetFlagStatus(SPI_Entry, SPI_I2S_FLAG_TXE));
-  // return (0);
+// /*
+//  *
+//  */
+// static int MAX7219_WriteBus(SPI_TypeDef* SPIx, const uint16_t data) {
+//   // SPI_I2S_SendData(SPI_Entry, data);
+//   // while (!SPI_I2S_GetFlagStatus(SPI_Entry, SPI_I2S_FLAG_TXE));
+//   // return (0);
   
   
-  if (SPI_Write_16b(SPIx, &data, 1)) return (1);
-  _delay_ms(5);
+//   if (SPI_Write_16b(SPIx, &data, 1)) return (1);
+//   _delay_ms(5);
   
-  return (0);
+//   return (0);
 
-}
+// }
 
 
 
