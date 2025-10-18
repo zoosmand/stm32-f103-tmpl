@@ -85,7 +85,6 @@ int SPI_Init(SPI_TypeDef* SPIx) {
     return (0);
   }
 
-
   return (1);
 }
 
@@ -95,9 +94,17 @@ int SPI_Init(SPI_TypeDef* SPIx) {
 
 
 int SPI_Enable(SPI_TypeDef* SPIx) {
-  while (!(PREG_CHECK(SPIx->SR, SPI_SR_BSY_Pos)));
-  PREG_SET(SPIx->CR1, SPI_CR1_SPE_Pos);
 
+  uint32_t tmout = SPI_BUS_TMOUT;
+
+  while(!(PREG_CHECK(SPIx->SR, SPI_SR_BSY_Pos))) {
+    if (!(--tmout)) {
+      SPI_Disable(SPIx);
+      return (1);
+    }
+  }
+
+  PREG_SET(SPIx->CR1, SPI_CR1_SPE_Pos);
   return (0);
 }
 
@@ -106,9 +113,15 @@ int SPI_Enable(SPI_TypeDef* SPIx) {
 
 
 int SPI_Disable(SPI_TypeDef* SPIx) {
-  while (!(PREG_CHECK(SPIx->SR, SPI_SR_BSY_Pos)));
-  PREG_CLR(SPIx->CR1, SPI_CR1_SPE_Pos);
+  uint32_t tmout = SPI_BUS_TMOUT;
+  
+  while(!(PREG_CHECK(SPIx->SR, SPI_SR_BSY_Pos))) {
+    if (!(--tmout)) {
+      return (1);
+    }
+  }
 
+  PREG_CLR(SPIx->CR1, SPI_CR1_SPE_Pos);
   return (0);
 }
 
@@ -124,10 +137,26 @@ int SPI_Disable(SPI_TypeDef* SPIx) {
   * @retval none
   */
 int SPI_Read(SPI_TypeDef* SPIx, uint8_t *buf, uint8_t cnt) {
+  uint32_t tmout = 0;
+
   while (cnt--) {
     *(__IO uint8_t*)&SPIx->DR = 0;
-    while (!(PREG_CHECK(SPIx->SR, SPI_SR_TXE_Pos)));
-    while (!(PREG_CHECK(SPIx->SR, SPI_SR_RXNE_Pos)));
+
+
+    tmout = SPI_BUS_TMOUT;
+    while(!(PREG_CHECK(SPIx->SR, SPI_SR_TXE_Pos))) {
+      if (!(--tmout)) {
+        return (1);
+      }
+    }
+
+    tmout = SPI_BUS_TMOUT;
+    while(!(PREG_CHECK(SPIx->SR, SPI_SR_RXNE_Pos))) {
+      if (!(--tmout)) {
+        return (1);
+      }
+    }
+
     *buf++ = (uint8_t)SPIx->DR;
   }
 
@@ -146,10 +175,25 @@ int SPI_Read(SPI_TypeDef* SPIx, uint8_t *buf, uint8_t cnt) {
   * @retval none
   */
 int SPI_Write(SPI_TypeDef* SPIx, uint8_t *buf, uint8_t cnt) {
+  uint32_t tmout = 0;
+
   while (cnt--) {
     *(__IO uint8_t*)&SPIx->DR = *buf++;
-    while (!(PREG_CHECK(SPIx->SR, SPI_SR_TXE_Pos)));
-    while (!(PREG_CHECK(SPIx->SR, SPI_SR_RXNE_Pos)));
+
+    tmout = SPI_BUS_TMOUT;
+    while(!(PREG_CHECK(SPIx->SR, SPI_SR_TXE_Pos))) {
+      if (!(--tmout)) {
+        return (1);
+      }
+    }
+
+    tmout = SPI_BUS_TMOUT;
+    while(!(PREG_CHECK(SPIx->SR, SPI_SR_RXNE_Pos))) {
+      if (!(--tmout)) {
+        return (1);
+      }
+    }
+
     SPIx->DR;
   }
 

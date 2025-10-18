@@ -93,13 +93,13 @@ extern w25qxx_t	w25qxx;
 
 
 
-int W25qxx_Init(void);
-void W25qxx_Reset();
-void W25qxx_IsBusy();
-void W25qxx_Read(const uint32_t addr, const uint16_t cnt, uint8_t *buf);
-void W25qxx_Write(const uint32_t addr, const uint16_t cnt, uint8_t *buf);
-void W25qxx_Erase(uint32_t addr, uint16_t sectors);
-uint8_t W25qxx_WriteStatusRegister(uint8_t type, uint8_t status);
+int W25qxx_Init(SPI_TypeDef*);
+int W25qxx_Reset(SPI_TypeDef*);
+int W25qxx_IsBusy(SPI_TypeDef*);
+int W25qxx_Read(SPI_TypeDef*, const uint32_t, const uint16_t, uint8_t*);
+int W25qxx_Write(SPI_TypeDef*, const uint32_t, const uint16_t, uint8_t*);
+int W25qxx_Erase(SPI_TypeDef*, uint32_t, uint16_t);
+uint8_t W25qxx_WriteStatusRegister(SPI_TypeDef*, uint8_t, uint8_t);
 
 
 #ifdef __cplusplus
