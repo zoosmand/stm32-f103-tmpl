@@ -46,9 +46,19 @@
 #define NSS_0_L         PIN_L(SPI_Port, NSS_0_Pin_Pos)
 
 
+typedef enum {
+  NEUTRAL   = 2,
+  READ      = 1,
+  WRITE     = 0
+} SPIDir_TypeDef;
 
 /* Exported functions prototypes ---------------------------------------------*/
 
+int SPI_Init(SPI_TypeDef*);
+int SPI_Enable(SPI_TypeDef*);
+int SPI_Disable(SPI_TypeDef*);
+int SPI_Read(SPI_TypeDef*, uint8_t*, uint8_t);
+int SPI_Write(SPI_TypeDef*, uint8_t*, uint8_t);
 
 
 #ifdef __cplusplus

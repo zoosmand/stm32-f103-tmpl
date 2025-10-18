@@ -42,6 +42,7 @@ extern "C" {
 #include "whxxxx.h"
 #include "ssd13xx.h"
 #include "fonts.h"
+#include "w25qxx.h"
 
 
 #if defined(USE_FULL_ASSERT)
@@ -69,10 +70,12 @@ extern uint32_t secCnt;
 #define _SYSSECF_         1
 
 
-/** Active Service Register Flags */
-#define OneWireBus_flag   0
-#define SSDDisplay_flag   1
-#define WHDisplay_flag    2
+/** Rediness Services Register Flags */
+#define OneWireBus_RF   0
+#define SSDDisplay_RF   1
+#define WHDisplay_RF    2
+#define SPI1_RF         3
+#define W25QXX_RF       4
 
 
 /* Exported defines -----------------------------------------------------------*/

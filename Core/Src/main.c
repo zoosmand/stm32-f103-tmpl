@@ -54,7 +54,7 @@ int main(void) {
     // printf("The long test message, that might stuck the program but now it does not at all...\n");
     printf("sec:%li\n", secCnt);
     
-    if (FLAG_CHECK(&_ASREG_, OneWireBus_flag)) {
+    if (FLAG_CHECK(&_ASREG_, OneWireBus_RF)) {
       if (tmpCnt <= secCnt ) {
 
         OneWireDevice_t* devs = Get_OwDevices();
@@ -93,9 +93,14 @@ void Cron_Handler(void) {
   __NVIC_SetPriorityGrouping(NVIC_PRIORITYGROUP_4);
   SET_BIT(CoreDebug->DEMCR, CoreDebug_DEMCR_TRCENA_Msk);
 
-  if (!OneWire_Search())    FLAG_SET(&_ASREG_, OneWireBus_flag);
-  if (!SSD13xx_Init(I2C1))  FLAG_SET(&_ASREG_, SSDDisplay_flag);
-  if (!WHxxxx_Init(I2C1))   FLAG_SET(&_ASREG_, WHDisplay_flag);
+  if (!OneWire_Search())    FLAG_SET(&_ASREG_, OneWireBus_RF);
+  if (!SSD13xx_Init(I2C1))  FLAG_SET(&_ASREG_, SSDDisplay_RF);
+  if (!WHxxxx_Init(I2C1))   FLAG_SET(&_ASREG_, WHDisplay_RF);
+  if (!SPI_Init(SPI1))      FLAG_SET(&_ASREG_, SPI1_RF);
+  
+  if (FLAG_CHECK(&_ASREG_, SPI1_RF)) {
+    if (!W25qxx_Init())      FLAG_SET(&_ASREG_, W25QXX_RF);
+  }
   
   /* Display calibration */
   printf("\n");
