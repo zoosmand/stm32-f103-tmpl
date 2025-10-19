@@ -77,6 +77,11 @@ int main(void) {
         tmpCnt = secCnt + 4;
       }
     }
+
+
+    if (FLAG_CHECK(&_ASREG_, MAX7219_RF)) {
+      MAX7219_Print("0987654321");
+    }
   }
 
   Led_Handler();

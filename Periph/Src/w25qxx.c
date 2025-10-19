@@ -40,7 +40,7 @@ w25qxx_t w25qxx;
 /* Private function prototypes -----------------------------------------------*/
 static int SPI_Transfer_DMA(SPI_TypeDef*, const uint16_t, const SPIDir_TypeDef, const uint32_t, uint8_t*);
 static int SPI_Transfer(SPI_TypeDef*, const uint8_t, int32_t, uint16_t, const SPIDir_TypeDef, const uint32_t, uint8_t*);
-
+__STATIC_INLINE void SPI_Adjust(SPI_TypeDef*);
 
 
 
@@ -48,6 +48,15 @@ static int SPI_Transfer(SPI_TypeDef*, const uint8_t, int32_t, uint16_t, const SP
 
 
 ////////////////////////////////////////////////////////////////////////////////
+__STATIC_INLINE void SPI_Adjust(SPI_TypeDef* SPIx) {
+  /* adjust frequency divider, 0b001 = 4, (PCLK)72/4 = 18MHz */
+  CLEAR_BIT(SPIx->CR1, (SPI_CR1_BR_0 | SPI_CR1_BR_1 | SPI_CR1_BR_2));
+  SET_BIT(SPIx->CR1, SPI_CR1_BR_0);
+  /* set 8-bit data buffer length */ 
+  PREG_CLR(SPIx->CR1, SPI_CR1_DFF_Pos); 
+}
+
+
 
 /**
   * @brief  Transfesr SPI data via DMA
@@ -269,7 +278,8 @@ int W25qxx_Init(SPI_TypeDef *SPIx) {
   NSS_0_H;
   _delay_ms(1);
 
-  SPI_Enable(SPIx, SPIBufLen_8bit);
+  SPI_Adjust(SPIx);
+  SPI_Enable(SPIx);
 
   uint8_t buf[12];
 
@@ -310,7 +320,8 @@ int W25qxx_Init(SPI_TypeDef *SPIx) {
 // -------------------------------------------------------------  
 int W25qxx_Read(SPI_TypeDef *SPIx, const uint32_t addr, const uint16_t cnt, uint8_t *buf) {
 
-  SPI_Enable(SPIx, SPIBufLen_8bit);
+  SPI_Adjust(SPIx);
+  SPI_Enable(SPIx);
 
   uint32_t phy_addr = 0;
   if (W25qxx_IsBusy(SPIx)) return (1);
@@ -334,7 +345,8 @@ int W25qxx_Write(SPI_TypeDef *SPIx, uint32_t addr, uint16_t cnt, uint8_t *buf) {
   uint8_t pump = 0;
   uint32_t phy_addr = 0;
 
-  SPI_Enable(SPIx, SPIBufLen_8bit);
+  SPI_Adjust(SPIx);
+  SPI_Enable(SPIx);
 
   if (W25qxx_IsBusy(SPIx)) return (1);
   
@@ -372,7 +384,8 @@ int W25qxx_Erase(SPI_TypeDef *SPIx, uint32_t addr, uint16_t sectors) {
   uint32_t phy_addr = 0;
   phy_addr = W25Qxx_BLOCK_SIZE * ((addr >> 8) & 0xffff);
   
-  SPI_Enable(SPIx, SPIBufLen_8bit);
+  SPI_Adjust(SPIx);
+  SPI_Enable(SPIx);
   
   if (sectors > 8) {
     if (sectors > 16) {
@@ -432,7 +445,8 @@ int W25qxx_Erase(SPI_TypeDef *SPIx, uint32_t addr, uint16_t sectors) {
 int W25qxx_IsBusy(SPI_TypeDef *SPIx) {
   uint8_t pump = 0;
 
-  SPI_Enable(SPIx, SPIBufLen_8bit);
+  SPI_Adjust(SPIx);
+  SPI_Enable(SPIx);
 
   pump = W25Qxx_BUSY_;
   while (pump & W25Qxx_BUSY_) {
@@ -451,7 +465,8 @@ int W25qxx_IsBusy(SPI_TypeDef *SPIx) {
 int W25qxx_Reset(SPI_TypeDef *SPIx) {
   uint8_t pump = 0;
 
-  SPI_Enable(SPIx, SPIBufLen_8bit);
+  SPI_Adjust(SPIx);
+  SPI_Enable(SPIx);
 
   if (SPI_Transfer(SPIx, W25Qxx_EnableReset, -1, 0, NEUTRAL, 0, &pump)) return (1);
   if (SPI_Transfer(SPIx, W25Qxx_ResetProccess, -1, 0, NEUTRAL, 0, &pump)) return (1);
@@ -468,7 +483,8 @@ int W25qxx_Reset(SPI_TypeDef *SPIx) {
 uint8_t W25qxx_WriteStatusRegister(SPI_TypeDef *SPIx, uint8_t type, uint8_t status) {
   uint8_t pump = 0;
 
-  SPI_Enable(SPIx, SPIBufLen_8bit);
+  SPI_Adjust(SPIx);
+  SPI_Enable(SPIx);
 
   if (type) {
     if (SPI_Transfer(SPIx, W25Qxx_Write_StatusNVRegEnable, -1, 0, NEUTRAL, 0, &pump)) return (1);

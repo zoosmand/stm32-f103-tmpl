@@ -27,18 +27,9 @@
 
 #define MAX7219_SEG_CNT  4
 
-typedef struct {
-  GPIO_TypeDef* GPIO_TypeDef;
-  uint8_t      pinSrc;
-} SPI_NSS_TypeDef;
-
-
-// #define _NSS_H(nss)      PIN_H(nss->gpio, nss->pinSrc)
-// #define _NSS_L(nss)      PIN_L(nss->gpio, nss->pinSrc)
-
 
 int MAX7219_Init(SPI_TypeDef*);
-int MAX7219_Print(SPI_TypeDef*, const char*);
+int MAX7219_Print(const char*);
 
 
 #ifdef __cplusplus

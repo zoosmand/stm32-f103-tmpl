@@ -52,15 +52,21 @@ typedef enum {
   WRITE     = 0
 } SPIDir_TypeDef;
 
-typedef enum {
-  SPIBufLen_8bit      = 0,
-  SPIBufLen_16bit     = 1
-} SPIBufLen_TypeDef;
+// typedef enum {
+//   SPIBufLen_8bit      = 0,
+//   SPIBufLen_16bit     = 1
+// } SPIBufLen_TypeDef;
+
+// typedef struct {
+//   GPIO_TypeDef* GPIOx;
+//   uint8_t       Pin;
+// } SPINss_TypeDef;
+
 
 /* Exported functions prototypes ---------------------------------------------*/
 
 int SPI_Init(SPI_TypeDef*);
-int SPI_Enable(SPI_TypeDef*, SPIBufLen_TypeDef);
+int SPI_Enable(SPI_TypeDef*);
 int SPI_Disable(SPI_TypeDef*);
 int SPI_Read_8b(SPI_TypeDef*, uint8_t*, uint8_t);
 int SPI_Write_8b(SPI_TypeDef*, const uint8_t*, uint8_t);

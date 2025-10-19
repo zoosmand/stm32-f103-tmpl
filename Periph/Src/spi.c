@@ -54,7 +54,7 @@ int SPI_Init(SPI_TypeDef* SPIx) {
   /* Enbale master SPI */
   /* Enbale SPI */
   // SET_BIT(SPIx->CR1, (SPI_CR1_SSM | SPI_CR1_BR_0 | SPI_CR1_MSTR | SPI_CR1_SPE));
-  SET_BIT(SPIx->CR1, (SPI_CR1_SSM | SPI_CR1_BR_1| SPI_CR1_MSTR));
+  SET_BIT(SPIx->CR1, (SPI_CR1_SSM | SPI_CR1_BR_0 | SPI_CR1_MSTR));
 
   /* Another variant to run SPI - clear (or not set) CR2_SSOE and set CR1_SSI */
 
@@ -94,7 +94,7 @@ int SPI_Init(SPI_TypeDef* SPIx) {
 
 
 
-int SPI_Enable(SPI_TypeDef* SPIx, SPIBufLen_TypeDef dataBufLen) {
+int SPI_Enable(SPI_TypeDef* SPIx) {
 
   uint32_t tmout = SPI_BUS_TMOUT;
 
@@ -105,11 +105,11 @@ int SPI_Enable(SPI_TypeDef* SPIx, SPIBufLen_TypeDef dataBufLen) {
     }
   }
 
-  if (dataBufLen == SPIBufLen_16bit) {
-    PREG_SET(SPIx->CR1, SPI_CR1_DFF_Pos); // set 16-bit buffer length, otherwise 8-bit
-  } else {
-    PREG_CLR(SPIx->CR1, SPI_CR1_DFF_Pos); // otherwise set buffer to 8-bit
-  }
+  // if (dataBufLen == SPIBufLen_16bit) {
+  //   PREG_SET(SPIx->CR1, SPI_CR1_DFF_Pos); // set 16-bit buffer length, otherwise 8-bit
+  // } else {
+  //   PREG_CLR(SPIx->CR1, SPI_CR1_DFF_Pos); // otherwise set buffer to 8-bit
+  // }
   
   PREG_SET(SPIx->CR1, SPI_CR1_SPE_Pos);
   return (0);
