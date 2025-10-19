@@ -25,7 +25,7 @@
  extern "C" {
 #endif
 
-#define MAX7219_SEG_CNT_  4
+#define MAX7219_SEG_CNT  4
 
 typedef struct {
   GPIO_TypeDef* GPIO_TypeDef;

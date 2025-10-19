@@ -54,35 +54,35 @@ int SPI_Init(SPI_TypeDef* SPIx) {
   /* Enbale master SPI */
   /* Enbale SPI */
   // SET_BIT(SPIx->CR1, (SPI_CR1_SSM | SPI_CR1_BR_0 | SPI_CR1_MSTR | SPI_CR1_SPE));
-  SET_BIT(SPIx->CR1, (SPI_CR1_SSM | SPI_CR1_BR_0 | SPI_CR1_MSTR));
+  SET_BIT(SPIx->CR1, (SPI_CR1_SSM | SPI_CR1_BR_1| SPI_CR1_MSTR));
 
   /* Another variant to run SPI - clear (or not set) CR2_SSOE and set CR1_SSI */
 
   /* Configure DMA, Channel2 - RX, Channel3 - TX */
   /* Set priority high*/
   /* Set memory to increment */
-  DMA1_Channel2->CCR = (DMA_CCR_PL_1 | DMA_CCR_MINC);
-  /* Set buffer size to 0 */
-  DMA1_Channel2->CNDTR = 0UL;
-  /* Set peripheral address */
-  DMA1_Channel2->CPAR = (uint32_t)&SPIx->DR;
-  /* Set memory address */
-  DMA1_Channel2->CMAR = (uint32_t)&pump;
+  // DMA1_Channel2->CCR = (DMA_CCR_PL_1 | DMA_CCR_MINC);
+  // /* Set buffer size to 0 */
+  // DMA1_Channel2->CNDTR = 0UL;
+  // /* Set peripheral address */
+  // DMA1_Channel2->CPAR = (uint32_t)&SPIx->DR;
+  // /* Set memory address */
+  // DMA1_Channel2->CMAR = (uint32_t)&pump;
   
-  /* Set priority high*/
-  /* Set memory to increment */
-  /* Set direction from memory to peripheral */
-  DMA1_Channel3->CCR = (DMA_CCR_PL_1 | DMA_CCR_MINC | DMA_CCR_DIR);
-  /* Set buffer size to 0 */
-  DMA1_Channel3->CNDTR = 0UL;
-  /* Set peripheral address */
-  DMA1_Channel3->CPAR = (uint32_t)&SPIx->DR;
-  /* Set memory address */
-  DMA1_Channel3->CMAR = (uint32_t)&pump;
+  // /* Set priority high*/
+  // /* Set memory to increment */
+  // /* Set direction from memory to peripheral */
+  // DMA1_Channel3->CCR = (DMA_CCR_PL_1 | DMA_CCR_MINC | DMA_CCR_DIR);
+  // /* Set buffer size to 0 */
+  // DMA1_Channel3->CNDTR = 0UL;
+  // /* Set peripheral address */
+  // DMA1_Channel3->CPAR = (uint32_t)&SPIx->DR;
+  // /* Set memory address */
+  // DMA1_Channel3->CMAR = (uint32_t)&pump;
   
   if (SPIx == SPI1) {
-    NVIC_SetPriority(SPI1_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 15, 0));
-    NVIC_EnableIRQ(SPI1_IRQn);
+    // NVIC_SetPriority(SPI1_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 15, 0));
+    // NVIC_EnableIRQ(SPI1_IRQn);
     return (0);
   }
 

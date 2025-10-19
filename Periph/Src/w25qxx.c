@@ -84,9 +84,9 @@ static int SPI_Transfer_DMA(SPI_TypeDef* SPIx, const uint16_t cnt, const SPIDir_
 
   } else {
     /* Enable from memory to peripheral DMA transfer */
-    PREG_SET(SPI1->CR2, SPI_CR2_TXDMAEN_Pos);
+    PREG_SET(SPIx->CR2, SPI_CR2_TXDMAEN_Pos);
     /* Enable from peripheral to memory DMA transfer */
-    PREG_SET(SPI1->CR2, SPI_CR2_RXDMAEN_Pos);
+    PREG_SET(SPIx->CR2, SPI_CR2_RXDMAEN_Pos);
     /* Disable incremental and wait until it clears */
     PREG_CLR(DMA1_Channel3->CCR, DMA_CCR_MINC_Pos);
     
@@ -134,7 +134,7 @@ static int SPI_Transfer_DMA(SPI_TypeDef* SPIx, const uint16_t cnt, const SPIDir_
     }
 
     /* Disable from memory to peripheral DMA transfer */
-    PREG_CLR(SPI1->CR2, SPI_CR2_TXDMAEN_Pos);
+    PREG_CLR(SPIx->CR2, SPI_CR2_TXDMAEN_Pos);
     /* Disable transfer from memory to peripheral */
     PREG_CLR(DMA1_Channel3->CCR, DMA_CCR_EN_Pos);
   } else {
@@ -174,7 +174,7 @@ static int SPI_Transfer(SPI_TypeDef* SPIx, const uint8_t cmd, int32_t addr, cons
   while (PREG_CHECK(SPI_Port->IDR, NSS_0_Pin_Pos));
 
   /* write a command, a dummy byte has to be read further */
-  SPI1->DR = cmd;
+  SPIx->DR = cmd;
 
   tmout = SPI_BUS_TMOUT;
   while(!(PREG_CHECK(SPIx->SR, SPI_SR_TXE_Pos))) {
@@ -199,7 +199,7 @@ static int SPI_Transfer(SPI_TypeDef* SPIx, const uint8_t cmd, int32_t addr, cons
   if (addr >= 0) {
     uint8_t i = 4;
     while (--i) {
-      SPI1->DR = (uint8_t)((addr >> (8 * i)) & 0xff);
+      SPIx->DR = (uint8_t)((addr >> (8 * i)) & 0xff);
 
       /* read a dummy byte from the bus to clear receive buffer */
       tmout = SPI_BUS_TMOUT;

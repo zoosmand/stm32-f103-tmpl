@@ -20,7 +20,7 @@
 #include "max7219.h"
 
 /* Private variables ---------------------------------------------------------*/
-static uint16_t maxData[(MAX7219_SEG_CNT_ * 8)];
+static uint16_t maxData[(MAX7219_SEG_CNT * 8)];
 
 /* Private function prototypes -----------------------------------------------*/
 static int MAX7219_WriteBus(SPI_TypeDef*, const uint16_t);
@@ -44,6 +44,7 @@ static int MAX7219_WriteBus(SPI_TypeDef*, const uint16_t);
   */
 int MAX7219_Init(SPI_TypeDef* SPIx) {
 
+  if (SPI_Enable(SPIx, SPIBufLen_16bit)) return (1);
   NSS_0_H;
   
   _delay_ms(5);
@@ -51,7 +52,7 @@ int MAX7219_Init(SPI_TypeDef* SPIx) {
   // const uint16_t maxInit[1] = {
   //   0x0c00, // 0x0c - Shutdown,     0x00 - Shutdown, 0x01 - Run 
   // };
-  const uint16_t maxInit[17] = {
+  const uint16_t maxInit[15] = {
     0x0c00, // 0x0c - Shutdown,     0x00 - Shutdown, 0x01 - Run 
     0x0f00, // 0x0f - DisplayTest,  0x00 - Off, 0x01 - On
     0x0900, // 0x09 - Decode Mode,  0x00 - No decode for digits 7�0, 0xff - Code B decode for digits 7�0
@@ -69,39 +70,46 @@ int MAX7219_Init(SPI_TypeDef* SPIx) {
     0x0000  // 0x00 - NOP
   };
   
-  if (SPI_Enable(SPIx, SPIBufLen_16bit)) return (1);
 
-  uint8_t seg = MAX7219_SEG_CNT_;
+  uint8_t segs = 0;
   
-  for (uint8_t i = 0; i < sizeof(maxInit); i++) {
-    // _NSS_L(SPInss);
-
+  for (uint8_t i = 0; i < sizeof(maxInit)/2; i++) {
+    segs = MAX7219_SEG_CNT;
     NSS_0_L;
-    while (seg--) {
-      if (SPI_Write_16b(SPIx, &maxInit[i], 1)) return (1);
+    while (segs-- > 0) {
+      // if (SPI_Write_16b(SPIx, &maxInit[i], 1)) return (1);
+      if (MAX7219_WriteBus(SPI1, maxInit[i])) return (1);
     }
-    // _NSS_H(SPInss);
     NSS_0_H;
   }
   
 
   
   
+//  _delay_ms(10);
+//  NSS_0_L;
+//  SPI_Write_16b(SPIx, (uint16_t*)0x0102, 1);
+//       _delay_ms(5);
+//  SPI_Write_16b(SPIx, (uint16_t*)0x0103, 1);
+//       _delay_ms(5);
+//  SPI_Write_16b(SPIx, (uint16_t*)0x0104, 1);
+//       _delay_ms(5);
+//  SPI_Write_16b(SPIx, (uint16_t*)0x0104, 1);
+//       _delay_ms(5);
+//  NSS_0_H;
+
  _delay_ms(10);
  NSS_0_L;
- SPI_Write_16b(SPIx, (uint16_t*)0x0302, 1);
- SPI_Write_16b(SPIx, (uint16_t*)0x0303, 1);
- SPI_Write_16b(SPIx, (uint16_t*)0x0304, 1);
- SPI_Write_16b(SPIx, (uint16_t*)0x0304, 1);
+//  MAX7219_WriteBus(SPIx, 0x0100);
+//  MAX7219_WriteBus(SPIx, 0x0101);
+//  MAX7219_WriteBus(SPIx, 0x0102);
+//  MAX7219_WriteBus(SPIx, 0x0103);
+//  MAX7219_WriteBus(SPIx, 0x0104);
+ MAX7219_WriteBus(SPIx, 0x01cc);
+ MAX7219_WriteBus(SPIx, 0x01cc);
+ MAX7219_WriteBus(SPIx, 0x01cc);
+ MAX7219_WriteBus(SPIx, 0x01cc);
  NSS_0_H;
-
-//  Delay_us(10);
-//  _NSS_L;
-//  MAX7219_WriteBus(0x0201);
-//  MAX7219_WriteBus(0x0202);
-//  MAX7219_WriteBus(0x0203);
-//  MAX7219_WriteBus(0x0204);
-//  _NSS_H;
 //  
 //  Delay_us(10);
 //  _NSS_L;
@@ -121,21 +129,21 @@ int MAX7219_Init(SPI_TypeDef* SPIx) {
 
 
 
-// /*
-//  *
-//  */
-// static int MAX7219_WriteBus(SPI_TypeDef* SPIx, const uint16_t data) {
-//   // SPI_I2S_SendData(SPI_Entry, data);
-//   // while (!SPI_I2S_GetFlagStatus(SPI_Entry, SPI_I2S_FLAG_TXE));
-//   // return (0);
+/*
+ *
+ */
+static int MAX7219_WriteBus(SPI_TypeDef* SPIx, const uint16_t data) {
+  // SPI_I2S_SendData(SPI_Entry, data);
+  // while (!SPI_I2S_GetFlagStatus(SPI_Entry, SPI_I2S_FLAG_TXE));
+  // return (0);
   
   
-//   if (SPI_Write_16b(SPIx, &data, 1)) return (1);
-//   _delay_ms(5);
+  if (SPI_Write_16b(SPIx, &data, 1)) return (1);
+  // _delay_ms(5);
   
-//   return (0);
+  return (0);
 
-// }
+}
 
 
 
