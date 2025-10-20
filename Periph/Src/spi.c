@@ -28,35 +28,28 @@
  * @retval (int) status of operation
  */
 int SPI_Init(SPI_TypeDef* SPIx) {
-  uint8_t pump = 0;
+  // uint8_t pump = 0;
 
 
   /* Enable GPIO SCK, MISO, MOSI alternative on high speed */
 
   if (SPIx == SPI1) {
     MODIFY_REG(SPI_Port->CRL,
-      (NSS_0_Pin_Mask | SCK_Pin_Mask | MISO_Pin_Mask | MOSI_Pin_Mask), (
+      (NSS_0_Pin_Mask | SCK_Pin_Mask | MISO_Pin_Mask | MOSI_Pin_Mask | NSS_1_Pin_Mask), (
         ((GPIO_AF_PP | GPIO_IOS_10) << (SCK_Pin_Pos * 4U))
       | ((GPIO_AF_PP | GPIO_IOS_10) << (MISO_Pin_Pos * 4U))
       | ((GPIO_AF_PP | GPIO_IOS_10) << (MOSI_Pin_Pos * 4U))
       | ((GPIO_GPO_PP | GPIO_IOS_2) << (NSS_0_Pin_Pos * 4U))
+      | ((GPIO_GPO_PP | GPIO_IOS_2) << (NSS_1_Pin_Pos * 4U))
     ));
   }
 
-  // NSS_0_H;
-  // NSS_1_H;
+  /* set ready NSS pins for the multimaster mode */
+  NSS_0_H;
+  NSS_1_H;
 
-  /* Enable software output */
-  SET_BIT(SPIx->CR2, SPI_CR2_SSOE);
-
-  /* Set software NSS master */
-  /* Set baud rate fPCLK/4, 18Mb/s */
-  /* Enbale master SPI */
-  /* Enbale SPI */
-  // SET_BIT(SPIx->CR1, (SPI_CR1_SSM | SPI_CR1_BR_0 | SPI_CR1_MSTR | SPI_CR1_SPE));
-  SET_BIT(SPIx->CR1, (SPI_CR1_SSM | SPI_CR1_BR_0 | SPI_CR1_MSTR));
-
-  /* Another variant to run SPI - clear (or not set) CR2_SSOE and set CR1_SSI */
+  /* Enbale SPI master mode */
+  SET_BIT(SPIx->CR1, SPI_CR1_MSTR);
 
   /* Configure DMA, Channel2 - RX, Channel3 - TX */
   /* Set priority high*/

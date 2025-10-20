@@ -26,7 +26,7 @@ static SPI_TypeDef* SPI_Instance;
 /* Private function prototypes -----------------------------------------------*/
 static int mAX7219_WriteByte(const uint8_t, const uint8_t);
 static int mAX7219_PrintBuf(const uint16_t*, uint16_t);
-__STATIC_INLINE void SPI_Adjust(SPI_TypeDef*);
+__STATIC_INLINE void SPI_Adjust(SPI_TypeDef*, DMA_Channel_TypeDef*, DMA_Channel_TypeDef*);
 
 
 
@@ -46,10 +46,10 @@ __STATIC_INLINE void SPI_Adjust(SPI_TypeDef*);
 int MAX7219_Init(SPI_TypeDef* SPIx) {
 
   SPI_Instance = SPIx;
-  SPI_Adjust(SPIx);
+  SPI_Adjust(SPIx, DMA1_Channel2, DMA1_Channel3);
 
   if (SPI_Enable(SPIx)) return (1);
-  NSS_0_H;
+  NSS_1_H;
   
   _delay_ms(5);
   
@@ -76,23 +76,23 @@ int MAX7219_Init(SPI_TypeDef* SPIx) {
   
   for (uint8_t i = 0; i < sizeof(maxInit)/2; i++) {
     segs = MAX7219_SEG_CNT;
-    NSS_0_L;
+    NSS_1_L;
     while (segs-- > 0) {
       if (SPI_Write_16b(SPI_Instance, &maxInit[i], 1)) return (1);
       // if (mAX7219_WriteByte(SPI1, maxInit[i])) return (1);
     }
-    NSS_0_H;
+    NSS_1_H;
   }
   
 
  _delay_ms(1);
  
-//  NSS_0_L;
+//  NSS_1_L;
 //  mAX7219_WriteByte(1, 0xcc);
 //  mAX7219_WriteByte(1, 0xcc);
 //  mAX7219_WriteByte(1, 0xcc);
 //  mAX7219_WriteByte(1, 0xcc);
-//  NSS_0_H;
+//  NSS_1_H;
 
 //  const char* txt = "QWERTYUIOPASDFGHJKLZXCVBNM1234567890qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890qwertyuiopasdfghjklzxcvbnm";
   // MAX7219_Draw("1234567890");
@@ -103,21 +103,21 @@ int MAX7219_Init(SPI_TypeDef* SPIx) {
   if (SPI_Disable(SPI_Instance)) return (1);
 
 
-  // uint16_t bufa[12] = {
-  //   0x01cc,
-  //   0x01cc,
-  //   0x01cc,
-  //   0x01cc,
-  //   0x0233,
-  //   0x0233,
-  //   0x0233,
-  //   0x0233,
-  //   0x0311,
-  //   0x0311,
-  //   0x0311,
-  //   0x0311
-  // };
-  // mAX7219_PrintBuf(bufa, sizeof(bufa)/2);
+  uint16_t bufa[12] = {
+    0x01cc,
+    0x01cc,
+    0x01cc,
+    0x01cc,
+    0x0233,
+    0x0233,
+    0x0233,
+    0x0233,
+    0x0311,
+    0x0311,
+    0x0311,
+    0x0311
+  };
+  mAX7219_PrintBuf(bufa, sizeof(bufa)/2);
 
 
   return (0);
@@ -127,12 +127,12 @@ int MAX7219_Init(SPI_TypeDef* SPIx) {
 
 
 
-__STATIC_INLINE void SPI_Adjust(SPI_TypeDef* SPIx) {
+__STATIC_INLINE void SPI_Adjust(SPI_TypeDef* SPIx, DMA_Channel_TypeDef* DMAxTx, DMA_Channel_TypeDef* DMAxRx) {
   /* adjust frequency divider, 0b010 = 8, (PCLK)72/8 = 9MHz */
-  CLEAR_BIT(SPIx->CR1, (SPI_CR1_BR_0 | SPI_CR1_BR_1 | SPI_CR1_BR_2));
-  SET_BIT(SPIx->CR1, SPI_CR1_BR_1);
   /* set 16-bit data buffer length */ 
-  PREG_SET(SPIx->CR1, SPI_CR1_DFF_Pos); 
+  MODIFY_REG(SPIx->CR1, (SPI_CR1_BR_Msk, SPI_CR1_DFF_Msk), (SPI_CR1_BR_1 | SPI_CR1_DFF));
+  DMAxTx->CCR = 0UL;
+  DMAxRx->CCR = 0UL;
 }
 
 
@@ -160,19 +160,19 @@ static int mAX7219_PrintBuf(const uint16_t* buf, uint16_t len) {
   uint16_t cntr = 0;
   uint8_t segs = 0;
 
-  SPI_Adjust(SPI_Instance);
+  SPI_Adjust(SPI_Instance, DMA1_Channel2, DMA1_Channel3);
   if (SPI_Enable(SPI_Instance)) return (1);
 
   for (uint8_t i = 0; i < len/MAX7219_SEG_CNT; i++) {
     segs = MAX7219_SEG_CNT;
 
-    NSS_0_L;
+    NSS_1_L;
     
     while (segs-- > 0) {
       if (SPI_Write_16b(SPI_Instance, &buf[cntr++], 1)) return (1);
     }
     
-    NSS_0_H;
+    NSS_1_H;
   }
 
   if (SPI_Disable(SPI_Instance)) return (1);

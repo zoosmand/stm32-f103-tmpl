@@ -31,6 +31,9 @@
 #define NSS_0_Pin       GPIO_PIN_4
 #define NSS_0_Pin_Pos   GPIO_PIN_4_Pos
 #define NSS_0_Pin_Mask  GPIO_PIN_4_Mask
+#define NSS_1_Pin       GPIO_PIN_3
+#define NSS_1_Pin_Pos   GPIO_PIN_3_Pos
+#define NSS_1_Pin_Mask  GPIO_PIN_3_Mask
 #define SCK_Pin         GPIO_PIN_5
 #define SCK_Pin_Pos     GPIO_PIN_5_Pos
 #define SCK_Pin_Mask    GPIO_PIN_5_Mask
@@ -44,6 +47,8 @@
 
 #define NSS_0_H         PIN_H(SPI_Port, NSS_0_Pin_Pos)
 #define NSS_0_L         PIN_L(SPI_Port, NSS_0_Pin_Pos)
+#define NSS_1_H         PIN_H(SPI_Port, NSS_1_Pin_Pos)
+#define NSS_1_L         PIN_L(SPI_Port, NSS_1_Pin_Pos)
 
 
 typedef enum {

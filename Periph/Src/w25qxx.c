@@ -40,7 +40,7 @@ w25qxx_t w25qxx;
 /* Private function prototypes -----------------------------------------------*/
 static int SPI_Transfer_DMA(SPI_TypeDef*, const uint16_t, const SPIDir_TypeDef, const uint32_t, uint8_t*);
 static int SPI_Transfer(SPI_TypeDef*, const uint8_t, int32_t, uint16_t, const SPIDir_TypeDef, const uint32_t, uint8_t*);
-__STATIC_INLINE void SPI_Adjust(SPI_TypeDef*);
+__STATIC_INLINE void SPI_Adjust(SPI_TypeDef*, DMA_Channel_TypeDef*, DMA_Channel_TypeDef*);
 
 
 
@@ -48,12 +48,35 @@ __STATIC_INLINE void SPI_Adjust(SPI_TypeDef*);
 
 
 ////////////////////////////////////////////////////////////////////////////////
-__STATIC_INLINE void SPI_Adjust(SPI_TypeDef* SPIx) {
+__STATIC_INLINE void SPI_Adjust(SPI_TypeDef* SPIx, DMA_Channel_TypeDef* DMAxTx, DMA_Channel_TypeDef* DMAxRx) {
   /* adjust frequency divider, 0b001 = 4, (PCLK)72/4 = 18MHz */
-  CLEAR_BIT(SPIx->CR1, (SPI_CR1_BR_0 | SPI_CR1_BR_1 | SPI_CR1_BR_2));
-  SET_BIT(SPIx->CR1, SPI_CR1_BR_0);
   /* set 8-bit data buffer length */ 
-  PREG_CLR(SPIx->CR1, SPI_CR1_DFF_Pos); 
+  MODIFY_REG(SPIx->CR1, (SPI_CR1_BR_Msk, SPI_CR1_DFF_Msk), SPI_CR1_BR_0);
+
+  uint8_t pump = 0;
+  /* configure DMA, Channel2 - RX, Channel3 - TX */
+  /* set priority high*/
+  /* set memory to increment */
+  MODIFY_REG(DMAxTx->CCR, (DMA_CCR_PL_Msk | DMA_CCR_MINC_Msk), (DMA_CCR_PL_1 | DMA_CCR_MINC));
+
+  /* set buffer size to 0 */
+  DMAxTx->CNDTR = 0UL;
+  /* set peripheral address */
+  DMAxTx->CPAR = (uint32_t)&SPIx->DR;
+  /* set memory address */
+  DMAxTx->CMAR = (uint32_t)&pump;
+  
+  /* set priority high*/
+  /* set memory to increment */
+  /* set direction from memory to peripheral */
+  MODIFY_REG(DMAxRx->CCR, (DMA_CCR_PL_Msk | DMA_CCR_MINC_Msk | DMA_CCR_DIR_Msk), (DMA_CCR_PL_1 | DMA_CCR_MINC | DMA_CCR_DIR));
+
+  /* set buffer size to 0 */
+  DMAxRx->CNDTR = 0UL;
+  /* set peripheral address */
+  DMAxRx->CPAR = (uint32_t)&SPIx->DR;
+  /* set memory address */
+  DMAxRx->CMAR = (uint32_t)&pump;
 }
 
 
@@ -278,7 +301,7 @@ int W25qxx_Init(SPI_TypeDef *SPIx) {
   NSS_0_H;
   _delay_ms(1);
 
-  SPI_Adjust(SPIx);
+  SPI_Adjust(SPIx, DMA1_Channel2, DMA1_Channel3);
   SPI_Enable(SPIx);
 
   uint8_t buf[12];
@@ -320,7 +343,7 @@ int W25qxx_Init(SPI_TypeDef *SPIx) {
 // -------------------------------------------------------------  
 int W25qxx_Read(SPI_TypeDef *SPIx, const uint32_t addr, const uint16_t cnt, uint8_t *buf) {
 
-  SPI_Adjust(SPIx);
+  SPI_Adjust(SPIx, DMA1_Channel2, DMA1_Channel3);
   SPI_Enable(SPIx);
 
   uint32_t phy_addr = 0;
@@ -345,7 +368,7 @@ int W25qxx_Write(SPI_TypeDef *SPIx, uint32_t addr, uint16_t cnt, uint8_t *buf) {
   uint8_t pump = 0;
   uint32_t phy_addr = 0;
 
-  SPI_Adjust(SPIx);
+  SPI_Adjust(SPIx, DMA1_Channel2, DMA1_Channel3);
   SPI_Enable(SPIx);
 
   if (W25qxx_IsBusy(SPIx)) return (1);
@@ -384,7 +407,7 @@ int W25qxx_Erase(SPI_TypeDef *SPIx, uint32_t addr, uint16_t sectors) {
   uint32_t phy_addr = 0;
   phy_addr = W25Qxx_BLOCK_SIZE * ((addr >> 8) & 0xffff);
   
-  SPI_Adjust(SPIx);
+  SPI_Adjust(SPIx, DMA1_Channel2, DMA1_Channel3);
   SPI_Enable(SPIx);
   
   if (sectors > 8) {
@@ -445,7 +468,7 @@ int W25qxx_Erase(SPI_TypeDef *SPIx, uint32_t addr, uint16_t sectors) {
 int W25qxx_IsBusy(SPI_TypeDef *SPIx) {
   uint8_t pump = 0;
 
-  SPI_Adjust(SPIx);
+  SPI_Adjust(SPIx, DMA1_Channel2, DMA1_Channel3);
   SPI_Enable(SPIx);
 
   pump = W25Qxx_BUSY_;
@@ -465,7 +488,7 @@ int W25qxx_IsBusy(SPI_TypeDef *SPIx) {
 int W25qxx_Reset(SPI_TypeDef *SPIx) {
   uint8_t pump = 0;
 
-  SPI_Adjust(SPIx);
+  SPI_Adjust(SPIx, DMA1_Channel2, DMA1_Channel3);
   SPI_Enable(SPIx);
 
   if (SPI_Transfer(SPIx, W25Qxx_EnableReset, -1, 0, NEUTRAL, 0, &pump)) return (1);
@@ -483,7 +506,7 @@ int W25qxx_Reset(SPI_TypeDef *SPIx) {
 uint8_t W25qxx_WriteStatusRegister(SPI_TypeDef *SPIx, uint8_t type, uint8_t status) {
   uint8_t pump = 0;
 
-  SPI_Adjust(SPIx);
+  SPI_Adjust(SPIx, DMA1_Channel2, DMA1_Channel3);
   SPI_Enable(SPIx);
 
   if (type) {
