@@ -25,7 +25,8 @@
  extern "C" {
 #endif
 
-#define MAX7219_SEG_CNT  4
+#define MAX7219_SEG_CNT       4
+#define MAX7219_MAX_SEG_CNT   16
 
 
 int MAX7219_Init(SPI_TypeDef*);

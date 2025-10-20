@@ -21,6 +21,7 @@
 
 /* Private variables ---------------------------------------------------------*/
 __IO static uint16_t maxBuf[(MAX7219_SEG_CNT * 8)];
+__IO static uint16_t tmpBuf[(MAX7219_MAX_SEG_CNT * 8)];
 static SPI_TypeDef* SPI_Instance;
 
 /* Private function prototypes -----------------------------------------------*/
@@ -100,24 +101,24 @@ int MAX7219_Init(SPI_TypeDef* SPIx) {
   // MAX7219_Print(SPIx, "0987654321");
 
 
-  if (SPI_Disable(SPI_Instance)) return (1);
+  // if (SPI_Disable(SPI_Instance)) return (1);
 
 
-  uint16_t bufa[12] = {
-    0x01cc,
-    0x01cc,
-    0x01cc,
-    0x01cc,
-    0x0233,
-    0x0233,
-    0x0233,
-    0x0233,
-    0x0311,
-    0x0311,
-    0x0311,
-    0x0311
-  };
-  mAX7219_PrintBuf(bufa, sizeof(bufa)/2);
+  // uint16_t bufa[12] = {
+  //   0x01cc,
+  //   0x01cc,
+  //   0x01cc,
+  //   0x01cc,
+  //   0x0233,
+  //   0x0233,
+  //   0x0233,
+  //   0x0233,
+  //   0x0311,
+  //   0x0311,
+  //   0x0311,
+  //   0x0311
+  // };
+  // mAX7219_PrintBuf(bufa, sizeof(bufa)/2);
 
 
   return (0);
@@ -188,13 +189,14 @@ static int mAX7219_PrintBuf(const uint16_t* buf, uint16_t len) {
 int MAX7219_Print(const char* buf) {
 
   uint16_t len = 0;
-  const char *buf_;
-  buf_ = buf;
+  const char *buf_ = buf;
   
   while (*buf_) {
     len++;
     buf_++;
   }
+
+  // uint16_t tmpBuf[len];
   
   // uint8_t maxData[(len * 8) - 8];
 //   //uint16_t tmpCompressedLine[((len / 4) * 3)];
@@ -208,14 +210,15 @@ int MAX7219_Print(const char* buf) {
     } else {
       pos -= 32;
     }
-    for (uint8_t i = 0; i < 8; i++) {
-      maxBuf[((cntr * 8) + i)] = ((i + 1) << 8) | (uint8_t)font_dot_5x7_max[pos][i];
+    for (uint8_t i = 0; i < len; i++) {
+      tmpBuf[(cntr + (8 * i))] = ((cntr + 1) << 8) | (uint8_t)font_dot_5x7_max[pos][i];
+      // tmpBuf[(cntr + (8 * i))] = 0x00ff & (uint8_t)font_dot_5x7_max[pos][i];
     }
     cntr++;
     buf++;
-
-    // return (0);
   }
+
+  mAX7219_PrintBuf(tmpBuf, (MAX7219_SEG_CNT * 4));
 
 
 
