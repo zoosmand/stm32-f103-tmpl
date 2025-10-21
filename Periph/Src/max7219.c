@@ -210,8 +210,8 @@ int MAX7219_Print(const char* buf) {
     } else {
       pos -= 32;
     }
-    for (uint8_t i = 0; i < len; i++) {
-      tmpBuf[(cntr + (8 * i))] = ((cntr + 1) << 8) | (uint8_t)font_dot_5x7_max[pos][i];
+    for (uint8_t i = 0; i < 8; i++) {
+      tmpBuf[(cntr + (len * i))] = ((i + 1) << 8) | (uint8_t)font_dot_5x7_max[pos][i];
       // tmpBuf[(cntr + (8 * i))] = 0x00ff & (uint8_t)font_dot_5x7_max[pos][i];
     }
     cntr++;
