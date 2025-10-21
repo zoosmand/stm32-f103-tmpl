@@ -55,7 +55,7 @@ int MAX7219_Init(SPI_TypeDef* SPIx) {
   _delay_ms(5);
   
   const uint16_t maxInit[15] = {
-    0x0c00, // 0x0c - Shutdown,     0x00 - Shutdown, 0x01 - Normal operation 
+    0x0c00, // 0x0c - Shutdown,     0x00 - Shutdown
     0x0f00, // 0x0f - DisplayTest,  0x00 - Off, 0x01 - On
     0x0900, // 0x09 - Decode Mode,  0x00 - No decode for digits 7�0, 0xff - Code B decode for digits 7�0
     0x0a07, // 0x0a - Intensity,    0x00 - lowest, 0x0f - highest
@@ -68,11 +68,10 @@ int MAX7219_Init(SPI_TypeDef* SPIx) {
     0x0600,
     0x0700,
     0x0800, // 0x08 - Line 8
-    0x0c01, // 0x0c - Run,          0x00 - Shutdown, 0x01 - Normal operation 
+    0x0c01, // 0x0c - Run,          0x01 - Normal operation 
     0x0000  // 0x00 - NOP
   };
   
-
   uint8_t segs = 0;
   
   for (uint8_t i = 0; i < sizeof(maxInit)/2; i++) {
@@ -85,44 +84,7 @@ int MAX7219_Init(SPI_TypeDef* SPIx) {
     NSS_1_H;
   }
   
-
- _delay_ms(1);
- 
-//  NSS_1_L;
-//  mAX7219_WriteByte(1, 0xcc);
-//  mAX7219_WriteByte(1, 0xcc);
-//  mAX7219_WriteByte(1, 0xcc);
-//  mAX7219_WriteByte(1, 0xcc);
-//  NSS_1_H;
-
-//  const char* txt = "QWERTYUIOPASDFGHJKLZXCVBNM1234567890qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890qwertyuiopasdfghjklzxcvbnm";
-  // MAX7219_Draw("1234567890");
-  // MAX7219_Draw("0987654321");
-  // MAX7219_Print(SPIx, "0987654321");
-
-
-  // if (SPI_Disable(SPI_Instance)) return (1);
-
-
-  // uint16_t bufa[12] = {
-  //   0x01cc,
-  //   0x01cc,
-  //   0x01cc,
-  //   0x01cc,
-  //   0x0233,
-  //   0x0233,
-  //   0x0233,
-  //   0x0233,
-  //   0x0311,
-  //   0x0311,
-  //   0x0311,
-  //   0x0311
-  // };
-  // mAX7219_PrintBuf(bufa, sizeof(bufa)/2);
-
-
   return (0);
-
 }
 
 
@@ -135,6 +97,7 @@ __STATIC_INLINE void SPI_Adjust(SPI_TypeDef* SPIx, DMA_Channel_TypeDef* DMAxTx, 
   DMAxTx->CCR = 0UL;
   DMAxRx->CCR = 0UL;
 }
+
 
 
 /*
@@ -156,21 +119,16 @@ static int mAX7219_WriteByte(const uint8_t line, const uint8_t byte) {
 /*
  *
  */
-static int mAX7219_PrintBuf(const uint16_t* buf, uint16_t len) {
-
-  uint16_t cntr = 0;
-  uint8_t segs = 0;
+static int mAX7219_PrintBuf(const uint16_t* buf, uint16_t offset) {
 
   SPI_Adjust(SPI_Instance, DMA1_Channel2, DMA1_Channel3);
   if (SPI_Enable(SPI_Instance)) return (1);
 
-  for (uint8_t i = 0; i < len/MAX7219_SEG_CNT; i++) {
-    segs = MAX7219_SEG_CNT;
-
+  for (uint8_t i = 0; i < 8; i++) {
     NSS_1_L;
     
-    while (segs-- > 0) {
-      if (SPI_Write_16b(SPI_Instance, &buf[cntr++], 1)) return (1);
+    for (uint8_t k = 0; k < MAX7219_SEG_CNT; k++) {
+      if (SPI_Write_16b(SPI_Instance, &buf[k + (offset * i)], 1)) return (1);
     }
     
     NSS_1_H;
@@ -196,10 +154,6 @@ int MAX7219_Print(const char* buf) {
     buf_++;
   }
 
-  // uint16_t tmpBuf[len];
-  
-  // uint8_t maxData[(len * 8) - 8];
-//   //uint16_t tmpCompressedLine[((len / 4) * 3)];
   uint16_t cntr = 0;
 
   while (*buf) {
@@ -212,13 +166,12 @@ int MAX7219_Print(const char* buf) {
     }
     for (uint8_t i = 0; i < 8; i++) {
       tmpBuf[(cntr + (len * i))] = ((i + 1) << 8) | (uint8_t)font_dot_5x7_max[pos][i];
-      // tmpBuf[(cntr + (8 * i))] = 0x00ff & (uint8_t)font_dot_5x7_max[pos][i];
     }
     cntr++;
     buf++;
   }
 
-  mAX7219_PrintBuf(tmpBuf, (MAX7219_SEG_CNT * 4));
+  mAX7219_PrintBuf(tmpBuf, len);
 
 
 
