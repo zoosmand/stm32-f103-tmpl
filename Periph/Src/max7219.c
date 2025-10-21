@@ -27,7 +27,7 @@ static SPI_TypeDef* SPI_Instance;
 /* Private function prototypes -----------------------------------------------*/
 // static int mAX7219_WriteByte(const uint8_t, const uint8_t);
 static int mAX7219_PrintBuf(const uint16_t*, uint16_t);
-static void mAX7219_CompressBuf(const uint16_t*, uint16_t, uint8_t);
+static void mAX7219_CompressBuf(uint16_t*, uint16_t, uint8_t);
 __STATIC_INLINE void SPI_Adjust(SPI_TypeDef*, DMA_Channel_TypeDef*, DMA_Channel_TypeDef*);
 
 
@@ -59,7 +59,7 @@ int MAX7219_Init(SPI_TypeDef* SPIx) {
     0x0c00, // 0x0c - Shutdown,     0x00 - Shutdown
     0x0f00, // 0x0f - DisplayTest,  0x00 - Off, 0x01 - On
     0x0900, // 0x09 - Decode Mode,  0x00 - No decode for digits 7�0, 0xff - Code B decode for digits 7�0
-    0x0a07, // 0x0a - Intensity,    0x00 - lowest, 0x0f - highest
+    0x0a04, // 0x0a - Intensity,    0x00 - lowest, 0x0f - highest
     0x0b07, // 0x0b - Scan-Limit,   0x07 - Display digits 0 1 2 3 4 5 6 7
     0x0100, // 0x01 - Line 1
     0x0200,
@@ -167,7 +167,7 @@ void MAX7219_Print(const char* buf) {
     }
   }
 
-  mAX7219_CompressBuf(tmpBuf, len, 2);
+  // mAX7219_CompressBuf(tmpBuf, len, 2);
   if (mAX7219_PrintBuf(tmpBuf, len)) return;
 }
 
@@ -183,20 +183,25 @@ void MAX7219_Print(const char* buf) {
  *
  */
 
-static void mAX7219_CompressBuf(const uint16_t* buf, uint16_t len, uint8_t step) {
+static void mAX7219_CompressBuf(uint16_t* buf, uint16_t len, uint8_t step) {
 
-  uint16_t curr = 0, next = 0, val = 0;
+  uint16_t curr = 0, next = 0, val = 0, val2 = 0;
+  uint8_t _step = 0;
   
   for (uint8_t i = 0; i < (len * 8); i++) {
     
     for (uint8_t k = 0; k < len; k++) {
-      if ((k + 1) >= len) break;
+      if ((k + 2) >= len) break;
       
       curr = buf[k + (len * i)];
       next = buf[k + (len * i) + 1];
-      // val = 
-    }
-  
-  }
 
+      _step = k * step + step;
+      
+      val = (curr & 0x00ff) | (((next & 0x00ff) << _step) >> 8) | (curr & 0xff00);
+      val2 = ((next << _step) & 0x00ff) | (next & 0xff00);
+      buf[k + (len * i)] = val;
+      buf[k + (len * i) + 1] = val2;
+    }
+  }
 }
