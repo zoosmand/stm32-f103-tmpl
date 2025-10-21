@@ -26,11 +26,11 @@
 #endif
 
 #define MAX7219_SEG_CNT       4
-#define MAX7219_MAX_SEG_CNT   16
+#define MAX7219_MAX_SEG_CNT   32
 
 
 int MAX7219_Init(SPI_TypeDef*);
-int MAX7219_Print(const char*);
+void MAX7219_Print(const char*);
 
 
 #ifdef __cplusplus

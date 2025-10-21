@@ -25,8 +25,9 @@ __IO static uint16_t tmpBuf[(MAX7219_MAX_SEG_CNT * 8)];
 static SPI_TypeDef* SPI_Instance;
 
 /* Private function prototypes -----------------------------------------------*/
-static int mAX7219_WriteByte(const uint8_t, const uint8_t);
+// static int mAX7219_WriteByte(const uint8_t, const uint8_t);
 static int mAX7219_PrintBuf(const uint16_t*, uint16_t);
+static void mAX7219_CompressBuf(const uint16_t*, uint8_t);
 __STATIC_INLINE void SPI_Adjust(SPI_TypeDef*, DMA_Channel_TypeDef*, DMA_Channel_TypeDef*);
 
 
@@ -100,18 +101,18 @@ __STATIC_INLINE void SPI_Adjust(SPI_TypeDef* SPIx, DMA_Channel_TypeDef* DMAxTx, 
 
 
 
-/*
- *
- */
-static int mAX7219_WriteByte(const uint8_t line, const uint8_t byte) {
+// /*
+//  *
+//  */
+// static int mAX7219_WriteByte(const uint8_t line, const uint8_t byte) {
 
-  if (line > 8) return (1);
+//   if (line > 8) return (1);
 
-  __IO uint16_t data = ((line << 8) | byte) & 0xffff;
-  if (SPI_Write_16b(SPI_Instance, &data, 1)) return (1);
+//   __IO uint16_t data = ((line << 8) | byte) & 0xffff;
+//   if (SPI_Write_16b(SPI_Instance, &data, 1)) return (1);
 
-  return (0);
-}
+//   return (0);
+// }
 
 
 
@@ -144,75 +145,44 @@ static int mAX7219_PrintBuf(const uint16_t* buf, uint16_t offset) {
 /*
  *
  */
-int MAX7219_Print(const char* buf) {
+void MAX7219_Print(const char* buf) {
 
   uint16_t len = 0;
   const char *buf_ = buf;
+
+  while (*buf_++) len++;
   
-  while (*buf_) {
-    len++;
-    buf_++;
-  }
+  len = (len > MAX7219_MAX_SEG_CNT) ? MAX7219_MAX_SEG_CNT : len;
 
-  uint16_t cntr = 0;
-
-  while (*buf) {
-    uint8_t pos = *buf;
+  for (uint16_t k = 0; k < len; k++) {
+    
+    uint8_t pos = buf[k];
     if ((pos > 126) || (pos < 32)) {
       if (pos == 176) pos = 95;
-      else return (1);
-    } else {
-      pos -= 32;
-    }
+      else return;
+    } else pos -= 32;
+    
     for (uint8_t i = 0; i < 8; i++) {
-      tmpBuf[(cntr + (len * i))] = ((i + 1) << 8) | (uint8_t)font_dot_5x7_max[pos][i];
+      tmpBuf[(k + (len * i))] = ((i + 1) << 8) | (uint8_t)font_dot_5x7_max[pos][i];
     }
-    cntr++;
-    buf++;
   }
 
-  mAX7219_PrintBuf(tmpBuf, len);
+  mAX7219_CompressBuf(tmpBuf, 2);
+  if (mAX7219_PrintBuf(tmpBuf, len)) return;
+}
 
 
 
 
-  
-//   uint16_t z = 0;
-//   uint16_t _in = 0;
-//   uint16_t _out = 0;
-//   uint16_t _cnt = 0;
 
-//   for (uint8_t i = 0; i < 8; i++) {
-//     for (uint16_t x = 0; x < MAX7219_SEG_CNT; x++) {
-//       maxData[z] = (((i + 1) << 8) & 0xff00);
-// //      tmpCompressedLine[z] = (((i + 1) << 8) & 0xff00);
-//      /*******/
-//       if (x == 0) {
-//         _in = 0;
-//         _out = 0;
-//         _cnt = 0;
-//       }
-//       if (_out == x) {
-//         _in = _out;
-//         _out = 3 + _in;
-//         _cnt++;
-//       }
-//       if ((x >= _in) && (x < _out)) {
-//         uint8_t k = x - _in;
-//         maxData[z] |= (maxData[(((x + (_cnt - 1)) * 8) + i)] << (2 * k)) & 0x00ff;
-//         maxData[z] |= (maxData[(((x + _cnt) * 8) + i)] >> (8 - (2 * (k + 1)))) & 0x00ff;
-// //        tmpCompressedLine[z] |= (maxData[(((x + (_cnt - 1)) * 8) + i)] << (2 * k)) & 0x00ff;
-// //        tmpCompressedLine[z] |= (maxData[(((x + _cnt) * 8) + i)] >> (8 - (2 * (k + 1)))) & 0x00ff;
-//       } 
-//       z++;
-//     }
-//   }
-  
-// //  for (uint16_t i = 0; i < (MAX7219_SEG_CNT_ * 8); i++) {
-// //    maxData[i] = tmpCompressedLine[i];
-// //  }
 
-//   MAX7219_PrintBus(SPIx);
 
-  return (0);
+
+
+/*
+ *
+ */
+
+static void mAX7219_CompressBuf(const uint16_t* buf, uint8_t step) {
+
 }
