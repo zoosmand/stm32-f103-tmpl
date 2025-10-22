@@ -167,7 +167,7 @@ void MAX7219_Print(const char* buf) {
     }
   }
 
-  // mAX7219_CompressBuf(tmpBuf, len, 2);
+  mAX7219_CompressBuf(tmpBuf, len, 2);
   if (mAX7219_PrintBuf(tmpBuf, len)) return;
 }
 
@@ -186,22 +186,33 @@ void MAX7219_Print(const char* buf) {
 static void mAX7219_CompressBuf(uint16_t* buf, uint16_t len, uint8_t step) {
 
   uint16_t curr = 0, next = 0, val = 0, val2 = 0;
-  uint8_t _step = 0;
+  uint8_t _step = 0, _step_cnt = 0, _step_cnt_skip = 0;
+  uint16_t p_curr = 0, p_next = 0;
   
   for (uint8_t i = 0; i < (len * 8); i++) {
     
-    for (uint8_t k = 0; k < len; k++) {
-      if ((k + 2) >= len) break;
+    // for (uint8_t m = 0; m < step; m++) {
       
-      curr = buf[k + (len * i)];
-      next = buf[k + (len * i) + 1];
+      for (uint8_t k = 0; k < len; k++) {
+        if ((k + 2) >= len) break;
 
-      _step = k * step + step;
-      
-      val = (curr & 0x00ff) | (((next & 0x00ff) << _step) >> 8) | (curr & 0xff00);
-      val2 = ((next << _step) & 0x00ff) | (next & 0xff00);
-      buf[k + (len * i)] = val;
-      buf[k + (len * i) + 1] = val2;
-    }
+        _step = ((_step_cnt++) & 0x3) * step + step;
+        // _step = _step_cnt * step + step;
+        // if (!((++_step_cnt) & 0x3)) {
+        //   _step_cnt_skip++;
+        // }
+        
+        p_curr = len * i;
+        p_next = (len * i) + 1 + _step_cnt_skip;
+        
+        curr = buf[k + p_curr];
+        next = buf[k + p_next];
+
+        val = (curr & 0x00ff) | (((next & 0x00ff) << _step) >> 8) | (curr & 0xff00);
+        val2 = ((next << _step) & 0x00ff) | (next & 0xff00);
+        buf[k + p_curr] = val;
+        buf[k + p_next] = val2;
+      }
+    // }
   }
 }
