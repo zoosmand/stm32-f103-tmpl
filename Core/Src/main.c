@@ -103,12 +103,12 @@ int main(void) {
       dataBuf[14] = 214;
       dataBuf[15] = 215;
 
-      W25qxx_Erase(SPI1, 0, 32);
+      W25qxx_Erase(&w25qxx, 0, 32);
 
       // W25qxx_Write(0x00000000, 9, dataBuf);
-      W25qxx_Read(SPI1, 0x00000000, 16, dataBuf2);
-      W25qxx_Read(SPI1, 0x00000001, 16, dataBuf2);
-      W25qxx_Read(SPI1, 0x00000000, 16, dataBuf2);
+      W25qxx_Read(&w25qxx, 0x00000000, 16, dataBuf2);
+      W25qxx_Read(&w25qxx, 0x00000001, 16, dataBuf2);
+      W25qxx_Read(&w25qxx, 0x00000000, 16, dataBuf2);
     }
   }
 

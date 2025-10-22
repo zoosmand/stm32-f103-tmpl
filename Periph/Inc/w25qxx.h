@@ -72,13 +72,16 @@
 #define W25Qxx_BLOCK_SIZE               0x00010000 // 64536
 
 typedef struct {
-  uint8_t   ID;
-  uint8_t   ManID;
-  uint8_t   Type;
-  uint64_t  UniqID;
-  uint16_t  BlockCount;
-  uint32_t  Capacity;
-  uint8_t   Lock;	
+  uint8_t               ID;
+  uint8_t               ManID;
+  uint8_t               Type;
+  uint64_t              UniqID;
+  uint16_t              BlockCount;
+  uint32_t              Capacity;
+  uint8_t               Lock;
+  SPI_TypeDef*          SPIx;
+  DMA_Channel_TypeDef*  DMAxRx;
+  DMA_Channel_TypeDef*  DMAxTx;
 } w25qxx_t;
 
 
@@ -94,12 +97,12 @@ extern w25qxx_t	w25qxx;
 
 
 int W25qxx_Init(SPI_TypeDef*);
-int W25qxx_Reset(SPI_TypeDef*);
-int W25qxx_IsBusy(SPI_TypeDef*);
-int W25qxx_Read(SPI_TypeDef*, const uint32_t, const uint16_t, uint8_t*);
-int W25qxx_Write(SPI_TypeDef*, const uint32_t, const uint16_t, uint8_t*);
-int W25qxx_Erase(SPI_TypeDef*, uint32_t, uint16_t);
-uint8_t W25qxx_WriteStatusRegister(SPI_TypeDef*, uint8_t, uint8_t);
+int W25qxx_Reset(w25qxx_t*);
+int W25qxx_IsBusy(w25qxx_t*);
+int W25qxx_Read(w25qxx_t*, const uint32_t, const uint16_t, uint8_t*);
+int W25qxx_Write(w25qxx_t*, const uint32_t, const uint16_t, uint8_t*);
+int W25qxx_Erase(w25qxx_t*, uint32_t, uint16_t);
+uint8_t W25qxx_WriteStatusRegister(w25qxx_t*, uint8_t, uint8_t);
 
 
 #ifdef __cplusplus
