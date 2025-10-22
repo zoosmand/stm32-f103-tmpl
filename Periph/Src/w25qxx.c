@@ -283,7 +283,7 @@ static int SPI_Transfer(SPI_TypeDef* SPIx, const uint8_t cmd, int32_t addr, cons
 
   /* put the date to DMA bus */
   if (cnt) {
-    SPI_Transfer_DMA(SPIx, cnt, dir, offset, buf);
+    if (SPI_Transfer_DMA(SPIx, cnt, dir, offset, buf)) return (1);
   }
 
   /* Deactivate slave */
