@@ -28,7 +28,7 @@
  * @retval (int) status of operation
  */
 int SPI_Init(SPI_TypeDef* SPIx) {
-  // uint8_t pump = 0;
+  uint8_t pump = 0;
 
 
   /* Enable GPIO SCK, MISO, MOSI alternative on high speed */
@@ -51,9 +51,9 @@ int SPI_Init(SPI_TypeDef* SPIx) {
   /* Enbale SPI master mode */
   SET_BIT(SPIx->CR1, SPI_CR1_MSTR);
 
-  /* Configure DMA, Channel2 - RX, Channel3 - TX */
-  /* Set priority high*/
-  /* Set memory to increment */
+  // /* Configure DMA, Channel2 - RX, Channel3 - TX */
+  // /* Set priority high*/
+  // /* Set memory to increment */
   // DMA1_Channel2->CCR = (DMA_CCR_PL_1 | DMA_CCR_MINC);
   // /* Set buffer size to 0 */
   // DMA1_Channel2->CNDTR = 0UL;
@@ -98,12 +98,6 @@ int SPI_Enable(SPI_TypeDef* SPIx) {
     }
   }
 
-  // if (dataBufLen == SPIBufLen_16bit) {
-  //   PREG_SET(SPIx->CR1, SPI_CR1_DFF_Pos); // set 16-bit buffer length, otherwise 8-bit
-  // } else {
-  //   PREG_CLR(SPIx->CR1, SPI_CR1_DFF_Pos); // otherwise set buffer to 8-bit
-  // }
-  
   PREG_SET(SPIx->CR1, SPI_CR1_SPE_Pos);
   return (0);
 }

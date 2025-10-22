@@ -51,7 +51,9 @@ __STATIC_INLINE void SPI_Adjust(SPI_TypeDef*, DMA_Channel_TypeDef*, DMA_Channel_
 __STATIC_INLINE void SPI_Adjust(SPI_TypeDef* SPIx, DMA_Channel_TypeDef* DMAxTx, DMA_Channel_TypeDef* DMAxRx) {
   /* adjust frequency divider, 0b001 = 4, (PCLK)72/4 = 18MHz */
   /* set 8-bit data buffer length */ 
-  MODIFY_REG(SPIx->CR1, (SPI_CR1_BR_Msk, SPI_CR1_DFF_Msk), SPI_CR1_BR_0);
+  MODIFY_REG(SPIx->CR1, (SPI_CR1_BR_Msk | SPI_CR1_DFF_Msk), SPI_CR1_BR_0);
+  PREG_SET(SPIx->CR2, SPI_CR2_SSOE_Pos);
+
 
   uint8_t pump = 0;
   /* configure DMA, Channel2 - RX, Channel3 - TX */
@@ -298,13 +300,14 @@ static int SPI_Transfer(SPI_TypeDef* SPIx, const uint8_t cmd, int32_t addr, cons
 
 int W25qxx_Init(SPI_TypeDef *SPIx) {
   /* Prepare NSS pin */
-  NSS_0_H;
-  _delay_ms(1);
+  // NSS_0_H;
+  // _delay_ms(1);
 
   SPI_Adjust(SPIx, DMA1_Channel2, DMA1_Channel3);
   SPI_Enable(SPIx);
 
   uint8_t buf[12];
+  int ret = 0;
 
   w25qxx.Lock = 1;
 
@@ -322,7 +325,7 @@ int W25qxx_Init(SPI_TypeDef *SPIx) {
 
   w25qxx.Lock = 0;
 
-  if ((w25qxx.ManID == 0xef) && (w25qxx.Type = 0x40)) return (0);
+  if (!(w25qxx.ManID == 0xef) && !(w25qxx.Type = 0x40)) ret = 1;
 
   /* protect first 32K */
   // uint8_t stub;
@@ -331,7 +334,7 @@ int W25qxx_Init(SPI_TypeDef *SPIx) {
   // printf("%x\n", ddd);
 
   SPI_Disable(SPIx);
-  return (1);
+  return ret;
 }
 
 

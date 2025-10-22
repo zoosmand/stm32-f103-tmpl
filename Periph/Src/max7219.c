@@ -95,6 +95,7 @@ __STATIC_INLINE void SPI_Adjust(SPI_TypeDef* SPIx, DMA_Channel_TypeDef* DMAxTx, 
   /* adjust frequency divider, 0b010 = 8, (PCLK)72/8 = 9MHz */
   /* set 16-bit data buffer length */ 
   MODIFY_REG(SPIx->CR1, (SPI_CR1_BR_Msk, SPI_CR1_DFF_Msk), (SPI_CR1_BR_1 | SPI_CR1_DFF));
+  PREG_CLR(SPIx->CR2, SPI_CR2_SSOE_Pos);
   DMAxTx->CCR = 0UL;
   DMAxRx->CCR = 0UL;
 }
@@ -167,7 +168,7 @@ void MAX7219_Print(const char* buf) {
     }
   }
 
-  mAX7219_CompressBuf(tmpBuf, len, 2);
+  // mAX7219_CompressBuf(tmpBuf, len, 2);
   if (mAX7219_PrintBuf(tmpBuf, len)) return;
 }
 
