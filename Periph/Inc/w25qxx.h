@@ -54,17 +54,17 @@
 #define W25Qxx_EnableReset              0x66
 #define W25Qxx_ResetProccess            0x99
 
-#define W25Qxx_BUSY_                    0x01 // Erase or write in progress
-#define W25Qxx_WEL_                     0x02 // Write enable Latch
-#define W25Qxx_BP0_                     0x04 // Block protect bit 0 (non-volatile)
-#define W25Qxx_BP1_                     0x08 // Block protect bit 1 (non-volatile)
-#define W25Qxx_BP2_                     0x10 // Block protect bit 2 (non-volatile)
-#define W25Qxx_TB_                      0x20 // Top/Bottom write protect (non-volatile)
-#define W25Qxx_SEC_                     0x40 // Sector protect (non-volatile)
+#define W25Qxx_BUSY                     0x01 // Erase or write in progress
+#define W25Qxx_WEL                      0x02 // Write enable Latch
+#define W25Qxx_BP0                      0x04 // Block protect bit 0 (non-volatile)
+#define W25Qxx_BP1                      0x08 // Block protect bit 1 (non-volatile)
+#define W25Qxx_BP2                      0x10 // Block protect bit 2 (non-volatile)
+#define W25Qxx_TB                       0x20 // Top/Bottom write protect (non-volatile)
+#define W25Qxx_SEC                      0x40 // Sector protect (non-volatile)
 
-#define W25Qxx_SRP0_                    0x80 // Status register protect bit 0 (non-volatile)
-#define W25Qxx_SRP1_                    0x01 // Status register protect bit 1 (non-volatile)
-#define W25Qxx_SREQ_                    0x02 // Quad enable
+#define W25Qxx_SRP0                     0x80 // Status register protect bit 0 (non-volatile)
+#define W25Qxx_SRP1                     0x01 // Status register protect bit 1 (non-volatile)
+#define W25Qxx_SREQ                     0x02 // Quad enable
 
 #define W25Qxx_PAGE_SIZE                0x0100 // 256
 #define W25Qxx_SECTOR_SIZE              0x1000 // 4096
@@ -86,17 +86,35 @@ typedef struct {
 } W25qxx_TypeDef;
 
 
-// Address Pattern
-// 0x00BBBBSP
-// bits 3..0 - number of a page - P
-// bits 7..4 - number of a sector - S
-// bits 23..8 - number of a block - B
-
 
 
 int W25qxx_Init(W25qxx_TypeDef*);
 int W25qxx_Reset(W25qxx_TypeDef*);
 int W25qxx_IsBusy(W25qxx_TypeDef*);
+
+/**
+ * @brief Reads data fron the given EEPROM.
+ * @param   dev: pointer to the flash device struct
+ * @param   addr: flash address
+ * 
+ * ---
+ * 
+ * - Address Pattern
+ * 
+ * - 0x00BBBBSP
+ * 
+ * - bits 3..0 - number of a page - P
+ * 
+ * - bits 7..4 - number of a sector - S
+ * 
+ * - bits 23..8 - number of a block - B
+ * 
+ * ---
+ * 
+ * @param   cnt: number of bytes to read
+ * @param   buf: pointer to a buffer to store the read data
+ * @retval  (int) status of operation
+ */
 int W25qxx_Read(W25qxx_TypeDef*, const uint32_t, const uint16_t, uint8_t*);
 int W25qxx_Write(W25qxx_TypeDef*, const uint32_t, const uint16_t, uint8_t*);
 int W25qxx_Erase(W25qxx_TypeDef*, uint32_t, uint16_t);

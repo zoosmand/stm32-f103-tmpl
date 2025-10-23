@@ -38,8 +38,35 @@ const uint16_t w25q[] = {
 
 
 /* Private function prototypes -----------------------------------------------*/
+
+/**
+ * @brief Transfers SPI data to/from EEPROM via DMA.
+ * @param   dev: pointer to the flash device struct
+ * @param   cnt: number of bytes to transfer
+ * @param   dir: direction of data transfer: READ or WRITE
+ * @param   offset: offset of a particular EEPROM address
+ * @param   buf: pointer to a buffer to write/read the data
+ * @retval  (int) status of operation
+ */
 static int SPI_Transfer_DMA(W25qxx_TypeDef*, const uint16_t, const SPIDir_TypeDef, const uint32_t, uint8_t*);
+
+/**
+ * @brief Transfers SPI commands and service data to/from EEPROM via SPI bus.
+ * @param   dev: pointer to the flash device struct
+ * @param   cmd: EEPROM specific command
+ * @param   cnt: number of bytes to transfer
+ * @param   dir: direction of data transfer: READ or WRITE
+ * @param   offset: offset of a particular EEPROM address
+ * @param   buf: pointer to a buffer to write/read the data
+ * @retval  (int) status of operation
+ */
 static int SPI_Transfer(W25qxx_TypeDef*, const uint8_t, int32_t, uint16_t, const SPIDir_TypeDef, const uint32_t, uint8_t*);
+
+/**
+ * @brief Adjusts SPI bus according to EEPROM parameters.
+ * @param   dev: pointer to the flash device struct
+ * @retval  none
+ */
 __STATIC_INLINE void SPI_Adjust(W25qxx_TypeDef*);
 
 
@@ -47,7 +74,11 @@ __STATIC_INLINE void SPI_Adjust(W25qxx_TypeDef*);
 
 
 
-////////////////////////////////////////////////////////////////////////////////
+/******************************************************************************/
+
+
+
+// ----------------------------------------------------------------------------
 __STATIC_INLINE void SPI_Adjust(W25qxx_TypeDef* dev) {
   /* adjust frequency divider, 0b001 = 4, (PCLK)72/4 = 18MHz */
   /* set 8-bit data buffer length */ 
@@ -84,13 +115,8 @@ __STATIC_INLINE void SPI_Adjust(W25qxx_TypeDef* dev) {
 
 
 
-/**
-  * @brief  Transfesr SPI data via DMA
-  * @param  cnt: Count of bytes to transfer
-  * @param  dir: Direction - READ or WRITE EEPROM
-  * @param  offset: Offset of a particular address of EEPROM
-  * @retval None
-  */
+
+// ----------------------------------------------------------------------------
 static int SPI_Transfer_DMA(W25qxx_TypeDef* dev, const uint16_t cnt, const SPIDir_TypeDef dir, const uint32_t offset, uint8_t *buf) {
   uint8_t pump = 0;
   uint32_t tmout = 0;
@@ -200,7 +226,7 @@ static int SPI_Transfer_DMA(W25qxx_TypeDef* dev, const uint16_t cnt, const SPIDi
 
 
 
-
+// ----------------------------------------------------------------------------
 static int SPI_Transfer(W25qxx_TypeDef* dev, const uint8_t cmd, int32_t addr, const uint16_t cnt, const SPIDir_TypeDef dir, const uint32_t offset, uint8_t *buf) {
 
   uint32_t tmout = 0;
@@ -330,7 +356,7 @@ int W25qxx_Init(W25qxx_TypeDef* dev) {
 
   /* protect first 32K */
   // uint8_t stub;
-  // stub = W25qxx_WriteStatusRegister(dev, 0, (W25Qxx_SEC_ | W25Qxx_TB_ | W25Qxx_BP2_));
+  // stub = W25qxx_WriteStatusRegister(dev, 0, (W25Qxx_SEC | W25Qxx_TB | W25Qxx_BP2));
   // SPI_Transfer(dev, W25Qxx_Read_StatusRegister_1, -1, 1, READ, 0, &stub);
   // printf("%x\n", stub);
 
@@ -471,10 +497,10 @@ int W25qxx_Erase(W25qxx_TypeDef* dev, uint32_t addr, uint16_t sectors) {
 
 
 int W25qxx_IsBusy(W25qxx_TypeDef* dev) {
-  uint8_t pump = W25Qxx_BUSY_;
+  uint8_t pump = W25Qxx_BUSY;
   uint32_t tmout = SPI_BUS_TMOUT * 5;
 
-  while (pump & W25Qxx_BUSY_) {
+  while (pump & W25Qxx_BUSY) {
     if (SPI_Transfer(dev, W25Qxx_Read_StatusRegister_1, -1, 1, READ, 0, &pump)) return (1);
     if (!(--tmout)) {
       SPI_Disable(dev->SPIx);
