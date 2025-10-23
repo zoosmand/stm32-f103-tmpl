@@ -330,13 +330,13 @@ int W25qxx_Init(W25qxx_TypeDef* dev) {
 
   /* protect first 32K */
   // uint8_t stub;
-  // stub = W25qxx_WriteStatusRegister(0, (W25Qxx_SEC_ | W25qxx_TypeDefB_ | W25Qxx_BP2_));
-  // SPI_Transfer(dev_Read_StatusRegister_1, -1, 1, READ, 0, &stub);
-  // printf("%x\n", ddd);
+  // stub = W25qxx_WriteStatusRegister(dev, 0, (W25Qxx_SEC_ | W25Qxx_TB_ | W25Qxx_BP2_));
+  // SPI_Transfer(dev, W25Qxx_Read_StatusRegister_1, -1, 1, READ, 0, &stub);
+  // printf("%x\n", stub);
 
   SPI_Disable(dev->SPIx);
 
-  return (0);
+  return ret;
 }
 
 
@@ -471,17 +471,17 @@ int W25qxx_Erase(W25qxx_TypeDef* dev, uint32_t addr, uint16_t sectors) {
 
 
 int W25qxx_IsBusy(W25qxx_TypeDef* dev) {
-  uint8_t pump = 0;
+  uint8_t pump = W25Qxx_BUSY_;
+  uint32_t tmout = SPI_BUS_TMOUT * 5;
 
-  SPI_Adjust(dev);
-  SPI_Enable(dev->SPIx);
-
-  pump = W25Qxx_BUSY_;
   while (pump & W25Qxx_BUSY_) {
     if (SPI_Transfer(dev, W25Qxx_Read_StatusRegister_1, -1, 1, READ, 0, &pump)) return (1);
+    if (!(--tmout)) {
+      SPI_Disable(dev->SPIx);
+      return (1);
+    }
   }
 
-  SPI_Disable(dev->SPIx);
   return (0);
 }
 

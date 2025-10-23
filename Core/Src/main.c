@@ -91,32 +91,33 @@ int main(void) {
     }
  
     if (FLAG_CHECK(&_ASREG_, W25QXX_RF)) {
-      static uint8_t dataBuf[16];
-      static uint8_t dataBuf2[16];
-      dataBuf[0] = 200;
-      dataBuf[1] = 201;
-      dataBuf[2] = 202;
-      dataBuf[3] = 203;
-      dataBuf[4] = 204;
-      dataBuf[5] = 205;
-      dataBuf[6] = 206;
-      dataBuf[7] = 207;
-      dataBuf[8] = 208;
-      dataBuf[9] = 209;
-      dataBuf[10] = 210;
-      dataBuf[11] = 211;
-      dataBuf[12] = 212;
-      dataBuf[13] = 213;
-      dataBuf[14] = 214;
-      dataBuf[15] = 215;
+      // __IO static uint8_t dataBuf[16];
+      // __IO static uint8_t dataBuf2[256];
+      // dataBuf[0] = 200;
+      // dataBuf[1] = 201;
+      // dataBuf[2] = 202;
+      // dataBuf[3] = 203;
+      // dataBuf[4] = 204;
+      // dataBuf[5] = 205;
+      // dataBuf[6] = 206;
+      // dataBuf[7] = 207;
+      // dataBuf[8] = 208;
+      // dataBuf[9] = 209;
+      // dataBuf[10] = 210;
+      // dataBuf[11] = 211;
+      // dataBuf[12] = 212;
+      // dataBuf[13] = 213;
+      // dataBuf[14] = 214;
+      // dataBuf[15] = 215;
 
 
-      W25qxx_Erase(&flash_0, 0, 32);
+      // if (W25qxx_Erase(&flash_0, 0, 32)) printf("Cannot erase the flash\n");
+      // if (W25qxx_Read(&flash_0, 0x00000000, 256, dataBuf2)) printf("Cannot read the flash\n");
 
-      // W25qxx_Write(0x00000000, 9, dataBuf);
-      W25qxx_Read(&flash_0, 0x00000000, 16, dataBuf2);
-      W25qxx_Read(&flash_0, 0x00000001, 16, dataBuf2);
-      W25qxx_Read(&flash_0, 0x00000000, 16, dataBuf2);
+      // if (W25qxx_Write(&flash_0, 0x00000000, 16, dataBuf)) printf("Cannot write to the flash\n");
+      // if (W25qxx_Read(&flash_0, 0x00000000, 256, dataBuf2)) printf("Cannot read the flash\n");
+
+      __NOP();
     }
   }
 
