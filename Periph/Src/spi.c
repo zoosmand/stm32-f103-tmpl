@@ -22,11 +22,7 @@
 
 
 
-/**
- * @brief  Initialize the given SPI bus.
- * @param  SPIx: pointer to the given SPI peripherals
- * @retval (int) status of operation
- */
+// ----------------------------------------------------------------------------
 int SPI_Init(SPI_TypeDef* SPIx) {
   uint8_t pump = 0;
 
@@ -51,28 +47,6 @@ int SPI_Init(SPI_TypeDef* SPIx) {
   /* Enbale SPI master mode */
   SET_BIT(SPIx->CR1, SPI_CR1_MSTR);
 
-  // /* Configure DMA, Channel2 - RX, Channel3 - TX */
-  // /* Set priority high*/
-  // /* Set memory to increment */
-  // DMA1_Channel2->CCR = (DMA_CCR_PL_1 | DMA_CCR_MINC);
-  // /* Set buffer size to 0 */
-  // DMA1_Channel2->CNDTR = 0UL;
-  // /* Set peripheral address */
-  // DMA1_Channel2->CPAR = (uint32_t)&SPIx->DR;
-  // /* Set memory address */
-  // DMA1_Channel2->CMAR = (uint32_t)&pump;
-  
-  // /* Set priority high*/
-  // /* Set memory to increment */
-  // /* Set direction from memory to peripheral */
-  // DMA1_Channel3->CCR = (DMA_CCR_PL_1 | DMA_CCR_MINC | DMA_CCR_DIR);
-  // /* Set buffer size to 0 */
-  // DMA1_Channel3->CNDTR = 0UL;
-  // /* Set peripheral address */
-  // DMA1_Channel3->CPAR = (uint32_t)&SPIx->DR;
-  // /* Set memory address */
-  // DMA1_Channel3->CMAR = (uint32_t)&pump;
-  
   if (SPIx == SPI1) {
     // NVIC_SetPriority(SPI1_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 15, 0));
     // NVIC_EnableIRQ(SPI1_IRQn);
@@ -85,8 +59,7 @@ int SPI_Init(SPI_TypeDef* SPIx) {
 
 
 
-
-
+// ----------------------------------------------------------------------------
 int SPI_Enable(SPI_TypeDef* SPIx) {
 
   uint32_t tmout = SPI_BUS_TMOUT;
@@ -105,7 +78,7 @@ int SPI_Enable(SPI_TypeDef* SPIx) {
 
 
 
-
+// ----------------------------------------------------------------------------
 int SPI_Disable(SPI_TypeDef* SPIx) {
   uint32_t tmout = SPI_BUS_TMOUT;
   
