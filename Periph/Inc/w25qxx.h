@@ -71,6 +71,10 @@
 #define W25Qxx_BLOCK_32K_SIZE           0x8000 // 32768
 #define W25Qxx_BLOCK_SIZE               0x00010000 // 64536
 
+
+/**
+ * @brief   EEPROM W25Qxx device type definition struct.
+ */
 typedef struct {
   uint8_t               ID;
   uint8_t               ManID;
@@ -87,15 +91,24 @@ typedef struct {
 
 
 
-
+/**
+ * @brief   Initializes the given EEPROM device.
+ * @param   dev: pointer to the EEPROM device struct
+ * @retval  (int) status of operation
+ */
 int W25qxx_Init(W25qxx_TypeDef*);
-int W25qxx_Reset(W25qxx_TypeDef*);
-int W25qxx_IsBusy(W25qxx_TypeDef*);
 
 /**
- * @brief Reads data fron the given EEPROM.
- * @param   dev: pointer to the flash device struct
- * @param   addr: flash address
+ * @brief   Resets the given EEPROM device.
+ * @param   dev: pointer to the EEPROM device struct
+ * @retval  (int) status of operation
+ */
+int W25qxx_Reset(W25qxx_TypeDef*);
+
+/**
+ * @brief Reads data from the given EEPROM device.
+ * @param   dev: pointer to the EEPROM device struct
+ * @param   addr: EEPROM address
  * 
  * ---
  * 
@@ -116,8 +129,69 @@ int W25qxx_IsBusy(W25qxx_TypeDef*);
  * @retval  (int) status of operation
  */
 int W25qxx_Read(W25qxx_TypeDef*, const uint32_t, const uint16_t, uint8_t*);
+
+/**
+ * @brief Writes data to the given EEPROM device.
+ * @param   dev: pointer to the EEPROM device struct
+ * @param   addr: flash address
+ * 
+ * ---
+ * 
+ * - Address Pattern
+ * 
+ * - 0x00BBBBSP
+ * 
+ * - bits 3..0 - number of a page - P
+ * 
+ * - bits 7..4 - number of a sector - S
+ * 
+ * - bits 23..8 - number of a block - B
+ * 
+ * ---
+ * 
+ * @param   cnt: number of bytes to read
+ * @param   buf: pointer to a buffer to store the read data
+ * @retval  (int) status of operation
+ */
 int W25qxx_Write(W25qxx_TypeDef*, const uint32_t, const uint16_t, uint8_t*);
+
+/**
+ * @brief   Wipes out data on the given EEPROM device.
+ * @param   dev: pointer to the EEPROM device struct
+ * @param   addr: flash address
+ * 
+ * ---
+ * 
+ * - Address Pattern
+ * 
+ * - 0x00BBBBSP
+ * 
+ * - bits 3..0 - number of a page - P
+ * 
+ * - bits 7..4 - number of a sector - S
+ * 
+ * - bits 23..8 - number of a block - B
+ * 
+ * ---
+ * 
+ * @param   sector: number of sectors to erase
+ * @retval  (int) status of operation
+ */
 int W25qxx_Erase(W25qxx_TypeDef*, uint32_t, uint16_t);
+
+/**
+ * @brief   Updates register status of the given EEPROM device.
+ * @param   dev: pointer to the EEPROM device struct
+ * @param   type: type of register: 
+ * 
+ * - 0 - non-volatile bits
+ * 
+ * - 1 - volatile bits
+ * 
+ * ---
+ * @param   status: register status to change (bit values)
+ * @retval  (uint8_t) the updated status value
+ */
 uint8_t W25qxx_WriteStatusRegister(W25qxx_TypeDef*, uint8_t, uint8_t);
 
 

@@ -21,7 +21,10 @@
 #include "w25qxx.h"
 
 /* Private variables ---------------------------------------------------------*/
-/* -- w25q capacities in blocks -- */
+
+/**
+ * @brief w25qxx EEPROM capacities in blocks.
+ */
 const uint16_t w25q[] = {
     0x0002
   , 0x0004
@@ -34,6 +37,8 @@ const uint16_t w25q[] = {
   , 0x0200
   , 0x0400
 };
+
+
 
 
 
@@ -69,11 +74,18 @@ static int SPI_Transfer(W25qxx_TypeDef*, const uint8_t, int32_t, uint16_t, const
  */
 __STATIC_INLINE void SPI_Adjust(W25qxx_TypeDef*);
 
+/**
+ * @brief   Controls the busy status of the given EEPROM.
+ * @param   dev: pointer to the flash device struct
+ * @retval  (int) status of operation
+ */
+static int W25qxx_IsBusy(W25qxx_TypeDef*);
 
 
 
 
-
+/******************************************************************************/
+/******************************************************************************/
 /******************************************************************************/
 
 
@@ -323,8 +335,7 @@ static int SPI_Transfer(W25qxx_TypeDef* dev, const uint8_t cmd, int32_t addr, co
 
 
 
-
-
+// ----------------------------------------------------------------------------
 int W25qxx_Init(W25qxx_TypeDef* dev) {
 
   if ((dev->SPIx == NULL) || (dev->DMAx == NULL) || (dev->DMAxRx == NULL) || (dev->DMAxTx == NULL)) return (1); 
@@ -495,8 +506,8 @@ int W25qxx_Erase(W25qxx_TypeDef* dev, uint32_t addr, uint16_t sectors) {
 
 
 
-
-int W25qxx_IsBusy(W25qxx_TypeDef* dev) {
+// -------------------------------------------------------------  
+static int W25qxx_IsBusy(W25qxx_TypeDef* dev) {
   uint8_t pump = W25Qxx_BUSY;
   uint32_t tmout = SPI_BUS_TMOUT * 5;
 
@@ -515,7 +526,7 @@ int W25qxx_IsBusy(W25qxx_TypeDef* dev) {
 
 
 
-
+// -------------------------------------------------------------  
 int W25qxx_Reset(W25qxx_TypeDef* dev) {
   uint8_t pump = 0;
 
@@ -533,7 +544,9 @@ int W25qxx_Reset(W25qxx_TypeDef* dev) {
 
 
 
+
 /* type: 0 - non-volatile bits, 1 - volatile bits*/
+// -------------------------------------------------------------  
 uint8_t W25qxx_WriteStatusRegister(W25qxx_TypeDef* dev, uint8_t type, uint8_t status) {
   uint8_t pump = 0;
 
@@ -557,12 +570,10 @@ uint8_t W25qxx_WriteStatusRegister(W25qxx_TypeDef* dev, uint8_t type, uint8_t st
     }
   }
 
-
   dev->SPIx->DR;
 
   if (W25qxx_IsBusy(dev)) return (1);
   if (SPI_Transfer(dev, W25Qxx_Read_StatusRegister_1, -1, 1, READ, 0, &pump)) return (1);
-
 
   SPI_Disable(dev->SPIx);
   return (pump);
