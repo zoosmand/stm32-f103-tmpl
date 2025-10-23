@@ -35,6 +35,13 @@ __attribute__((section(".cron"))) uint32_t secCnt               = 0;
 /* Private variables ---------------------------------------------------------*/
 static __attribute__((section(".cron"))) uint32_t secCntCache   = 0;
 
+__IO static W25qxx_TypeDef flash_0 = {
+  .SPIx   = SPI1,
+  .DMAx   = DMA1,
+  .DMAxTx = DMA1_Channel3,
+  .DMAxRx = DMA1_Channel2,
+};
+
 /* Private function prototypes -----------------------------------------------*/
 
 /* Private user code ---------------------------------------------------------*/
@@ -103,14 +110,13 @@ int main(void) {
       dataBuf[14] = 214;
       dataBuf[15] = 215;
 
-      W25qxx_TypeDef* flash_0 = W25qxx_GetDev(0);
 
-      W25qxx_Erase(flash_0, 0, 32);
+      W25qxx_Erase(&flash_0, 0, 32);
 
       // W25qxx_Write(0x00000000, 9, dataBuf);
-      W25qxx_Read(flash_0, 0x00000000, 16, dataBuf2);
-      W25qxx_Read(flash_0, 0x00000001, 16, dataBuf2);
-      W25qxx_Read(flash_0, 0x00000000, 16, dataBuf2);
+      W25qxx_Read(&flash_0, 0x00000000, 16, dataBuf2);
+      W25qxx_Read(&flash_0, 0x00000001, 16, dataBuf2);
+      W25qxx_Read(&flash_0, 0x00000000, 16, dataBuf2);
     }
   }
 
@@ -134,8 +140,7 @@ void Cron_Handler(void) {
   if (!SPI_Init(SPI1))      FLAG_SET(&_ASREG_, SPI1_RF);
   
   if (FLAG_CHECK(&_ASREG_, SPI1_RF)) {
-    W25qxx_TypeDef* flash_0 = W25qxx_GetDev(0);
-    if (!W25qxx_Init(flash_0)) FLAG_SET(&_ASREG_, W25QXX_RF);
+    if (!W25qxx_Init(&flash_0)) FLAG_SET(&_ASREG_, W25QXX_RF);
     // if (!MAX7219_Init(SPI1)) FLAG_SET(&_ASREG_, MAX7219_RF);
   }
   

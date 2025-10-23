@@ -35,7 +35,7 @@ const uint16_t w25q[] = {
   , 0x0400
 };
 
-__IO static W25qxx_TypeDef w25qxx[2];
+
 
 /* Private function prototypes -----------------------------------------------*/
 static int SPI_Transfer_DMA(W25qxx_TypeDef*, const uint16_t, const SPIDir_TypeDef, const uint32_t, uint8_t*);
@@ -148,7 +148,7 @@ static int SPI_Transfer_DMA(W25qxx_TypeDef* dev, const uint16_t cnt, const SPIDi
 
   /* Wait for transfer is compete */
   tmout = SPI_BUS_TMOUT;
-  while(!(PREG_CHECK(DMA1->ISR, DMA_ISR_TCIF3_Pos))) {
+  while(!(PREG_CHECK(dev->DMAx->ISR, DMA_ISR_TCIF3_Pos))) {
     if (!(--tmout)) {
       SPI_Disable(dev->SPIx);
       return (1);
@@ -156,7 +156,7 @@ static int SPI_Transfer_DMA(W25qxx_TypeDef* dev, const uint16_t cnt, const SPIDi
   }
 
   /* Clear complete transger flag */
-  SET_BIT(DMA1->IFCR, DMA_IFCR_CTCIF3);
+  SET_BIT(dev->DMAx->IFCR, DMA_IFCR_CTCIF3);
   
   if (dir == WRITE) {
     /* Wait white SPI is busy */
@@ -192,7 +192,7 @@ static int SPI_Transfer_DMA(W25qxx_TypeDef* dev, const uint16_t cnt, const SPIDi
     PREG_CLR(dev->DMAxTx->CCR, DMA_CCR_EN_Pos);
   }
   /* Clear correspondents DMA flags */
-  DMA1->IFCR |= 0x00000ff0;
+  dev->DMAx->IFCR |= 0x00000ff0;
 
   return (0);
 }
@@ -301,10 +301,9 @@ static int SPI_Transfer(W25qxx_TypeDef* dev, const uint8_t cmd, int32_t addr, co
 
 int W25qxx_Init(W25qxx_TypeDef* dev) {
 
+  if ((dev->SPIx == NULL) || (dev->DMAx == NULL) || (dev->DMAxRx == NULL) || (dev->DMAxTx == NULL)) return (1); 
+
   dev->Lock = 1;
-  dev->SPIx = SPI1;
-  dev->DMAxTx = DMA1_Channel3;
-  dev->DMAxRx = DMA1_Channel2;
 
   SPI_Adjust(dev);
   SPI_Enable(dev->SPIx);
@@ -336,7 +335,8 @@ int W25qxx_Init(W25qxx_TypeDef* dev) {
   // printf("%x\n", ddd);
 
   SPI_Disable(dev->SPIx);
-  return ret;
+
+  return (0);
 }
 
 
@@ -543,9 +543,3 @@ uint8_t W25qxx_WriteStatusRegister(W25qxx_TypeDef* dev, uint8_t type, uint8_t st
 }
 
 
-
-W25qxx_TypeDef* W25qxx_GetDev(uint8_t devIndex) {
-
-  if (devIndex > (sizeof(w25qxx) - 1)) return NULL;
-  return &w25qxx[devIndex];
-}

@@ -80,6 +80,7 @@ typedef struct {
   uint32_t              Capacity;
   uint8_t               Lock;
   SPI_TypeDef*          SPIx;
+  DMA_TypeDef*          DMAx;
   DMA_Channel_TypeDef*  DMAxTx;
   DMA_Channel_TypeDef*  DMAxRx;
 } W25qxx_TypeDef;
@@ -91,9 +92,6 @@ typedef struct {
 // bits 7..4 - number of a sector - S
 // bits 23..8 - number of a block - B
 
-// extern w25qxx_t	w25qxx;
-
-
 
 
 int W25qxx_Init(W25qxx_TypeDef*);
@@ -103,7 +101,8 @@ int W25qxx_Read(W25qxx_TypeDef*, const uint32_t, const uint16_t, uint8_t*);
 int W25qxx_Write(W25qxx_TypeDef*, const uint32_t, const uint16_t, uint8_t*);
 int W25qxx_Erase(W25qxx_TypeDef*, uint32_t, uint16_t);
 uint8_t W25qxx_WriteStatusRegister(W25qxx_TypeDef*, uint8_t, uint8_t);
-W25qxx_TypeDef* W25qxx_GetDev(uint8_t);
+
+
 
 #ifdef __cplusplus
 }
