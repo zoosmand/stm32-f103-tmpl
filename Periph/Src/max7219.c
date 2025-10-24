@@ -20,15 +20,10 @@
 #include "max7219.h"
 
 /* Private variables ---------------------------------------------------------*/
-// __IO static uint16_t maxBuf[(MAX7219_SEG_CNT * 8)];
-// __IO static uint16_t tmpBuf[(MAX7219_MAX_SEG_CNT * 8)];
-// static SPI_TypeDef* SPI_Instance;
 
 /* Private function prototypes -----------------------------------------------*/
-// static int mAX7219_WriteByte(const uint8_t, const uint8_t);
 static int mAX7219_PrintBuf(Max7219_TypeDef* dev, uint16_t);
 static void mAX7219_CompressBuf(Max7219_TypeDef* dev, uint16_t, uint8_t);
-// __STATIC_INLINE void SPI_Adjust(SPI_TypeDef*, DMA_Channel_TypeDef*, DMA_Channel_TypeDef*);
 
 /**
  * @brief Adjusts SPI bus according to MAC7219 parameters.
@@ -82,11 +77,10 @@ int MAX7219_Init(Max7219_TypeDef* dev) {
   uint8_t segs = 0;
   
   for (uint8_t i = 0; i < sizeof(maxInit)/2; i++) {
-    segs = MAX7219_SEG_CNT;
+    segs = dev->SegCnt;
     NSS_1_L;
     while (segs-- > 0) {
       if (SPI_Write_16b(dev->SPIx, &maxInit[i], 1)) return (1);
-      // if (mAX7219_WriteByte(SPI1, maxInit[i])) return (1);
     }
     NSS_1_H;
   }
@@ -105,22 +99,10 @@ __STATIC_INLINE void SPI_Adjust(Max7219_TypeDef* dev) {
   PREG_CLR(dev->SPIx->CR2, SPI_CR2_SSOE_Pos);
   dev->DMAxTx->CCR = 0UL;
   dev->DMAxRx->CCR = 0UL;
+  /* Clear correspondents DMA flags */
+  dev->DMAx->IFCR |= 0x00000ff0;
 }
 
-
-
-// /*
-//  *
-//  */
-// static int mAX7219_WriteByte(const uint8_t line, const uint8_t byte) {
-
-//   if (line > 8) return (1);
-
-//   __IO uint16_t data = ((line << 8) | byte) & 0xffff;
-//   if (SPI_Write_16b(SPI_Instance, &data, 1)) return (1);
-
-//   return (0);
-// }
 
 
 
@@ -136,8 +118,8 @@ static int mAX7219_PrintBuf(Max7219_TypeDef* dev, uint16_t len) {
   for (uint8_t i = 0; i < 8; i++) {
     NSS_1_L;
     
-    for (uint8_t k = 0; k < MAX7219_SEG_CNT; k++) {
-      if (SPI_Write_16b(dev->SPIx, &(dev->BufPtr)[k + (len * i)], 1)) return (1);
+    for (uint8_t k = 0; k < dev->SegCnt; k++) {
+      if (SPI_Write_16b(dev->SPIx, &(dev->TmpBufPtr)[k + (len * i)], 1)) return (1);
     }
     
     NSS_1_H;
@@ -160,7 +142,7 @@ void MAX7219_Print(Max7219_TypeDef* dev, const char* buf) {
 
   while (*buf_++) len++;
   
-  len = (len > MAX7219_MAX_SEG_CNT) ? MAX7219_MAX_SEG_CNT : len;
+  len = (len > dev->MaxSegCnt) ? dev->MaxSegCnt : len;
 
   for (uint16_t k = 0; k < len; k++) {
     
@@ -175,6 +157,7 @@ void MAX7219_Print(Max7219_TypeDef* dev, const char* buf) {
     }
   }
 
+  /* TODO fix buffer overflow bug */
   // mAX7219_CompressBuf(dev, len, 2);
   if (mAX7219_PrintBuf(dev, len)) return;
 }
@@ -208,7 +191,7 @@ static void mAX7219_CompressBuf(Max7219_TypeDef* dev, uint16_t len, uint8_t step
     for (uint8_t k = 0; k < len; k++) {
 
       if ((k + 2) >= len) {
-        dev->BufPtr[k + 1] = (dev->BufPtr[k + 1] & 0xff00);
+        dev->TmpBufPtr[k + 1] = (dev->TmpBufPtr[k + 1] & 0xff00);
         break;
       }
 
@@ -222,11 +205,11 @@ static void mAX7219_CompressBuf(Max7219_TypeDef* dev, uint16_t len, uint8_t step
       cur_ptr   = len * i;
       next_ptr  = (len * i) + 1 + step_offset;
       
-      cur_val   = dev->BufPtr[k + cur_ptr];
-      next_val  = dev->BufPtr[k + next_ptr];
+      cur_val   = dev->TmpBufPtr[k + cur_ptr];
+      next_val  = dev->TmpBufPtr[k + next_ptr];
 
-      dev->BufPtr[k + cur_ptr]                  = (cur_val & 0x00ff) | (((next_val & 0x00ff) << step_tmp) >> 8) | (cur_val & 0xff00);
-      dev->BufPtr[k + next_ptr - step_offset]   = ((next_val << step_tmp) & 0x00ff) | (next_val & 0xff00);
+      dev->TmpBufPtr[k + cur_ptr]                  = (cur_val & 0x00ff) | (((next_val & 0x00ff) << step_tmp) >> 8) | (cur_val & 0xff00);
+      dev->TmpBufPtr[k + next_ptr - step_offset]   = ((next_val << step_tmp) & 0x00ff) | (next_val & 0xff00);
 
     }
   }
