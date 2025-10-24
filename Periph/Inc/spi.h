@@ -92,9 +92,9 @@ int SPI_Enable(SPI_TypeDef*);
 int SPI_Disable(SPI_TypeDef*);
 
 int SPI_Read_8b(SPI_TypeDef*, uint8_t*, uint8_t);
-int SPI_Write_8b(SPI_TypeDef*, const uint8_t*, uint8_t);
+int SPI_Write_8b(SPI_TypeDef*, uint8_t*, uint8_t);
 int SPI_Read_16b(SPI_TypeDef*, uint16_t*, uint8_t);
-int SPI_Write_16b(SPI_TypeDef*, const uint16_t*, uint8_t);
+int SPI_Write_16b(SPI_TypeDef*, uint16_t*, uint8_t);
 
 
 #ifdef __cplusplus

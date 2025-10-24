@@ -28,9 +28,25 @@
 #define MAX7219_SEG_CNT       4
 #define MAX7219_MAX_SEG_CNT   32
 
+/**
+ * @brief   MAX7219 device type definition struct.
+ */
+typedef struct {
+  uint8_t               SegCnt;
+  uint8_t               MaxSegCnt;
+  uint16_t*             BufPtr;
+  uint16_t*             TmpBufPtr;
+  uint8_t               Lock;
+  SPI_TypeDef*          SPIx;
+  DMA_TypeDef*          DMAx;
+  DMA_Channel_TypeDef*  DMAxTx;
+  DMA_Channel_TypeDef*  DMAxRx;
+} Max7219_TypeDef;
 
-int MAX7219_Init(SPI_TypeDef*);
-void MAX7219_Print(const char*);
+
+
+int MAX7219_Init(Max7219_TypeDef*);
+void MAX7219_Print(Max7219_TypeDef*, const char*);
 
 
 #ifdef __cplusplus

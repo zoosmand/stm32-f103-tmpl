@@ -42,6 +42,23 @@ __IO static W25qxx_TypeDef flash_0 = {
   .DMAxRx = DMA1_Channel2,
 };
 
+
+__IO static uint16_t maxBuf[(MAX7219_SEG_CNT * 8)];
+__IO static uint16_t tmpMaxBuf[(MAX7219_MAX_SEG_CNT * 8)];
+
+__IO static Max7219_TypeDef maxDisplay = {
+  .SegCnt     = MAX7219_SEG_CNT,
+  .MaxSegCnt  = MAX7219_MAX_SEG_CNT,
+  .BufPtr     = &maxBuf[0],
+  .TmpBufPtr  = &tmpMaxBuf[0],
+  .SPIx       = SPI1,
+  .DMAx       = DMA1,
+  .DMAxTx     = DMA1_Channel3,
+  .DMAxRx     = DMA1_Channel2,
+};
+
+
+
 /* Private function prototypes -----------------------------------------------*/
 
 /* Private user code ---------------------------------------------------------*/
@@ -87,7 +104,9 @@ int main(void) {
 
 
     if (FLAG_CHECK(&_ASREG_, MAX7219_RF)) {
-      MAX7219_Print("0987654321");
+      // MAX7219_Print("0987654321");
+
+      MAX7219_Print(&maxDisplay, "1234567890");
     }
  
     if (FLAG_CHECK(&_ASREG_, W25QXX_RF)) {
@@ -142,7 +161,7 @@ void Cron_Handler(void) {
   
   if (FLAG_CHECK(&_ASREG_, SPI1_RF)) {
     if (!W25qxx_Init(&flash_0)) FLAG_SET(&_ASREG_, W25QXX_RF);
-    // if (!MAX7219_Init(SPI1)) FLAG_SET(&_ASREG_, MAX7219_RF);
+    if (!MAX7219_Init(&maxDisplay)) FLAG_SET(&_ASREG_, MAX7219_RF);
   }
   
   /* Display calibration */
