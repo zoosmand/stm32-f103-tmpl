@@ -64,7 +64,7 @@ __IO static Max72xx_TypeDef maxDisplay = {
 __IO static BMx280_ItemTypeDef bosch_0 = {
   .sensorType = BME280,
   .busType = BMx280_I2C,
-  .bus = I2C2
+  .bus = I2C1
 };
 
 
@@ -171,7 +171,7 @@ void Cron_Handler(void) {
   }
   
   if (FLAG_CHECK(&_ASREG_, I2C1_RF)) {
-    // if (!BMx280_Init(&bosch_0)) FLAG_SET(&_ASREG_, BMX280_RF);
+    if (!BMx280_Init(&bosch_0)) FLAG_SET(&_ASREG_, BMX280_RF);
     if (!SSD13xx_Init(I2C1))  FLAG_SET(&_ASREG_, SSDDisplay_RF);
     if (!WHxxxx_Init(I2C1))   FLAG_SET(&_ASREG_, WHDisplay_RF);
   }

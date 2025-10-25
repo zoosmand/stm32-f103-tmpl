@@ -64,9 +64,20 @@ static BMx280_U32_t bmx280_compensate_P_int32(BMx280_S32_t adc_P);
 static BMx280_U32_t bmx280_compensate_H_int32(BMx280_S32_t adc_H);
 
 
+/**
+  * @brief  Writes 8 bit data via I2C
+  * @param  I2Cx: pointer to an I2C instance
+  * @param  data: a byte to send
+  * @return None
+  */
+static int I2C_Write(I2C_TypeDef*, uint8_t, uint8_t*, uint16_t);
 
-
-
+/**
+  * @brief  Reads 8 bit data via I2C
+  * @param  I2Cx: pointer to an I2C instance
+  * @return  a received byte
+  */
+static int I2C_Read(I2C_TypeDef*, uint8_t, uint8_t, uint8_t*, uint16_t);
 
 
 
@@ -321,6 +332,42 @@ static BMx280_U32_t bmx280_compensate_H_int32(BMx280_S32_t adc_H) {
   H >>= 12;
   return (H);
 }
+
+
+
+
+
+/**
+  * @brief  Writes 8 bit data via I2C
+  * @param  I2Cx: pointer to an I2C instance
+  * @param  data: a byte to send
+  * @return None
+  */
+static int I2C_Write(I2C_TypeDef *I2Cx, uint8_t slaveAddr, uint8_t *buf, uint16_t len) {
+
+  return (0);
+}
+
+
+
+
+
+
+/**
+  * @brief  Reads 8 bit data via I2C
+  * @param  I2Cx: pointer to an I2C instance
+  * @return  a received byte
+  */
+static int I2C_Read(I2C_TypeDef *I2Cx, uint8_t slaveAddr, uint8_t reg, uint8_t *buf, uint16_t len) {
+  if (I2C_Master_Send(I2Cx, slaveAddr, &reg, 1)) return (ERROR);
+
+  I2C_Master_Receive(I2Cx, slaveAddr, buf, len);
+
+  return (0);
+}
+
+
+
 
 /* ------------------------------------------------------------------------------- */
 /* ------------------------------------------------------------------------------- */

@@ -213,31 +213,35 @@ uint8_t I2C_ReadByte(I2C_TypeDef* I2Cx){
 
 
 
-/**
-  * @brief  Writes 8 bit data via I2C
-  * @param  I2Cx: pointer to an I2C instance
-  * @param  data: a byte to send
-  * @return None
-  */
-int I2C_Write(I2C_TypeDef *I2Cx, uint8_t slaveAddr, uint8_t *buf, uint16_t len) {
 
-  return (0);
+// ----------------------------------------------------------------------------
+ErrorStatus I2C_Master_Send(I2C_TypeDef* I2Cx, uint16_t slaveAddr, uint8_t *buf, uint32_t len) {
+
+  I2C_Start(I2Cx);
+  if (I2C_SendAddress(I2Cx, slaveAddr)) return (ERROR);
+
+  for (uint16_t i = 0; i < len; i++) {
+    I2C_WriteByte(I2Cx, *buf++); 
+  }
+  I2C_Stop(I2Cx);
+  return (SUCCESS);
 }
 
 
 
 
+// ----------------------------------------------------------------------------
+ErrorStatus I2C_Master_Receive(I2C_TypeDef* I2Cx, uint16_t slaveAddr, uint8_t *buf, uint16_t len) {
 
+  I2C_Start(I2Cx);
+  
+  if (I2C_SendAddress(I2Cx, slaveAddr)) return (ERROR);
+  
+  for (uint16_t i = 0; i < len; i++) {
+    *buf++ = I2C_ReadByte(I2Cx); 
+  }
 
-/**
-  * @brief  Reads 8 bit data via I2C
-  * @param  I2Cx: pointer to an I2C instance
-  * @return  a received byte
-  */
-int I2C_Read(I2C_TypeDef *I2Cx, uint8_t slaveAddr, uint8_t reg, uint8_t *buf, uint16_t len) {
+  I2C_Stop(I2Cx);
 
-  return (0);
+  return (SUCCESS);
 }
-
-
-

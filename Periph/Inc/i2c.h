@@ -54,20 +54,33 @@ int I2C_WriteByte(I2C_TypeDef*, uint8_t);
 uint8_t I2C_ReadByte(I2C_TypeDef*);
 
 
-/**
-  * @brief  Writes 8 bit data via I2C
-  * @param  I2Cx: pointer to an I2C instance
-  * @param  data: a byte to send
-  * @return None
-  */
-int I2C_Write(I2C_TypeDef*, uint8_t, uint8_t*, uint16_t);
+
+
+
+
 
 /**
-  * @brief  Reads 8 bit data via I2C
-  * @param  I2Cx: pointer to an I2C instance
-  * @return  a received byte
+  * @brief  Transmits in master mode an amount of data.
+  * @param  I2Cx Pointer to a I2C_TypeDef I2Cx.
+  * @param  slaveAddress Target I2Cx address: The I2Cx 7 bits address value
+  *         in datasheet must be shifted to the left before calling the interface
+  * @param  buf Pointer to data buffer
+  * @param  len Amount of data to be sent
+  * @return transmit status
   */
-int I2C_Read(I2C_TypeDef*, uint8_t, uint8_t, uint8_t*, uint16_t);
+ErrorStatus I2C_Master_Send(I2C_TypeDef *I2Cx, uint16_t slaveAddr, uint8_t *buf, uint32_t len);
+
+/**
+  * @brief  Receives in master mode an amount of data.
+  * @param  I2Cx Pointer to a I2C_TypeDef I2Cx.
+  * @param  slaveAddress Target I2Cx address: The I2Cx 7 bits address value
+  *         in datasheet must be shifted to the left before calling the interface
+  * @param  buf Pointer to data buffer
+  * @param  len Amount of data to be sent
+  * @return receive status
+  */
+ErrorStatus I2C_Master_Receive(I2C_TypeDef *I2Cx, uint16_t slaveAddr, uint8_t *buf, uint16_t len);
+
 
 #ifdef __cplusplus
 }

@@ -144,7 +144,7 @@ typedef struct {
   I2C_TypeDef *bus;
 } BMx280_ItemTypeDef;
 
-#define BMX280_I2C_ADDR   (0x76 << 1)
+#define BMX280_I2C_ADDR   0x76
 
 #define BMX280_DEV_ID     0xd0
 #define BMX280_CALIB1     0x88
