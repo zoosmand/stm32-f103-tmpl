@@ -45,7 +45,6 @@ SystemInit:
   @ bl WWatchdogInit
   bl LedInit
   bl Usart1Init
-  bl I2c1Init
   bl OwInit
 
   @ Set up CoreDebug_DEMCR_TRCENA_Msk

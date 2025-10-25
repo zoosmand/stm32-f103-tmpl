@@ -363,7 +363,7 @@ int W25qxx_Init(W25qxx_TypeDef* dev) {
 
   dev->Lock = 0;
 
-  if (!(dev->ManID == 0xef) && !(dev->Type = 0x40)) ret = 1;
+  if (!(dev->ManID == 0xef) && !(dev->Type == 0x40)) ret = 1;
 
   /* protect first 32K */
   // uint8_t stub;

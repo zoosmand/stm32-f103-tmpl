@@ -44,6 +44,7 @@ extern "C" {
 #include "fonts.h"
 #include "w25qxx.h"
 #include "max72xx.h"
+#include "bmx280.h"
 
 
 #if defined(USE_FULL_ASSERT)
@@ -79,6 +80,8 @@ extern uint32_t secCnt;
 #define SPI1_RF         3
 #define W25QXX_RF       4
 #define MAX72XX_RF      5
+#define BMX280_RF       6
+#define I2C1_RF         7
 
 
 /* Exported defines -----------------------------------------------------------*/

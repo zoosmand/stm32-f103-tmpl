@@ -1,7 +1,7 @@
 /**
   ******************************************************************************
-  * @file           : max7219.h
-  * @brief          : This file contains header definitions MAX 7219 display
+  * @file           : max72xx.h
+  * @brief          : This file contains header definitions MAX 72xx display
   ******************************************************************************
   * @attention
   *

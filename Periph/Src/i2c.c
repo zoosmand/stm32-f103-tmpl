@@ -21,6 +21,36 @@
 
 
 
+int I2C_Init(I2C_TypeDef* I2Cx) {
+
+  /* Condigure PB6 - SCL, PB7 - SDA, 2MHz frequency, alternative*/
+
+  if (I2Cx == I2C1) {
+    MODIFY_REG(I2C_Port->CRL,
+      (SCL_Pin_Mask | SDA_Pin_Mask), (
+        ((GPIO_AF_OD | GPIO_IOS_2) << (SCL_Pin_Pos * 4U))
+      | ((GPIO_AF_OD | GPIO_IOS_2) << (SDA_Pin_Pos * 4U))
+    ));
+  }
+
+  /* Set I2C frequency */
+  MODIFY_REG(I2Cx->CR2, I2C_CR2_FREQ_Msk, APB1_FREQ/1000000);
+  MODIFY_REG(I2Cx->CCR, I2C_CCR_CCR_Msk, (((I2C_TRISE_SM/2)/(1000/(APB1_FREQ/1000000)))+1));
+  MODIFY_REG(I2Cx->TRISE, I2C_TRISE_TRISE_Msk, ((1000/(1000/(APB1_FREQ/1000000)))+1));
+  
+  
+  if (I2Cx == I2C1) {
+    // NVIC_SetPriority(I2C1_ER_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 15, 0));
+    // NVIC_EnableIRQ(I2C1_ER_IRQn);
+    return (0);
+  }
+
+
+  return (1);
+}
+
+
+
 
 /**
  * @brief  Starts (sends start condition) to the given I2C peripherals
@@ -54,6 +84,8 @@ int I2C_Start(I2C_TypeDef* I2Cx){
   }
   return (0);
 }
+
+
 
 
 /**
@@ -144,6 +176,8 @@ int I2C_WriteByte(I2C_TypeDef* I2Cx, uint8_t txByte){
 }
 
 
+
+
 /**
  * @brief  Reads a byte value from the given I2C bus
  * @param  I2Cx: pointer to the I2C peripherals
@@ -175,4 +209,35 @@ uint8_t I2C_ReadByte(I2C_TypeDef* I2Cx){
   
   return rxByte;
 }
+
+
+
+
+/**
+  * @brief  Writes 8 bit data via I2C
+  * @param  I2Cx: pointer to an I2C instance
+  * @param  data: a byte to send
+  * @return None
+  */
+int I2C_Write(I2C_TypeDef *I2Cx, uint8_t slaveAddr, uint8_t *buf, uint16_t len) {
+
+  return (0);
+}
+
+
+
+
+
+
+/**
+  * @brief  Reads 8 bit data via I2C
+  * @param  I2Cx: pointer to an I2C instance
+  * @return  a received byte
+  */
+int I2C_Read(I2C_TypeDef *I2Cx, uint8_t slaveAddr, uint8_t reg, uint8_t *buf, uint16_t len) {
+
+  return (0);
+}
+
+
 

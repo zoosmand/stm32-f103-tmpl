@@ -24,17 +24,15 @@
 
 // ----------------------------------------------------------------------------
 int SPI_Init(SPI_TypeDef* SPIx) {
-  uint8_t pump = 0;
-
 
   /* Enable GPIO SCK, MISO, MOSI alternative on high speed */
 
   if (SPIx == SPI1) {
     MODIFY_REG(SPI_Port->CRL,
       (NSS_0_Pin_Mask | SCK_Pin_Mask | MISO_Pin_Mask | MOSI_Pin_Mask | NSS_1_Pin_Mask), (
-        ((GPIO_AF_PP | GPIO_IOS_10) << (SCK_Pin_Pos * 4U))
-      | ((GPIO_AF_PP | GPIO_IOS_10) << (MISO_Pin_Pos * 4U))
-      | ((GPIO_AF_PP | GPIO_IOS_10) << (MOSI_Pin_Pos * 4U))
+        ((GPIO_AF_PP | GPIO_IOS_50) << (SCK_Pin_Pos * 4U))
+      | ((GPIO_AF_PP | GPIO_IOS_50) << (MISO_Pin_Pos * 4U))
+      | ((GPIO_AF_PP | GPIO_IOS_50) << (MOSI_Pin_Pos * 4U))
       | ((GPIO_GPO_PP | GPIO_IOS_2) << (NSS_0_Pin_Pos * 4U))
       | ((GPIO_GPO_PP | GPIO_IOS_2) << (NSS_1_Pin_Pos * 4U))
     ));

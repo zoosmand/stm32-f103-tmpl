@@ -43,18 +43,29 @@ __IO static W25qxx_TypeDef flash_0 = {
 };
 
 
-__IO static uint16_t maxBuf[(MAX72XX_MAX_SEG_CNT * 8)];
-
+__IO static uint16_t max_0[(MAX72XX_MAX_SEG_CNT * 8)];
 __IO static Max72xx_TypeDef maxDisplay = {
   .SegCnt     = MAX72XX_SEG_CNT,
   .MaxSegCnt  = MAX72XX_MAX_SEG_CNT,
-  .BufPtr     = maxBuf,
+  .BufPtr     = max_0,
   .SPIx       = SPI1,
   .DMAx       = DMA1,
   .DMAxTx     = DMA1_Channel3,
   .DMAxRx     = DMA1_Channel2,
 };
 
+
+// __IO static uint8_t boschBuf[8];
+// __IO static BMx280_TypeDef bosch_0 = {
+//   .I2Cx   = I2C1,
+//   .BufPtr = boschBuf,
+// };
+
+__IO static BMx280_ItemTypeDef bosch_0 = {
+  .sensorType = BME280,
+  .busType = BMx280_I2C,
+  .bus = I2C2
+};
 
 
 /* Private function prototypes -----------------------------------------------*/
@@ -151,15 +162,19 @@ void Cron_Handler(void) {
   SET_BIT(CoreDebug->DEMCR, CoreDebug_DEMCR_TRCENA_Msk);
 
   if (!OneWire_Search())    FLAG_SET(&_ASREG_, OneWireBus_RF);
-  if (!SSD13xx_Init(I2C1))  FLAG_SET(&_ASREG_, SSDDisplay_RF);
-  if (!WHxxxx_Init(I2C1))   FLAG_SET(&_ASREG_, WHDisplay_RF);
   if (!SPI_Init(SPI1))      FLAG_SET(&_ASREG_, SPI1_RF);
+  if (!I2C_Init(I2C1))      FLAG_SET(&_ASREG_, I2C1_RF);
   
   if (FLAG_CHECK(&_ASREG_, SPI1_RF)) {
     if (!W25qxx_Init(&flash_0)) FLAG_SET(&_ASREG_, W25QXX_RF);
-    if (!MAX72xx_Init(&maxDisplay)) FLAG_SET(&_ASREG_, MAX72XX_RF);
+    // if (!MAX72xx_Init(&max_0)) FLAG_SET(&_ASREG_, MAX72XX_RF);
   }
   
+  if (FLAG_CHECK(&_ASREG_, I2C1_RF)) {
+    // if (!BMx280_Init(&bosch_0)) FLAG_SET(&_ASREG_, BMX280_RF);
+    if (!SSD13xx_Init(I2C1))  FLAG_SET(&_ASREG_, SSDDisplay_RF);
+    if (!WHxxxx_Init(I2C1))   FLAG_SET(&_ASREG_, WHDisplay_RF);
+  }
   /* Display calibration */
   printf("\n");
 
