@@ -132,6 +132,7 @@ PeripheralInit:
   | RCC_APB2ENR_IOPBEN \
   | RCC_APB2ENR_IOPCEN \
   | RCC_APB2ENR_USART1EN \
+  | RCC_APB2ENR_SPI1EN \
   , RCC_APB2ENR
   
   STRW \
@@ -139,6 +140,10 @@ PeripheralInit:
   | RCC_APB1ENR_PWREN \
   | RCC_APB1ENR_I2C1EN \
   , RCC_APB1ENR
+
+  STRW \
+    RCC_AHBENR_DMA1EN \
+  , RCC_AHBENR
 
   pop {pc}
 

@@ -49,7 +49,7 @@ __STATIC_INLINE void _putc(uint8_t ch) {
   #endif
 
   #ifdef DSPL_OUT
-    if (FLAG_CHECK(&_ASREG_, SSDDisplay_flag) || FLAG_CHECK(&_ASREG_, WHDisplay_flag)) {
+    if (FLAG_CHECK(&_ASREG_, SSDDisplay_RF) || FLAG_CHECK(&_ASREG_, WHDisplay_RF)) {
       putc_dspl(ch);
     }
   #endif

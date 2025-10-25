@@ -20,7 +20,7 @@
 
 /* Global variables ---------------------------------------------------------*/
 __attribute__((section(".cron"))) uint32_t _GEREG_              = 0;
-__attribute__((section(".cron"))) uint32_t _ASREG_       = 0;
+__attribute__((section(".cron"))) uint32_t _ASREG_              = 0;
 __attribute__((section(".cron"))) uint32_t sysCnt               = 0;
 __attribute__((section(".cron"))) uint32_t secCnt               = 0;
 
@@ -34,6 +34,28 @@ __attribute__((section(".cron"))) uint32_t secCnt               = 0;
 
 /* Private variables ---------------------------------------------------------*/
 static __attribute__((section(".cron"))) uint32_t secCntCache   = 0;
+
+__IO static W25qxx_TypeDef flash_0 = {
+  .SPIx   = SPI1,
+  .DMAx   = DMA1,
+  .DMAxTx = DMA1_Channel3,
+  .DMAxRx = DMA1_Channel2,
+};
+
+
+__IO static uint16_t maxBuf[(MAX72XX_MAX_SEG_CNT * 8)];
+
+__IO static Max72xx_TypeDef maxDisplay = {
+  .SegCnt     = MAX72XX_SEG_CNT,
+  .MaxSegCnt  = MAX72XX_MAX_SEG_CNT,
+  .BufPtr     = maxBuf,
+  .SPIx       = SPI1,
+  .DMAx       = DMA1,
+  .DMAxTx     = DMA1_Channel3,
+  .DMAxRx     = DMA1_Channel2,
+};
+
+
 
 /* Private function prototypes -----------------------------------------------*/
 
@@ -52,9 +74,9 @@ int main(void) {
   if (CRON_SEC_EVENT) {
     
     // printf("The long test message, that might stuck the program but now it does not at all...\n");
-    // printf("sec:%li\n", secCnt);
+    printf("sec:%li\n", secCnt);
     
-    if (FLAG_CHECK(&_ASREG_, OneWireBus_flag)) {
+    if (FLAG_CHECK(&_ASREG_, OneWireBus_RF)) {
       if (tmpCnt <= secCnt ) {
 
         OneWireDevice_t* devs = Get_OwDevices();
@@ -77,6 +99,41 @@ int main(void) {
         tmpCnt = secCnt + 4;
       }
     }
+
+
+    if (FLAG_CHECK(&_ASREG_, MAX72XX_RF)) {
+      MAX72xx_Print(&maxDisplay, "1234567890");
+    }
+ 
+    if (FLAG_CHECK(&_ASREG_, W25QXX_RF)) {
+      // __IO static uint8_t dataBuf[16];
+      // __IO static uint8_t dataBuf2[256];
+      // dataBuf[0] = 200;
+      // dataBuf[1] = 201;
+      // dataBuf[2] = 202;
+      // dataBuf[3] = 203;
+      // dataBuf[4] = 204;
+      // dataBuf[5] = 205;
+      // dataBuf[6] = 206;
+      // dataBuf[7] = 207;
+      // dataBuf[8] = 208;
+      // dataBuf[9] = 209;
+      // dataBuf[10] = 210;
+      // dataBuf[11] = 211;
+      // dataBuf[12] = 212;
+      // dataBuf[13] = 213;
+      // dataBuf[14] = 214;
+      // dataBuf[15] = 215;
+
+
+      // if (W25qxx_Erase(&flash_0, 0, 32)) printf("Cannot erase the flash\n");
+      // if (W25qxx_Read(&flash_0, 0x00000000, 256, dataBuf2)) printf("Cannot read the flash\n");
+
+      // if (W25qxx_Write(&flash_0, 0x00000000, 16, dataBuf)) printf("Cannot write to the flash\n");
+      // if (W25qxx_Read(&flash_0, 0x00000000, 256, dataBuf2)) printf("Cannot read the flash\n");
+
+      __NOP();
+    }
   }
 
   Led_Handler();
@@ -93,9 +150,18 @@ void Cron_Handler(void) {
   __NVIC_SetPriorityGrouping(NVIC_PRIORITYGROUP_4);
   SET_BIT(CoreDebug->DEMCR, CoreDebug_DEMCR_TRCENA_Msk);
 
-  if (!OneWire_Search())    FLAG_SET(&_ASREG_, OneWireBus_flag);
-  if (!SSD13xx_Init(I2C1))  FLAG_SET(&_ASREG_, SSDDisplay_flag);
-  if (!WHxxxx_Init(I2C1))   FLAG_SET(&_ASREG_, WHDisplay_flag);
+  if (!OneWire_Search())    FLAG_SET(&_ASREG_, OneWireBus_RF);
+  if (!SSD13xx_Init(I2C1))  FLAG_SET(&_ASREG_, SSDDisplay_RF);
+  if (!WHxxxx_Init(I2C1))   FLAG_SET(&_ASREG_, WHDisplay_RF);
+  if (!SPI_Init(SPI1))      FLAG_SET(&_ASREG_, SPI1_RF);
+  
+  if (FLAG_CHECK(&_ASREG_, SPI1_RF)) {
+    if (!W25qxx_Init(&flash_0)) FLAG_SET(&_ASREG_, W25QXX_RF);
+    if (!MAX72xx_Init(&maxDisplay)) FLAG_SET(&_ASREG_, MAX72XX_RF);
+  }
+  
+  /* Display calibration */
+  printf("\n");
 
   
   while (1) {

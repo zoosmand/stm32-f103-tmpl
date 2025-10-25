@@ -14,8 +14,8 @@
   *
   ******************************************************************************
   */
-#ifndef _I2C_H
-#define _I2C_H
+#ifndef __I2C_H
+#define __I2C_H
 
 #ifdef __cplusplus
  extern "C" {
@@ -40,4 +40,4 @@ uint8_t I2C_ReadByte(I2C_TypeDef*);
 #ifdef __cplusplus
 }
 #endif
-#endif // _I2C_H
+#endif // __I2C_H

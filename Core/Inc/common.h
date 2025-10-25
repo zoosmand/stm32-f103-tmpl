@@ -87,19 +87,32 @@
 #define GPIO_PIN_15_Mask            0xf0000000
 #define GPIO_PIN_ALL                (uint16_t)0xffff /*!< Select all pins */
 /* GPIO Modes bit definitions */
-#define _MODE_OUT                   0b01 /* GPIO output mode */
-#define _MODE_IN                    0b00 /* GPIO input mode */
-#define _MODE_AF                    0b10 /* GPIO alternate function mode */ 
-#define _MODE_AN                    0b11 /* GPIO analog mode */
-#define _OTYPE_PP                   0b0  /* GPIO output push-pull mode */ 
-#define _OTYPE_OD                   0b1  /* GPIO output open-drain mode */
-#define _SPEED_L                    0b00 /* GPIO low speed ~2MHz */
-#define _SPEED_M                    0b01 /* GPIO medium speed ~10MHz */
-#define _SPEED_H                    0b10 /* GPIO high speed ~25MHz */
-#define _SPEED_V                    0b11 /* GPIO very high speed ~100MHz */
-#define _PUPD_NO                    0b00 /* GPIO neither pull-up, no pull-down */
-#define _PUPD_PU                    0b01 /* GPIO pull-up */
-#define _PUPD_PD                    0b10 /* GPIO pull-down */
+// #define GPIO_MODE_OUT               0b01 /* GPIO output mode */
+// #define GPIO_MODE_IN                0b00 /* GPIO input mode */
+// #define GPIO_MODE_AF                0b10 /* GPIO alternate function mode */ 
+// #define GPIO_MODE_AN                0b11 /* GPIO analog mode */
+// #define GPIO_OTYPE_PP               0b0  /* GPIO output push-pull mode */ 
+// #define GPIO_OTYPE_OD               0b1  /* GPIO output open-drain mode */
+// #define GPIO_SPEED_L                0b00 /* GPIO low speed ~2MHz */
+// #define GPIO_SPEED_M                0b01 /* GPIO medium speed ~10MHz */
+// #define GPIO_SPEED_H                0b10 /* GPIO high speed ~25MHz */
+// #define GPIO_SPEED_V                0b11 /* GPIO very high speed ~100MHz */
+// #define GPIO_PUPD_NO                0b00 /* GPIO neither pull-up, no pull-down */
+// #define GPIO_PUPD_PU                0b01 /* GPIO pull-up */
+// #define GPIO_PUPD_PD                0b10 /* GPIO pull-down */
+
+#define GPIO_GPO_PP                 0b0000 // General purpose output push-pull
+#define GPIO_GPO_OD                 0b0100 // General purpose output open drain
+#define GPIO_IOS_2                  0b0010 // I/O speed is 2 MHz
+#define GPIO_IOS_10                 0b0001 // I/O speed is 10 MHz
+#define GPIO_IOS_50                 0b0011 // I/O speed is 50 MHz
+#define GPIO_AF_PP                  0b1000 // Alterhative function push-pull
+#define GPIO_AF_OD                  0b1100 // Alterhative function open drain
+#define GPIO_IN_AN                  0b0000 // Input analog
+#define GPIO_IN_FL                  0b0100 // Input floating point
+#define GPIO_IN_PD                  0b1000 // correspondent ODR register pin has to be 0
+#define GPIO_IN_PU                  0b1000 // correspondent ODR register pin has to be 1
+
 /* GPIO Alternative function defines */
 #define GPIO_AF_0                   0b0000 /*!< Select alternate function 0 */
 #define GPIO_AF_1                   0b0001 /*!< Select alternate function 1 */
