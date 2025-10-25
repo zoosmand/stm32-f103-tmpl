@@ -16,8 +16,8 @@
   */
 
 
-#ifndef __MAX7219_H
-#define __MAX7219_H
+#ifndef __MAX72XX_H
+#define __MAX72XX_H
 
 #include "main.h"
 
@@ -25,8 +25,8 @@
  extern "C" {
 #endif
 
-#define MAX7219_SEG_CNT       4
-#define MAX7219_MAX_SEG_CNT   32
+#define MAX72XX_SEG_CNT       4
+#define MAX72XX_MAX_SEG_CNT   (MAX72XX_SEG_CNT * 8)
 
 /**
  * @brief   MAX7219 device type definition struct.
@@ -35,22 +35,32 @@ typedef struct {
   uint8_t               SegCnt;
   uint8_t               MaxSegCnt;
   uint16_t*             BufPtr;
-  uint16_t*             TmpBufPtr;
   uint8_t               Lock;
   SPI_TypeDef*          SPIx;
   DMA_TypeDef*          DMAx;
   DMA_Channel_TypeDef*  DMAxTx;
   DMA_Channel_TypeDef*  DMAxRx;
-} Max7219_TypeDef;
+} Max72xx_TypeDef;
 
 
+/**
+ * @brief   Initializes the given MAX72xx device.
+ * @param   dev: pointer to the MAX72xx device struct
+ * @retval  (int) status of operation
+ */
+int MAX72xx_Init(Max72xx_TypeDef*);
 
-int MAX7219_Init(Max7219_TypeDef*);
-void MAX7219_Print(Max7219_TypeDef*, const char*);
+/**
+ * @brief   Prints the buffer from the given MAX72xx dev.
+ * @param   dev: pointer to the MAX72xx device struct
+ * @param   buf: chars buffer to print
+ * @retval  none
+ */
+void MAX72xx_Print(Max72xx_TypeDef*, const char*);
 
 
 #ifdef __cplusplus
 }
 #endif
-#endif /* __MAX7219_H */
+#endif /* __MAX72XX_H */
 

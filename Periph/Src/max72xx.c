@@ -1,6 +1,6 @@
 /**
   ******************************************************************************
-  * @file           : max7219.c
+  * @file           : max72xx.c
   * @brief          : This file contains MAX 7219 display
   ******************************************************************************
   * @attention
@@ -17,36 +17,44 @@
 
 
 /* Includes ------------------------------------------------------------------*/
-#include "max7219.h"
+#include "max72xx.h"
 
 /* Private variables ---------------------------------------------------------*/
 
 /* Private function prototypes -----------------------------------------------*/
-static int mAX7219_PrintBuf(Max7219_TypeDef* dev, uint16_t);
-static void mAX7219_CompressBuf(Max7219_TypeDef* dev, uint16_t, uint8_t);
 
 /**
- * @brief Adjusts SPI bus according to MAC7219 parameters.
- * @param   dev: pointer to the flash device struct
+ * @brief   Prints the buffer from the given MAX72xx dev.
+ * @param   dev: pointer to the MAX72xx device struct
+ * @param   len: number of bytes to print at the buffer
  * @retval  none
  */
-__STATIC_INLINE void SPI_Adjust(Max7219_TypeDef*);
-
-
-
-
-
-
-////////////////////////////////////////////////////////////////////////////////
+static int mAX72xx_PrintBuf(Max72xx_TypeDef*, uint16_t);
 
 /**
-  * @brief  Transfesr SPI data via DMA
-  * @param  cnt: Count of bytes to transfer
-  * @param  dir: Direction - READ or WRITE EEPROM
-  * @param  offset: Offset of a particular address of EEPROM
-  * @retval None
-  */
-int MAX7219_Init(Max7219_TypeDef* dev) {
+ * @brief   Compresses the buffer from the given MAX72xx dev.
+ * @param   dev: pointer to the MAX72xx device struct
+ * @param   len: number of bytes to print at the buffer
+ * @param   step: number of offset steps
+ * @retval  none
+ */
+static void mAX72xx_CompressBuf(Max72xx_TypeDef*, uint16_t, uint8_t);
+
+/**
+ * @brief Adjusts SPI bus according to MAX72xx parameters.
+ * @param   dev: pointer to the MAX72xx device struct
+ * @retval  none
+ */
+__STATIC_INLINE void SPI_Adjust(Max72xx_TypeDef*);
+
+
+
+
+
+
+
+// ----------------------------------------------------------------------------
+int MAX72xx_Init(Max72xx_TypeDef* dev) {
   if ((dev->SPIx == NULL) || (dev->DMAx == NULL) || (dev->DMAxRx == NULL) || (dev->DMAxTx == NULL)) return (1); 
 
   dev->Lock = 1;
@@ -92,7 +100,8 @@ int MAX7219_Init(Max7219_TypeDef* dev) {
 
 
 
-__STATIC_INLINE void SPI_Adjust(Max7219_TypeDef* dev) {
+// ----------------------------------------------------------------------------
+__STATIC_INLINE void SPI_Adjust(Max72xx_TypeDef* dev) {
   /* adjust frequency divider, 0b010 = 8, (PCLK)72/8 = 9MHz */
   /* set 16-bit data buffer length */ 
   MODIFY_REG(dev->SPIx->CR1, (SPI_CR1_BR_Msk, SPI_CR1_DFF_Msk), (SPI_CR1_BR_1 | SPI_CR1_DFF));
@@ -107,10 +116,8 @@ __STATIC_INLINE void SPI_Adjust(Max7219_TypeDef* dev) {
 
 
 
-/*
- *
- */
-static int mAX7219_PrintBuf(Max7219_TypeDef* dev, uint16_t len) {
+// ----------------------------------------------------------------------------
+static int mAX72xx_PrintBuf(Max72xx_TypeDef* dev, uint16_t len) {
 
   SPI_Adjust(dev);
   if (SPI_Enable(dev->SPIx)) return (1);
@@ -119,7 +126,7 @@ static int mAX7219_PrintBuf(Max7219_TypeDef* dev, uint16_t len) {
     NSS_1_L;
     
     for (uint8_t k = 0; k < dev->SegCnt; k++) {
-      if (SPI_Write_16b(dev->SPIx, &(dev->TmpBufPtr)[k + (len * i)], 1)) return (1);
+      if (SPI_Write_16b(dev->SPIx, &(dev->BufPtr)[k + (len * i)], 1)) return (1);
     }
     
     NSS_1_H;
@@ -132,10 +139,9 @@ static int mAX7219_PrintBuf(Max7219_TypeDef* dev, uint16_t len) {
 
 
 
-/*
- *
- */
-void MAX7219_Print(Max7219_TypeDef* dev, const char* buf) {
+
+// ----------------------------------------------------------------------------
+void MAX72xx_Print(Max72xx_TypeDef* dev, const char* buf) {
 
   uint16_t len = 0;
   const char *buf_ = buf;
@@ -153,27 +159,21 @@ void MAX7219_Print(Max7219_TypeDef* dev, const char* buf) {
     } else pos -= 32;
     
     for (uint8_t i = 0; i < 8; i++) {
-      dev->TmpBufPtr[(k + (len * i))] = ((i + 1) << 8) | (uint8_t)font_dot_5x7_max[pos][i];
+      dev->BufPtr[(k + (len * i))] = ((i + 1) << 8) | (uint8_t)font_dot_5x7_max[pos][i];
     }
   }
 
   /* TODO fix buffer overflow bug */
-  // mAX7219_CompressBuf(dev, len, 2);
-  if (mAX7219_PrintBuf(dev, len)) return;
+  // mAX72xx_CompressBuf(dev, len, 2);
+  if (mAX72xx_PrintBuf(dev, len)) return;
 }
 
 
 
 
 
-
-
-
-
-/*
- *
- */
-static void mAX7219_CompressBuf(Max7219_TypeDef* dev, uint16_t len, uint8_t step) {
+// ----------------------------------------------------------------------------
+static void mAX72xx_CompressBuf(Max72xx_TypeDef* dev, uint16_t len, uint8_t step) {
 
   if (step > 3) return;
   uint16_t cur_val, next_val, cur_ptr, next_ptr;
@@ -191,7 +191,7 @@ static void mAX7219_CompressBuf(Max7219_TypeDef* dev, uint16_t len, uint8_t step
     for (uint8_t k = 0; k < len; k++) {
 
       if ((k + 2) >= len) {
-        dev->TmpBufPtr[k + 1] = (dev->TmpBufPtr[k + 1] & 0xff00);
+        dev->BufPtr[k + 1] = (dev->BufPtr[k + 1] & 0xff00);
         break;
       }
 
@@ -205,11 +205,11 @@ static void mAX7219_CompressBuf(Max7219_TypeDef* dev, uint16_t len, uint8_t step
       cur_ptr   = len * i;
       next_ptr  = (len * i) + 1 + step_offset;
       
-      cur_val   = dev->TmpBufPtr[k + cur_ptr];
-      next_val  = dev->TmpBufPtr[k + next_ptr];
+      cur_val   = dev->BufPtr[k + cur_ptr];
+      next_val  = dev->BufPtr[k + next_ptr];
 
-      dev->TmpBufPtr[k + cur_ptr]                  = (cur_val & 0x00ff) | (((next_val & 0x00ff) << step_tmp) >> 8) | (cur_val & 0xff00);
-      dev->TmpBufPtr[k + next_ptr - step_offset]   = ((next_val << step_tmp) & 0x00ff) | (next_val & 0xff00);
+      dev->BufPtr[k + cur_ptr]                  = (cur_val & 0x00ff) | (((next_val & 0x00ff) << step_tmp) >> 8) | (cur_val & 0xff00);
+      dev->BufPtr[k + next_ptr - step_offset]   = ((next_val << step_tmp) & 0x00ff) | (next_val & 0xff00);
 
     }
   }
