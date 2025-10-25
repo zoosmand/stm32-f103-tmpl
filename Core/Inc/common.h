@@ -37,69 +37,82 @@
 #define NVIC_PRIORITYGROUP_4         0x00000003U /*!< 4 bits for pre-emption priority 0 bits for subpriority */
 
 /* GPIO*/
-#define GPIO_PIN_0                  GPIO_BSRR_BS_0 /*!< Select pin 0 */
-#define GPIO_PIN_0_Pos              0
-#define GPIO_PIN_0_Mask             0x00000003
-#define GPIO_PIN_1                  GPIO_BSRR_BS_1 /*!< Select pin 1 */
-#define GPIO_PIN_1_Pos              1
-#define GPIO_PIN_1_Mask             0x0000000c
-#define GPIO_PIN_2                  GPIO_BSRR_BS_2 /*!< Select pin 2 */
-#define GPIO_PIN_2_Pos              2
-#define GPIO_PIN_2_Mask             0x00000030
-#define GPIO_PIN_3                  GPIO_BSRR_BS_3 /*!< Select pin 3 */
-#define GPIO_PIN_3_Pos              3
-#define GPIO_PIN_3_Mask             0x000000c0
-#define GPIO_PIN_4                  GPIO_BSRR_BS_4 /*!< Select pin 4 */
-#define GPIO_PIN_4_Pos              4
-#define GPIO_PIN_4_Mask             0x00000300
-#define GPIO_PIN_5                  GPIO_BSRR_BS_5 /*!< Select pin 5 */
-#define GPIO_PIN_5_Pos              5
-#define GPIO_PIN_5_Mask             0x00000c00
-#define GPIO_PIN_6                  GPIO_BSRR_BS_6 /*!< Select pin 6 */
-#define GPIO_PIN_6_Pos              6
-#define GPIO_PIN_6_Mask             0x00003000
-#define GPIO_PIN_7                  GPIO_BSRR_BS_7 /*!< Select pin 7 */
-#define GPIO_PIN_7_Pos              7
-#define GPIO_PIN_7_Mask             0x0000c000
-#define GPIO_PIN_8                  GPIO_BSRR_BS_8 /*!< Select pin 8 */
-#define GPIO_PIN_8_Pos              8
-#define GPIO_PIN_8_Mask             0x00030000
-#define GPIO_PIN_9                  GPIO_BSRR_BS_9 /*!< Select pin 9 */
-#define GPIO_PIN_9_Pos              9
-#define GPIO_PIN_9_Mask             0x000c0000
-#define GPIO_PIN_10                 GPIO_BSRR_BS_10 /*!< Select pin 10 */
-#define GPIO_PIN_10_Pos             10
-#define GPIO_PIN_10_Mask            0x00300000
-#define GPIO_PIN_11                 GPIO_BSRR_BS_11 /*!< Select pin 11 */
-#define GPIO_PIN_11_Pos             11
-#define GPIO_PIN_11_Mask            0x00c00000
-#define GPIO_PIN_12                 GPIO_BSRR_BS_12 /*!< Select pin 12 */
-#define GPIO_PIN_12_Pos             12
-#define GPIO_PIN_12_Mask            0x03000000
-#define GPIO_PIN_13                 GPIO_BSRR_BS_13 /*!< Select pin 13 */
-#define GPIO_PIN_13_Pos             13
-#define GPIO_PIN_13_Mask            0x0c000000
-#define GPIO_PIN_14                 GPIO_BSRR_BS_14 /*!< Select pin 14 */
-#define GPIO_PIN_14_Pos             14
-#define GPIO_PIN_14_Mask            0x30000000
-#define GPIO_PIN_15                 GPIO_BSRR_BS_15 /*!< Select pin 15 */
-#define GPIO_PIN_15_Pos             15
-#define GPIO_PIN_15_Mask            0xc0000000
+#define GPIO_PIN_0                  GPIO_BSRR_BS0_Pos /*!< Select pin 0 */
+#define GPIO_PIN_0_Pos              GPIO_PIN_0
+#define GPIO_PIN_0_Mask             0x0000000f
+#define GPIO_PIN_1                  GPIO_BSRR_BS1_Pos /*!< Select pin 1 */
+#define GPIO_PIN_1_Pos              GPIO_PIN_1
+#define GPIO_PIN_1_Mask             0x000000f0
+#define GPIO_PIN_2                  GPIO_BSRR_BS2_Pos /*!< Select pin 2 */
+#define GPIO_PIN_2_Pos              GPIO_PIN_2
+#define GPIO_PIN_2_Mask             0x00000f00
+#define GPIO_PIN_3                  GPIO_BSRR_BS3_Pos /*!< Select pin 3 */
+#define GPIO_PIN_3_Pos              GPIO_PIN_3
+#define GPIO_PIN_3_Mask             0x0000f000
+#define GPIO_PIN_4                  GPIO_BSRR_BS4_Pos /*!< Select pin 4 */
+#define GPIO_PIN_4_Pos              GPIO_PIN_4
+#define GPIO_PIN_4_Mask             0x000f0000
+#define GPIO_PIN_5                  GPIO_BSRR_BS5_Pos /*!< Select pin 5 */
+#define GPIO_PIN_5_Pos              GPIO_PIN_5
+#define GPIO_PIN_5_Mask             0x00f00000
+#define GPIO_PIN_6                  GPIO_BSRR_BS6_Pos /*!< Select pin 6 */
+#define GPIO_PIN_6_Pos              GPIO_PIN_6
+#define GPIO_PIN_6_Mask             0x0f000000
+#define GPIO_PIN_7                  GPIO_BSRR_BS7_Pos /*!< Select pin 7 */
+#define GPIO_PIN_7_Pos              GPIO_PIN_7
+#define GPIO_PIN_7_Mask             0xf0000000
+#define GPIO_PIN_8                  GPIO_BSRR_BS8_Pos /*!< Select pin 8 */
+#define GPIO_PIN_8_Pos              GPIO_PIN_8
+#define GPIO_PIN_8_Mask             0x0000000f
+#define GPIO_PIN_9                  GPIO_BSRR_BS9_Pos /*!< Select pin 9 */
+#define GPIO_PIN_9_Pos              GPIO_PIN_9
+#define GPIO_PIN_9_Mask             0x000000f0
+#define GPIO_PIN_10                 GPIO_BSRR_BS10_Pos /*!< Select pin 10 */
+#define GPIO_PIN_10_Pos             GPIO_PIN_10
+#define GPIO_PIN_10_Mask            0x00000f00
+#define GPIO_PIN_11                 GPIO_BSRR_BS11_Pos /*!< Select pin 11 */
+#define GPIO_PIN_11_Pos             GPIO_PIN_11
+#define GPIO_PIN_11_Mask            0x0000f000
+#define GPIO_PIN_12                 GPIO_BSRR_BS12_Pos /*!< Select pin 12 */
+#define GPIO_PIN_12_Pos             GPIO_PIN_12
+#define GPIO_PIN_12_Mask            0x000f0000
+#define GPIO_PIN_13                 GPIO_BSRR_BS13_Pos /*!< Select pin 13 */
+#define GPIO_PIN_13_Pos             GPIO_PIN_13
+#define GPIO_PIN_13_Mask            0x00f00000
+#define GPIO_PIN_14                 GPIO_BSRR_BS14_Pos /*!< Select pin 14 */
+#define GPIO_PIN_14_Pos             GPIO_PIN_14
+#define GPIO_PIN_14_Mask            0x0f000000
+#define GPIO_PIN_15                 GPIO_BSRR_BS15_Pos /*!< Select pin 15 */
+#define GPIO_PIN_15_Pos             GPIO_PIN_15
+#define GPIO_PIN_15_Mask            0xf0000000
 #define GPIO_PIN_ALL                (uint16_t)0xffff /*!< Select all pins */
 /* GPIO Modes bit definitions */
-#define _MODE_OUT                   0b01 /* GPIO output mode */
-#define _MODE_IN                    0b00 /* GPIO input mode */
-#define _MODE_AF                    0b10 /* GPIO alternate function mode */ 
-#define _MODE_AN                    0b11 /* GPIO analog mode */
-#define _OTYPE_PP                   0b0  /* GPIO output push-pull mode */ 
-#define _OTYPE_OD                   0b1  /* GPIO output open-drain mode */
-#define _SPEED_L                    0b00 /* GPIO low speed ~2MHz */
-#define _SPEED_M                    0b01 /* GPIO medium speed ~10MHz */
-#define _SPEED_H                    0b10 /* GPIO high speed ~25MHz */
-#define _SPEED_V                    0b11 /* GPIO very high speed ~100MHz */
-#define _PUPD_NO                    0b00 /* GPIO neither pull-up, no pull-down */
-#define _PUPD_PU                    0b01 /* GPIO pull-up */
-#define _PUPD_PD                    0b10 /* GPIO pull-down */
+// #define GPIO_MODE_OUT               0b01 /* GPIO output mode */
+// #define GPIO_MODE_IN                0b00 /* GPIO input mode */
+// #define GPIO_MODE_AF                0b10 /* GPIO alternate function mode */ 
+// #define GPIO_MODE_AN                0b11 /* GPIO analog mode */
+// #define GPIO_OTYPE_PP               0b0  /* GPIO output push-pull mode */ 
+// #define GPIO_OTYPE_OD               0b1  /* GPIO output open-drain mode */
+// #define GPIO_SPEED_L                0b00 /* GPIO low speed ~2MHz */
+// #define GPIO_SPEED_M                0b01 /* GPIO medium speed ~10MHz */
+// #define GPIO_SPEED_H                0b10 /* GPIO high speed ~25MHz */
+// #define GPIO_SPEED_V                0b11 /* GPIO very high speed ~100MHz */
+// #define GPIO_PUPD_NO                0b00 /* GPIO neither pull-up, no pull-down */
+// #define GPIO_PUPD_PU                0b01 /* GPIO pull-up */
+// #define GPIO_PUPD_PD                0b10 /* GPIO pull-down */
+
+#define GPIO_GPO_PP                 0b0000 // General purpose output push-pull
+#define GPIO_GPO_OD                 0b0100 // General purpose output open drain
+#define GPIO_IOS_2                  0b0010 // I/O speed is 2 MHz
+#define GPIO_IOS_10                 0b0001 // I/O speed is 10 MHz
+#define GPIO_IOS_50                 0b0011 // I/O speed is 50 MHz
+#define GPIO_AF_PP                  0b1000 // Alterhative function push-pull
+#define GPIO_AF_OD                  0b1100 // Alterhative function open drain
+#define GPIO_IN_AN                  0b0000 // Input analog
+#define GPIO_IN_FL                  0b0100 // Input floating point
+#define GPIO_IN_PD                  0b1000 // correspondent ODR register pin has to be 0
+#define GPIO_IN_PU                  0b1000 // correspondent ODR register pin has to be 1
+
 /* GPIO Alternative function defines */
 #define GPIO_AF_0                   0b0000 /*!< Select alternate function 0 */
 #define GPIO_AF_1                   0b0001 /*!< Select alternate function 1 */
@@ -129,6 +142,11 @@
 #define EXTI_TRIGGER_FALLING        0b10 /*!< Trigger Falling Mode */
 #define EXTI_TRIGGER_BOTH           0b11 /*!< Trigger Rising & Falling Mode */
 
+/* IWDG */
+#define IWDG_KEY_RELOAD             0x0000aaaa
+#define IWDG_KEY_ENABLE             0x0000cccc
+#define IWDG_KEY_ACCESS             0x00005555
+#define IWDG_RELOAD_COUNTER         0x00000fff /* 4095 */
 
 
 
@@ -158,8 +176,8 @@
 #define PREG_CHECK(peripheral, key)                             (GET_PERIPH_BB_VAL((uint32_t)&peripheral, 0, key))
 
 /* --- Task control --- */
-#define CRON_SEC_EVENT                                          FLAG_CHECK(_GEREG_, _SYSSECF_)
-#define TASK_CTRL(task)                                         if (FLAG_CHECK(task.counterReg, task.entranceFlag)) task.callback((__I uint32_t*)&task);
+#define CRON_SEC_EVENT                                          FLAG_CHECK(&_GEREG_, _SYSSECF_)
+#define TASK_CTRL(task)                                         if (FLAG_CHECK(task.scheduler->counterReg, task.scheduler->entranceFlag)) task.callback((uint32_t*)&task);
 
 
 #define BIT_2_0(per)        (per * 2U)

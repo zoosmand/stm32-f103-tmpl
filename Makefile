@@ -4,6 +4,7 @@
 # ChangeLog :
 #	2025-02-08 - Init empty project
 # 2025-06-20 - Add THUMB conditional instruction
+# 2025-06-30 - Refactor text
 # ------------------------------------------------
 
 ######################################
@@ -19,7 +20,11 @@ TARGET = F103C8T6_tmpl
 DEBUG = 1
 # optimization
 OPT = -Og
-
+# platform
+ARCH := $(shell uname -m)
+SYS := $(shell uname -s)
+# output
+OUTPUT = 1
 
 #######################################
 # paths
@@ -33,17 +38,18 @@ BUILD_DIR = build
 # C sources
 C_SOURCES =  \
 $(wildcard Core/Src/*.c) \
+$(wildcard Periph/Src/*.c) \
 $(wildcard Tasks/Led/Src/*.c)
 
 # ASM sources
 ASM_SOURCES =  \
 startup_stm32f103xb.s \
-$(wildcard Core/Src/*.s) \
+$(wildcard Core/*.s) \
 $(wildcard Periph/*.s)
 
 # ASM sources
 ASMM_SOURCES = \
-$(wildcard Core/Src/*.S) \
+$(wildcard Core/*.S) \
 $(wildcard Periph/*.S)
 
 
@@ -83,20 +89,6 @@ CPU = -mcpu=cortex-m3
 MCU = $(CPU) -mthumb $(FPU) $(FLOAT-ABI)
 
 # macros for gcc
-# AS defines
-AS_DEFS = \
--DUSE_FULL_LL_DRIVER \
--DHSE_VALUE=8000000 \
--DHSE_STARTUP_TIMEOUT=100 \
--DLSE_STARTUP_TIMEOUT=5000 \
--DLSE_VALUE=32768 \
--DHSI_VALUE=8000000 \
--DLSI_VALUE=40000 \
--DVDD_VALUE=3300 \
--DPREFETCH_ENABLE=1 \
--DSTM32F103xB \
--D__ASSEMBLER__
-
 # C defines
 C_DEFS =  \
 -DUSE_FULL_LL_DRIVER \
@@ -110,16 +102,15 @@ C_DEFS =  \
 -DPREFETCH_ENABLE=1 \
 -DSTM32F103xB
 
+# AS defines
+AS_DEFS = $(C_DEFS) \
+-D__ASSEMBLER__
 
-# AS includes
-# AS_INCLUDES = \
-# -ICore/Inc \
-# -IDrivers/CMSIS/Device/ST/STM32F1xx/Include \
-# -IDrivers/CMSIS/Include
 
 # C includes
 C_INCLUDES =  \
 -ICore/Inc \
+-IPeriph/Inc \
 -ITasks/Led/Inc \
 -IDrivers/CMSIS/Device/ST/STM32F1xx/Include \
 -IDrivers/CMSIS/Include
@@ -133,10 +124,24 @@ ASFLAGS = $(MCU) $(AS_DEFS) $(AS_INCLUDES) $(OPT) -Wall -fdata-sections -ffuncti
 
 CFLAGS += $(MCU) $(C_DEFS) $(C_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections
 
+
 ifeq ($(DEBUG), 1)
 # CFLAGS += -g -gdwarf-2 -D CMAKE_CXX_FLAGS_RELEASE="-Wa,-mimplicit-it=thumb"
-CFLAGS += -g -gdwarf-2
-ASFLAGS += $(CFLAGS)
+# CFLAGS += -g -gdwarf-2 -Wextra -pedantic
+DEBUGFLAGS = -g -gdwarf-2 -DDEBUG
+CFLAGS += $(DEBUGFLAGS)
+ASFLAGS += $(DEBUGFLAGS)
+endif
+
+ifeq ($(OUTPUT), 1)
+OUTPUTFLAGS = -DDSPL_OUT=putc_dspl_wh1602
+ifeq ($(SYS), Darwin)
+OUTPUTFLAGS += -DSWO_ITM=0 
+else ifeq ($(SYS), Linux)
+OUTPUTFLAGS += -DUSART_OUT=USART1
+endif
+CFLAGS += $(OUTPUTFLAGS)
+ASFLAGS += $(OUTPUTFLAGS)
 endif
 
 

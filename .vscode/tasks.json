@@ -6,20 +6,12 @@
     {
       "label": "Make Firmware",
       "type": "shell",
-      "command": "gmake -j$(sysctl -n hw.ncpu) all TARGET=vsarm_firmware GCC_PATH=${env:VSARM}/arm-gcc/bin",
-      "options": {
-        "cwd": "${workspaceRoot}"
+      "osx": {
+        "command": "gmake -j$(sysctl -n hw.ncpu) all TARGET=vsarm_firmware GCC_PATH=${env:VSARM}/arm-gcc/bin"
       },
-      "group": {
-        "kind": "build",
-        "isDefault": true
+      "linux": {
+        "command": "gmake -j$(nproc) all TARGET=vsarm_firmware GCC_PATH=${env:VSARM}/arm-gcc/bin"
       },
-      "problemMatcher": []
-    },
-    {
-      "label": "Make Firmware Linux",
-      "type": "shell",
-      "command": "make -j$(nproc) all TARGET=vsarm_firmware GCC_PATH=${env:VSARM}/arm-gcc/bin",
       "options": {
         "cwd": "${workspaceRoot}"
       },
@@ -32,7 +24,14 @@
     {
       "label": "Load Firmware",
       "type": "shell",
-      "command": "st-flash write ${workspaceRoot}/build/vsarm_firmware.bin 0x08000000",
+      "osx": {
+        "command": "/Applications/SEGGER/JLink/JLinkExe -speed 6000 -if swd -device STM32F103C8 ./flash.jlink"
+        // "command": "st-flash write ${workspaceRoot}/build/vsarm_firmware.bin 0x08000000"
+      },
+      "linux": {
+        // "command": "JLinkExe -speed 6000 -if swd -device STM32F103C8 ./flash.jlink"
+        "command": "st-flash write ${workspaceRoot}/build/vsarm_firmware.bin 0x08000000"
+      },
       "options": {
         "cwd": "${workspaceRoot}"
       },

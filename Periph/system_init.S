@@ -6,6 +6,7 @@
   .thumb
 
 #include <stm32f103xb.h>
+#include <core_cm3.h>
 .include "stm32f1xx.inc"
 .include "macroses.inc"
 .include "local.inc"
@@ -25,20 +26,6 @@ SystemInit:
   mov zero, 0
   mov one, 1
   
-  /** Clear system stack */    
-  ldr tmpa, =(SRAM_BASE - 4)
-  mov tmp, (_SystemStackSize_ / 4)
-_ClearSystemStack:
-	str zero, [tmpa, #4]!
-	sub tmp, 1
-	teq tmp, 0
-	bne _ClearSystemStack
-
-  /** Init second cache with 1000 value */
-  ldr tmpa, =secCntCache
-  ldr tmpd, [tmpa]
-  add tmpd, tmpd, #0x03e8
-  str tmpd, [tmpa]
 
   /** Switch on MCU power */
   STRW \
@@ -58,6 +45,11 @@ _ClearSystemStack:
   @ bl WWatchdogInit
   bl LedInit
   bl Usart1Init
+  bl I2c1Init
+  bl OwInit
+
+  @ Set up CoreDebug_DEMCR_TRCENA_Msk
+  @ STRW 1<<0, CoreDebug_DEMCR
 
   pop {pc}
   .size SystemInit, .-SystemInit
@@ -140,12 +132,18 @@ PeripheralInit:
   | RCC_APB2ENR_IOPBEN \
   | RCC_APB2ENR_IOPCEN \
   | RCC_APB2ENR_USART1EN \
+  | RCC_APB2ENR_SPI1EN \
   , RCC_APB2ENR
   
   STRW \
     RCC_APB1ENR_WWDGEN \
   | RCC_APB1ENR_PWREN \
+  | RCC_APB1ENR_I2C1EN \
   , RCC_APB1ENR
+
+  STRW \
+    RCC_AHBENR_DMA1EN \
+  , RCC_AHBENR
 
   pop {pc}
 
@@ -222,6 +220,30 @@ WWatchdogInit:
   STRP one, WWDG_CR_WDGA_Pos
 
   pop {pc}
+
+
+
+@ /**
+@   * System initialization.
+@   *
+@   */
+@   .section .text._delay_us
+@   .global _delay_us
+@   .type _delay_us, %function
+
+@ _delay_us:
+@   push {r0, r1, lr}
+@   mov r1, 98
+@   muls r0, r0, r1
+@   @ adds r0, r0, #2
+@   @ nop
+@   mov r1, 10
+@   __delay_us_loop_:
+@     @ nop
+@     subs r0, r0, r1
+@     bpl __delay_us_loop_
+@   pop {r0, r1, pc}
+@   .size _delay_us, .-_delay_us
 
 
   .end

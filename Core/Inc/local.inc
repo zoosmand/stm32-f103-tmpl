@@ -25,21 +25,16 @@ _ON_    .req v7
 .equ PERIPH_BB,               0x42000000
 .equ SRAM_BB,                 0x22000000
 .equ SRAM_BASE,               0x20000000
-.equ _SystemStackSize_,       128
+.equ _SystemStackSize_,       256
+
+
+.equ APB2_FREQ,               72000000
+.equ APB1_FREQ,               APB2_FREQ/2
 
 
 /* ------------------------------------------------------------------------- */
 /*                            Critical values                                */
 /* ------------------------------------------------------------------------- */
-/** Global system variables */
-.equ _GEREG_,                 SRAM_BASE
-.equ sysQuantCnt,             SRAM_BASE + 0x04
-.equ secCnt,                  SRAM_BASE + 0x08
-.equ secCntCache,             SRAM_BASE + 0x0c
-
-/** Global Events Register Flags */
-@ .equ _SYSTICKF_,              0 @ SysTick Interval Flag
-.equ _SYSSECF_,               1 @ SysTick Interval Flag
 
 
 /* ------------------------------------------------------------------------- */
@@ -190,3 +185,13 @@ _ON_    .req v7
 .equ _IN_FL,                  0b0100 /* Input floating point */
 .equ _IN_PD,                  0b1000 /* correspondent ODR register pin has to be 0 */
 .equ _IN_PU,                  0b1000 /* correspondent ODR register pin has to be 1 */
+
+
+
+/* I2C */
+.equ I2C_SM_FREQ,             100
+.equ I2C_FM_FREQ,             400
+
+.equ I2C_TRISE_SM,            1000000/I2C_SM_FREQ /* 10000ns */
+.equ I2C_TRISE_FM,            1000000/I2C_FM_FREQ /* 2500ns */
+

@@ -37,26 +37,52 @@ extern "C" {
 #include "stm32f1xx.h"
 
 /* Private includes ----------------------------------------------------------*/
-#include "common.h"
-#include "led.h"
+#include "i2c.h"
+#include "spi.h"
+#include "whxxxx.h"
+#include "ssd13xx.h"
+#include "fonts.h"
+#include "w25qxx.h"
+#include "max72xx.h"
+
 
 #if defined(USE_FULL_ASSERT)
 #include "stm32_assert.h"
 #endif /* USE_FULL_ASSERT */
 
+/* Freq definitions */
+#define APB2_FREQ   72000000U
+#define APB1_FREQ   APB2_FREQ/2
 
 /* Exported types ------------------------------------------------------------*/
-#define SWO_USART
+
+
+/* Exported variables --------------------------------------------------------*/
+extern uint32_t _GEREG_;
+extern uint32_t _ASREG_;
+extern uint32_t sysCnt;
+extern uint32_t secCnt;
+
+
 
 /* Exported constants --------------------------------------------------------*/
-#define _GEREG_                       (uint32_t*)(SRAM_BASE)
-#define sysQuantCnt                   (uint32_t*)(SRAM_BASE + 0x04)
-#define secCnt                        (uint32_t*)(SRAM_BASE + 0x08)
 
 
 /** Global Events Register Flags */
-#define _SYSSECF_                     1
+#define _SYSSECF_         1
 
+
+/** Rediness Services Register Flags */
+#define OneWireBus_RF   0
+#define SSDDisplay_RF   1
+#define WHDisplay_RF    2
+#define SPI1_RF         3
+#define W25QXX_RF       4
+#define MAX72XX_RF      5
+
+
+/* Exported defines -----------------------------------------------------------*/
+#define putc_dspl(ch) DSPL_OUT(ch);
 
 /* Exported macro ------------------------------------------------------------*/
 
@@ -68,20 +94,35 @@ extern "C" {
 
 
 /* Private structures -------------------------------------------------------------*/
-// typedef struct {
-//   uint32_t  *counter;
-//   uint32_t  *counterSrc;
-//  	uint32_t  period;
-// } task_scheduler_t;
+typedef struct {
+  uint32_t  *counter;
+  uint32_t  *counterSrc;
+  uint32_t  period;
+  uint32_t  *counterReg;
+  uint32_t  entranceFlag;
+} task_scheduler_t;
+
+
+typedef struct {
+  uint8_t   addr[8];
+  uint8_t   spad[9];
+} OneWireDevice_t;
+
+
+/* Private includes ----------------------------------------------------------*/
+#include "common.h"
+#include "led.h"
+#include "ow.h"
+#include "ds18b20.h"
 
 
 
 /* Exported functions prototypes ---------------------------------------------*/
-void Error_Handler(void);
-// void LedToggle_Task(__I uint32_t*); // localted in ./Periph/led.S
-void Scheduler_Handler(__I uint32_t*); // localted in ./Core/system_cron.S
-
-// extern void Led_Handler(void);
+void __attribute__((weak)) Error_Handler(void);
+int __attribute__((weak)) putc_dspl(char);
+void Scheduler_Handler(task_scheduler_t*);
+void _delay_us(uint32_t);
+void _delay_ms(uint32_t);
 
 
 #ifdef __cplusplus
@@ -89,4 +130,3 @@ void Scheduler_Handler(__I uint32_t*); // localted in ./Core/system_cron.S
 #endif
 
 #endif /* __MAIN_H */
-
