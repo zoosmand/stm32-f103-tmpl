@@ -68,7 +68,7 @@ int WHxxxx_Init(I2C_TypeDef* I2Cx) {
   }; 
   
   if (I2C_Start(I2Cx)) return (1);
-  if (I2C_SendAddress(I2Cx, WHxxxx_I2C_ADDR)) return (1);
+  if (I2C_SendAddress(I2Cx, WHxxxx_I2C_ADDR, TX)) return (1);
   for(uint8_t i = 0; i < sizeof(params); i++) {
     if (I2C_WriteByte(I2Cx, _WR1NCMD((uint8_t)params[i]))) return (1);
     if (I2C_WriteByte(I2Cx, _WR2NCMD((uint8_t)params[i]))) return (1);
@@ -128,7 +128,7 @@ int __attribute__((weak)) putc_dspl_wh1602(char ch) {
     FLAG_CLR(&_DSPLREG_, _0ACF_);
 
     if (I2C_Start(I2C1)) return (1);
-    if (I2C_SendAddress(I2C1, WHxxxx_I2C_ADDR)) return (1);
+    if (I2C_SendAddress(I2C1, WHxxxx_I2C_ADDR, TX)) return (1);
     if (WHxxxx_WriteCommand(I2C1, WHxxxx_CLR_DSLP, WHxxxx_LD)) return (1);
     if (WHxxxx_WriteCommand(I2C1, WHxxxx_POS_1LS, WHxxxx_SD)) return (1);
     I2C_Stop(I2C1);
@@ -136,7 +136,7 @@ int __attribute__((weak)) putc_dspl_wh1602(char ch) {
   }
   if ((ch != 0x0a) && (ch != 0x0d)) {
     if (I2C_Start(I2C1)) return (1);
-    if (I2C_SendAddress(I2C1, WHxxxx_I2C_ADDR)) return (1);
+    if (I2C_SendAddress(I2C1, WHxxxx_I2C_ADDR, TX)) return (1);
     if (diplPrintPos > 15) {
       if (WHxxxx_WriteCommand(I2C1, WHxxxx_POS_2LS, WHxxxx_SD)) return (1);
       diplPrintPos = 0;
@@ -165,7 +165,7 @@ int __attribute__((weak)) putc_dspl_wh2004(char ch) {
     FLAG_CLR(&_DSPLREG_, _0ACF_);
 
     if (I2C_Start(I2C1)) return (1);
-    if (I2C_SendAddress(I2C1, WHxxxx_I2C_ADDR)) return (1);
+    if (I2C_SendAddress(I2C1, WHxxxx_I2C_ADDR, TX)) return (1);
     if (WHxxxx_WriteCommand(I2C1, WHxxxx_CLR_DSLP, WHxxxx_LD)) return (1);
     if (WHxxxx_WriteCommand(I2C1, WHxxxx_POS_1LS, WHxxxx_SD)) return (1);
     I2C_Stop(I2C1);
@@ -173,7 +173,7 @@ int __attribute__((weak)) putc_dspl_wh2004(char ch) {
   }
   if ((ch != 0x0a) && (ch != 0x0d)) {
     if (I2C_Start(I2C1)) return (1);
-    if (I2C_SendAddress(I2C1, WHxxxx_I2C_ADDR)) return (1);
+    if (I2C_SendAddress(I2C1, WHxxxx_I2C_ADDR, TX)) return (1);
     if (diplPrintPos > 19) {
       if (WHxxxx_WriteCommand(I2C1, WHxxxx_POS_2LS, WHxxxx_SD)) return (1);
       diplPrintPos = 0;

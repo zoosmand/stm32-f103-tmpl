@@ -49,7 +49,16 @@
 int I2C_Init(I2C_TypeDef*);
 int I2C_Start(I2C_TypeDef*);
 void I2C_Stop(I2C_TypeDef*);
-int I2C_SendAddress(I2C_TypeDef*, uint8_t);
+
+/**
+ * @brief  Transmits slave device address into the given I2C bus.
+ * @param  I2Cx: pointer to the give I2C struct 
+ * @param  addr: slave device address
+ * @param  dir: data transmission direction (READ|WRITE, RX|TX)
+ * @retval (int) status of operation
+ */
+int I2C_SendAddress(I2C_TypeDef*, uint8_t, DataTransmitDirection_TypeDef);
+
 int I2C_WriteByte(I2C_TypeDef*, uint8_t);
 uint8_t I2C_ReadByte(I2C_TypeDef*);
 

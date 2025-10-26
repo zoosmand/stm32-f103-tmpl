@@ -135,7 +135,7 @@ typedef enum {
 
 typedef enum {
   BMx280_SPI  = 0,
-  BMx280_I2C
+  BMx280_I2C  = !BMx280_SPI
 } BMx280_BusTypeDef;
 
 typedef struct {  

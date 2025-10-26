@@ -112,7 +112,7 @@ int SSD13xx_Init(I2C_TypeDef* i2c) {
   if (I2C_Start(I2C_Instance)) return (1);
   _delay_us(1);
   /* --- Control ACK on sending address --- */
-  if (I2C_SendAddress(I2C_Instance, SSD1315_I2C_ADDR)) return (1);
+  if (I2C_SendAddress(I2C_Instance, SSD1315_I2C_ADDR, TX)) return (1);
   /* --- Send control byte --- */
   if (sSD13xx_WriteDataByte((uint8_t)((1 << SSD13xx_DC_BIT) & ~(1 << SSD13xx_Co_BIT)))) return (1);
 
@@ -123,8 +123,7 @@ int SSD13xx_Init(I2C_TypeDef* i2c) {
   }
   I2C_Stop(I2C_Instance);
 
-  // /* --- Initialize the init cursor position --- */
-
+  /* --- Initialize the init cursor position --- */
   putc_dspl('\n');
  
   return (0);
@@ -140,7 +139,7 @@ static int sSD13xx_WriteCommand(uint8_t cmd) {
   _delay_us(1);
 
   /* --- Control ACK on sending address --- */
-  if (I2C_SendAddress(I2C_Instance, SSD1315_I2C_ADDR)) return (1);
+  if (I2C_SendAddress(I2C_Instance, SSD1315_I2C_ADDR, TX)) return (1);
   
   /* --- Send control byte --- */
   if (I2C_WriteByte(I2C_Instance, (uint8_t)(~(1 << SSD13xx_Co_BIT) & ~(1 << SSD13xx_DC_BIT)))) return (1);
@@ -214,7 +213,7 @@ static int sSD13xx_WriteBuf(const uint8_t* buf, uint16_t len, uint8_t* pos) {
   _delay_us(1);
 
   /* --- Control ACK on sending address --- */
-  if (I2C_SendAddress(I2C_Instance, SSD1315_I2C_ADDR)) return (1);
+  if (I2C_SendAddress(I2C_Instance, SSD1315_I2C_ADDR, TX)) return (1);
 
   /* --- Send control byte --- */
   if (sSD13xx_WriteDataByte((uint8_t)((1 << SSD13xx_DC_BIT) & ~(1 << SSD13xx_Co_BIT)))) return (1);

@@ -37,6 +37,7 @@ extern "C" {
 #include "stm32f1xx.h"
 
 /* Private includes ----------------------------------------------------------*/
+#include "common.h"
 #include "i2c.h"
 #include "spi.h"
 #include "whxxxx.h"

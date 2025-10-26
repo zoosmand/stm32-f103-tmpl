@@ -188,6 +188,25 @@
 #define BIT_4_3(per)        (per * 4U + 3U)
 
 
+/**
+ * @brief Data transmit diretion mode struct
+ * 
+ * - TX - transmission from an MCU bus to a peripheral device
+ * 
+ * - RX - transmission from a peripheral device to an MCU bus
+ * 
+ * - NONE - no transmission (dummy mode)
+ * 
+ * ---
+ * 
+ */
+typedef enum {
+  TX    = 0,
+  RX    = 1,
+  NONE  = !TX & !RX
+} DataTransmitDirection_TypeDef;
+
+
 /* Exported functions prototypes ---------------------------------------------*/
 void Error_Handler(void);
 
