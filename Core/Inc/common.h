@@ -86,21 +86,8 @@
 #define GPIO_PIN_15_Pos             GPIO_PIN_15
 #define GPIO_PIN_15_Mask            0xf0000000
 #define GPIO_PIN_ALL                (uint16_t)0xffff /*!< Select all pins */
-/* GPIO Modes bit definitions */
-// #define GPIO_MODE_OUT               0b01 /* GPIO output mode */
-// #define GPIO_MODE_IN                0b00 /* GPIO input mode */
-// #define GPIO_MODE_AF                0b10 /* GPIO alternate function mode */ 
-// #define GPIO_MODE_AN                0b11 /* GPIO analog mode */
-// #define GPIO_OTYPE_PP               0b0  /* GPIO output push-pull mode */ 
-// #define GPIO_OTYPE_OD               0b1  /* GPIO output open-drain mode */
-// #define GPIO_SPEED_L                0b00 /* GPIO low speed ~2MHz */
-// #define GPIO_SPEED_M                0b01 /* GPIO medium speed ~10MHz */
-// #define GPIO_SPEED_H                0b10 /* GPIO high speed ~25MHz */
-// #define GPIO_SPEED_V                0b11 /* GPIO very high speed ~100MHz */
-// #define GPIO_PUPD_NO                0b00 /* GPIO neither pull-up, no pull-down */
-// #define GPIO_PUPD_PU                0b01 /* GPIO pull-up */
-// #define GPIO_PUPD_PD                0b10 /* GPIO pull-down */
 
+/* GPIO Modes bit definitions */
 #define GPIO_GPO_PP                 0b0000 // General purpose output push-pull
 #define GPIO_GPO_OD                 0b0100 // General purpose output open drain
 #define GPIO_IOS_2                  0b0010 // I/O speed is 2 MHz
@@ -180,13 +167,6 @@
 #define TASK_CTRL(task)                                         if (FLAG_CHECK(task.scheduler->counterReg, task.scheduler->entranceFlag)) task.callback((uint32_t*)&task);
 
 
-#define BIT_2_0(per)        (per * 2U)
-#define BIT_2_1(per)        (per * 2U + 1U)
-#define BIT_4_0(per)        (per * 4U)
-#define BIT_4_1(per)        (per * 4U + 1U)
-#define BIT_4_2(per)        (per * 4U + 2U)
-#define BIT_4_3(per)        (per * 4U + 3U)
-
 
 /**
  * @brief Data transmit diretion mode struct
@@ -203,8 +183,36 @@
 typedef enum {
   TX    = 0,
   RX    = 1,
-  NONE  = !TX & !RX
+  NONE  = (!TX & !RX)
 } DataTransmitDirection_TypeDef;
+
+
+typedef enum {
+  BMP280  = 0x58,
+  BME280  = 0x60
+} BMx280_SensorTypeDef;
+
+typedef enum {
+  BMx280_SPI  = 0,
+  BMx280_I2C  = !BMx280_SPI
+} BMx280_BusTypeDef;
+
+typedef struct {  
+  BMx280_SensorTypeDef sensorType;
+  BMx280_BusTypeDef busType;
+  I2C_TypeDef *bus;
+} BMx280_ItemTypeDef;
+
+
+/**
+ * @brief   Bosch BMx280 device type definition struct.
+ */
+typedef struct {
+  uint8_t       ID;
+  I2C_TypeDef*  I2Cx;
+  uint8_t*      BufPtr;
+} BMx280_TypeDef;
+
 
 
 /* Exported functions prototypes ---------------------------------------------*/

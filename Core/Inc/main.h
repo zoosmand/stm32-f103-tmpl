@@ -46,6 +46,7 @@ extern "C" {
 #include "w25qxx.h"
 #include "max72xx.h"
 #include "bmx280.h"
+#include "tmpr.h"
 
 
 #if defined(USE_FULL_ASSERT)

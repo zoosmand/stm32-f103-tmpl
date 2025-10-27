@@ -48,13 +48,6 @@ static BMx280_S32_t t_fine = 0;
 
 
 /* Global variables ---------------------------------------------------------*/
-uint32_t _BMX280REG_    = 0;
-int32_t temperature     = 0;
-uint32_t pressure       = 0;
-uint32_t humidity       = 0;
-
-ErrorStatus bmx280Status = ERROR;
-
 
 /* Private function prototypes ----------------------------------------------*/
 static ErrorStatus BMx280_Read(BMx280_ItemTypeDef *item, uint8_t cmd, uint8_t *buf, uint8_t len);
@@ -87,12 +80,12 @@ static int I2C_Read(I2C_TypeDef*, uint8_t, uint8_t, uint8_t*, uint16_t);
 
 
 ////////////////////////////////////////////////////////////////////////////////
-/**
-  * @brief  Initialize a sensor
-  * @param  sensorType: a model of a sensor
-  * @param  transportType: a data transport of a sensor
-  * @return Error status
-  */
+
+
+
+
+// ----------------------------------------------------------------------------
+
 ErrorStatus BMx280_Init(BMx280_ItemTypeDef *sensor) {
   uint8_t buf[32];
 

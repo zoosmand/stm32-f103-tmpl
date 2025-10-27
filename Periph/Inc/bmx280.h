@@ -26,36 +26,6 @@
  extern "C" {
 #endif
 
-#define MAX72XX_SEG_CNT       4
-#define MAX72XX_MAX_SEG_CNT   (MAX72XX_SEG_CNT * 8)
-
-
-
-
-/**
- * @brief   Bosch BMx280 device type definition struct.
- */
-typedef struct {
-  uint8_t       ID;
-  uint16_t      T1;
-  int16_t       T2;
-  int16_t       T3;
-  uint16_t      P1;
-  int16_t       P2;
-  int16_t       P3;
-  int16_t       P4;
-  int16_t       P5;
-  int16_t       P6;
-  int16_t       P7;
-  int16_t       P8;
-  int16_t       P9;
-  uint8_t       H1;
-  int16_t       H2;
-  uint8_t       H3;
-  uint8_t       Lock;
-  I2C_TypeDef*  I2Cx;
-  uint8_t*      BufPtr;
-} BMx280_TypeDef;
 
 
 /* Private defines -----------------------------------------------------------*/
@@ -96,53 +66,25 @@ typedef int32_t               BMP280_S32_t;
 typedef uint32_t              BMP280_U32_t;
 
 
-
-/**
- * @brief   Initializes the given Bosch BMx280 device.
- * @param   dev: pointer to the MAX72xx device struct
- * @retval  (int) status of operation
- */
-// int BMx280_Init(BMx280_TypeDef*);
-
-
-
-BMP280_S32_t* BMP280_ReadT(void);
-BMP280_U32_t* BMP280_ReadP(void);
-double* BMP280_ReadTP(void);
-double* BMP280_ReadPP(void);
-
-
-
-
-
-
-
-
-
 /* Global variables ----------------------------------------------------------*/
-extern uint32_t _BMX280REG_;
-extern int32_t temperature;
-extern uint32_t pressure;
-extern uint32_t humidity;
-
 
 
 /* Private defines -----------------------------------------------------------*/
-typedef enum {
-  BMP280  = 0x58,
-  BME280  = 0x60
-} BMx280_SensorTypeDef;
+// typedef enum {
+//   BMP280  = 0x58,
+//   BME280  = 0x60
+// } BMx280_SensorTypeDef;
 
-typedef enum {
-  BMx280_SPI  = 0,
-  BMx280_I2C  = !BMx280_SPI
-} BMx280_BusTypeDef;
+// typedef enum {
+//   BMx280_SPI  = 0,
+//   BMx280_I2C  = !BMx280_SPI
+// } BMx280_BusTypeDef;
 
-typedef struct {  
-  BMx280_SensorTypeDef sensorType;
-  BMx280_BusTypeDef busType;
-  I2C_TypeDef *bus;
-} BMx280_ItemTypeDef;
+// typedef struct {  
+//   BMx280_SensorTypeDef sensorType;
+//   BMx280_BusTypeDef busType;
+//   I2C_TypeDef *bus;
+// } BMx280_ItemTypeDef;
 
 #define BMX280_I2C_ADDR   0x76
 
@@ -167,7 +109,14 @@ typedef uint32_t          BMx280_U32_t;
 extern ErrorStatus bmx280Status;
 
 /* Exported functions prototypes ---------------------------------------------*/
+
+/**
+ * @brief   Initializes the given Bosch BMx280 device.
+ * @param   dev: pointer to the Bosch BMx280 device struct
+ * @retval  status of operation
+ */
 ErrorStatus BMx280_Init(BMx280_ItemTypeDef*);
+
 ErrorStatus BMx280_Measurment(BMx280_ItemTypeDef*, int32_t*);
 
 

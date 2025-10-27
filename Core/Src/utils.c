@@ -33,6 +33,10 @@
 
 
 
+void __attribute__((weak)) Error_Handler(void) {
+  while (1);
+}
+
 
 /**
  * @brief  Sends a symbol into USART. 

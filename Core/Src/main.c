@@ -35,7 +35,7 @@ __attribute__((section(".cron"))) uint32_t secCnt               = 0;
 /* Private variables ---------------------------------------------------------*/
 static __attribute__((section(".cron"))) uint32_t secCntCache   = 0;
 
-__IO static W25qxx_TypeDef flash_0 = {
+static W25qxx_TypeDef flash_0 = {
   .SPIx   = SPI1,
   .DMAx   = DMA1,
   .DMAxTx = DMA1_Channel3,
@@ -43,8 +43,8 @@ __IO static W25qxx_TypeDef flash_0 = {
 };
 
 
-__IO static uint16_t max_0[(MAX72XX_MAX_SEG_CNT * 8)];
-__IO static Max72xx_TypeDef maxDisplay = {
+static uint16_t max_0[(MAX72XX_MAX_SEG_CNT * 8)];
+static Max72xx_TypeDef maxDisplay = {
   .SegCnt     = MAX72XX_SEG_CNT,
   .MaxSegCnt  = MAX72XX_MAX_SEG_CNT,
   .BufPtr     = max_0,
@@ -61,8 +61,8 @@ __IO static Max72xx_TypeDef maxDisplay = {
 //   .BufPtr = boschBuf,
 // };
 
-__IO static int32_t bosch_data[3];
-__IO static BMx280_ItemTypeDef bosch_0 = {
+static int32_t bosch_data[3];
+static BMx280_ItemTypeDef bosch_0 = {
   .sensorType = BME280,
   .busType = BMx280_I2C,
   .bus = I2C1
@@ -109,15 +109,19 @@ int main(void) {
         );
 
 
-        if (FLAG_CHECK(&_ASREG_, BMX280_RF)) {
-          // BMx280_Measurment(&bosch_0, bosch_data);
-        }
-
-
+        
+        
         tmpCnt = secCnt + 4;
       }
     }
-
+    
+    if (FLAG_CHECK(&_ASREG_, BMX280_RF)) {
+      if (tmpCnt <= secCnt ) {
+        BMx280_Measurment(&bosch_0, bosch_data);
+        __NOP();
+        tmpCnt = secCnt + 10;
+      }
+    }
 
     if (FLAG_CHECK(&_ASREG_, MAX72XX_RF)) {
       MAX72xx_Print(&maxDisplay, "1234567890");

@@ -58,6 +58,7 @@ int SPI_Init(SPI_TypeDef* SPIx) {
 
 
 // ----------------------------------------------------------------------------
+
 int SPI_Enable(SPI_TypeDef* SPIx) {
 
   uint32_t tmout = SPI_BUS_TMOUT;
@@ -77,6 +78,7 @@ int SPI_Enable(SPI_TypeDef* SPIx) {
 
 
 // ----------------------------------------------------------------------------
+
 int SPI_Disable(SPI_TypeDef* SPIx) {
   uint32_t tmout = SPI_BUS_TMOUT;
   
