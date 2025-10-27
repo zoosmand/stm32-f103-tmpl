@@ -61,6 +61,7 @@ __IO static Max72xx_TypeDef maxDisplay = {
 //   .BufPtr = boschBuf,
 // };
 
+__IO static int32_t bosch_data[3];
 __IO static BMx280_ItemTypeDef bosch_0 = {
   .sensorType = BME280,
   .busType = BMx280_I2C,
@@ -107,6 +108,12 @@ int main(void) {
           (int8_t)((*t2 & 0x0000fff0) >> 4), (uint8_t)(((*t2 & 0x0000000f) * 100) >> 4)
         );
 
+
+        if (FLAG_CHECK(&_ASREG_, BMX280_RF)) {
+          // BMx280_Measurment(&bosch_0, bosch_data);
+        }
+
+
         tmpCnt = secCnt + 4;
       }
     }
@@ -145,6 +152,8 @@ int main(void) {
 
       __NOP();
     }
+
+
   }
 
   Led_Handler();

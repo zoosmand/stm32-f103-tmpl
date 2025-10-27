@@ -344,7 +344,7 @@ static BMx280_U32_t bmx280_compensate_H_int32(BMx280_S32_t adc_H) {
   * @return None
   */
 static int I2C_Write(I2C_TypeDef *I2Cx, uint8_t slaveAddr, uint8_t *buf, uint16_t len) {
-
+  if (I2C_Master_Send(I2Cx, slaveAddr, buf, len)) return (ERROR);
   return (0);
 }
 
