@@ -33,7 +33,18 @@
 
 
 /* Exported functions prototypes ---------------------------------------------*/
-ErrorStatus BoschMeasurment_Task(BMx280_ItemTypeDef*);
+
+/**
+ * @brief Bosch BMx CRON handler procedure.
+ * @return none
+ */
+void BoschMeasurment_CronHandler(void);
+
+/**
+ * @brief Return BMx Bosch device struct pointer.
+ * @return device struct pointer
+ */
+BMx280_ItemTypeDef* Get_BoschDevice(void);
 
 
 #ifdef __cplusplus

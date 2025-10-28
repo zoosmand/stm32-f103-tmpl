@@ -61,14 +61,14 @@ static BMx280_U32_t bmx280_compensate_H_int32(BMx280_S32_t adc_H);
   * @brief  Writes 8 bit data via I2C
   * @param  I2Cx: pointer to an I2C instance
   * @param  data: a byte to send
-  * @return None
+  * @return status of operation
   */
 static int I2C_Write(I2C_TypeDef*, uint8_t, uint8_t*, uint16_t);
 
 /**
   * @brief  Reads 8 bit data via I2C
   * @param  I2Cx: pointer to an I2C instance
-  * @return  a received byte
+  * @return status of operation
   */
 static int I2C_Read(I2C_TypeDef*, uint8_t, uint8_t, uint8_t*, uint16_t);
 

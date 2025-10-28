@@ -55,19 +55,6 @@ static Max72xx_TypeDef maxDisplay = {
 };
 
 
-// __IO static uint8_t boschBuf[8];
-// __IO static BMx280_TypeDef bosch_0 = {
-//   .I2Cx   = I2C1,
-//   .BufPtr = boschBuf,
-// };
-
-static int32_t bosch_data[3];
-static BMx280_ItemTypeDef bosch_0 = {
-  .sensorType = BME280,
-  .busType = BMx280_I2C,
-  .bus = I2C1
-};
-
 
 /* Private function prototypes -----------------------------------------------*/
 
@@ -115,13 +102,7 @@ int main(void) {
       }
     }
     
-    if (FLAG_CHECK(&_ASREG_, BMX280_RF)) {
-      if (tmpCnt <= secCnt ) {
-        BMx280_Measurment(&bosch_0, bosch_data);
-        __NOP();
-        tmpCnt = secCnt + 10;
-      }
-    }
+    if (FLAG_CHECK(&_ASREG_, BMX280_RF)) { BoschMeasurment_CronHandler(); }
 
     if (FLAG_CHECK(&_ASREG_, MAX72XX_RF)) {
       MAX72xx_Print(&maxDisplay, "1234567890");
@@ -184,7 +165,7 @@ void Cron_Handler(void) {
   }
   
   if (FLAG_CHECK(&_ASREG_, I2C1_RF)) {
-    if (!BMx280_Init(&bosch_0)) FLAG_SET(&_ASREG_, BMX280_RF);
+    if (!BMx280_Init(Get_BoschDevice())) FLAG_SET(&_ASREG_, BMX280_RF);
     // if (!SSD13xx_Init(I2C1))  FLAG_SET(&_ASREG_, SSDDisplay_RF);
     if (!WHxxxx_Init(I2C1))   FLAG_SET(&_ASREG_, WHDisplay_RF);
   }

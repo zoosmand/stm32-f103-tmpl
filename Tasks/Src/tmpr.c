@@ -33,18 +33,48 @@ static task_scheduler_t boschScheduler = {
   .entranceFlag   = 31,
 };
 
+static int32_t bosch_data[3];
+
+static BMx280_ItemTypeDef bosch_0 = {
+  .sensorType = BME280,
+  .busType = BMx280_I2C,
+  .bus = I2C1
+};
+
+
+/* Private function prototypes ----------------------------------------------*/
 
 
 
-static ErrorStatus BoschMeasurment_Handler(void) {
 
-  return (SUCCESS);
+
+
+////////////////////////////////////////////////////////////////////////////////
+
+
+// ----------------------------------------------------------------------------
+
+void BoschMeasurment_CronHandler(void) {
+
+  Scheduler_Handler(&boschScheduler);
+
+  if (FLAG_CHECK(boschScheduler.counterReg, boschScheduler.entranceFlag)) {
+
+    FLAG_CLR(boschScheduler.counterReg, boschScheduler.entranceFlag);
+    
+    if (BMx280_Measurment(&bosch_0, bosch_data)) printf("Cannot collect Bosch device data\n");
+
+    /* TODO handle Bosch data usage */
+  }
 }
 
 
-ErrorStatus BoschMeasurment_Task(BMx280_ItemTypeDef* dev) {
 
 
-  return (SUCCESS);
+// ----------------------------------------------------------------------------
+
+BMx280_ItemTypeDef* Get_BoschDevice(void) {
+
+  return &bosch_0;
 }
 
