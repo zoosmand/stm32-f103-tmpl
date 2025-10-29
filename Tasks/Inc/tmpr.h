@@ -41,6 +41,12 @@
 void BoschMeasurment_CronHandler(void);
 
 /**
+ * @brief Bosch DS CRON handler procedure.
+ * @return none
+ */
+void DsMeasurment_CronHandler(void);
+
+/**
  * @brief Return BMx Bosch device struct pointer.
  * @return device struct pointer
  */

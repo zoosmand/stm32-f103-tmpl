@@ -66,41 +66,14 @@ static Max72xx_TypeDef maxDisplay = {
  * @retval int
  */
 int main(void) {
-
-
-  static uint32_t tmpCnt = 0;
   
   if (CRON_SEC_EVENT) {
     
     // printf("The long test message, that might stuck the program but now it does not at all...\n");
     printf("sec:%li\n", secCnt);
     
-    if (FLAG_CHECK(&_ASREG_, OneWireBus_RF)) {
-      if (tmpCnt <= secCnt ) {
 
-        OneWireDevice_t* devs = Get_OwDevices();
-
-        for (uint8_t i = 0; i < 2; i++) {
-          if (DS18B20_GetTemperatureMeasurment(&devs[i])) {
-            /* --- on error, set up -128.00 C --- */
-            devs[i].spad[0] = 0x00;
-            devs[i].spad[1] = 0x08;
-          }
-        }
-
-        uint32_t* t1 = (int32_t*)&devs[0].spad;
-        uint32_t* t2 = (int32_t*)&devs[1].spad;
-        printf("%d.%02d %d.%02d\n", 
-          (int8_t)((*t1 & 0x0000fff0) >> 4), (uint8_t)(((*t1 & 0x0000000f) * 100) >> 4),
-          (int8_t)((*t2 & 0x0000fff0) >> 4), (uint8_t)(((*t2 & 0x0000000f) * 100) >> 4)
-        );
-
-
-        
-        
-        tmpCnt = secCnt + 4;
-      }
-    }
+    if (FLAG_CHECK(&_ASREG_, OneWireBus_RF)) { DsMeasurment_CronHandler(); }
     
     if (FLAG_CHECK(&_ASREG_, BMX280_RF)) { BoschMeasurment_CronHandler(); }
 
@@ -155,10 +128,13 @@ void Cron_Handler(void) {
   __NVIC_SetPriorityGrouping(NVIC_PRIORITYGROUP_4);
   SET_BIT(CoreDebug->DEMCR, CoreDebug_DEMCR_TRCENA_Msk);
 
-  if (!OneWire_Search())    FLAG_SET(&_ASREG_, OneWireBus_RF);
+  if (!OneWireBus_Init())   FLAG_SET(&_ASREG_, OneWireBus_RF);
   if (!SPI_Init(SPI1))      FLAG_SET(&_ASREG_, SPI1_RF);
   if (!I2C_Init(I2C1))      FLAG_SET(&_ASREG_, I2C1_RF);
   
+  /* One Wire contition   */
+  if (FLAG_CHECK(&_ASREG_, OneWireBus_RF)) OneWire_Search();
+
   if (FLAG_CHECK(&_ASREG_, SPI1_RF)) {
     if (!W25qxx_Init(&flash_0)) FLAG_SET(&_ASREG_, W25QXX_RF);
     // if (!MAX72xx_Init(&max_0)) FLAG_SET(&_ASREG_, MAX72XX_RF);
