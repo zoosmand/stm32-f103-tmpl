@@ -88,6 +88,7 @@ void BoschMeasurment_CronHandler(void) {
     if (BMx280_Measurment(&bosch_0)) printf("Cannot collect Bosch device data\n");
 
     /* TODO handle Bosch data usage */
+    __NOP();
   }
 }
 
@@ -130,6 +131,7 @@ void DsMeasurment_CronHandler(void) {
     );
 
     /* TODO handle DS data usage */
+    __NOP();
   }
 
 }
