@@ -50,11 +50,12 @@ static BMx280_S32_t t_fine = 0;
 /* Global variables ---------------------------------------------------------*/
 
 /* Private function prototypes ----------------------------------------------*/
-static ErrorStatus BMx280_Read(BMx280_ItemTypeDef *item, uint8_t cmd, uint8_t *buf, uint8_t len);
-static ErrorStatus BMx280_Write(BMx280_ItemTypeDef *item, uint8_t *buf, uint8_t len);
-static BMx280_S32_t bmx280_compensate_T_int32(BMx280_S32_t adc_T);
-static BMx280_U32_t bmx280_compensate_P_int32(BMx280_S32_t adc_P);
-static BMx280_U32_t bmx280_compensate_H_int32(BMx280_S32_t adc_H);
+static ErrorStatus BMx280_Read(BMxX80_TypeDef*, uint8_t, uint8_t);
+static ErrorStatus BMx280_Write(BMxX80_TypeDef*, uint8_t);
+
+static BMx280_S32_t bmx280_compensate_T_int32(BMx280_S32_t);
+static BMx280_U32_t bmx280_compensate_P_int32(BMx280_S32_t);
+static BMx280_U32_t bmx280_compensate_H_int32(BMx280_S32_t);
 
 
 /**
@@ -86,70 +87,64 @@ static int I2C_Read(I2C_TypeDef*, uint8_t, uint8_t, uint8_t*, uint16_t);
 
 // ----------------------------------------------------------------------------
 
-ErrorStatus BMx280_Init(BMx280_ItemTypeDef *sensor) {
-  uint8_t buf[32];
+ErrorStatus BMx280_Init(BMxX80_TypeDef* dev) {
+  // uint8_t buf[32];
 
+  if (dev->Lock == ENABLE) dev->Lock = DISABLE; else return (ERROR);
 
   /* Read Device ID and if it isn't equal to the current, exit. */
-  buf[0] = 0;
-  if (BMx280_Read(sensor, BMX280_DEV_ID, buf, 1)) {
-    return (ERROR);
-  }
-  if (sensor->sensorType != buf[0]) {
-    return (ERROR);
-  }
+  dev->RawBufPtr[0] = 0;
+  if (BMx280_Read(dev, BMX280_DEV_ID, 1)) return (ERROR);
+  
+  dev->DevID = dev->RawBufPtr[0];
+
+  if (!((dev->DevID == BMP280_ID) || (dev->DevID == BME280_ID) || (dev->DevID == BME680_ID))) return (ERROR);
 
   /* Read calibration data. This is common for both sensor's types */
-  if (BMx280_Read(sensor, BMX280_CALIB1, buf, 26)) {
-    return (ERROR);
-  }
-  dig_T1 = (uint16_t)((buf[1] << 8) | buf[0]);
-  dig_T2 = (int16_t)((buf[3] << 8) | buf[2]);
-  dig_T3 = (int16_t)((buf[5] << 8) | buf[4]);
-  dig_P1 = (uint16_t)((buf[7] << 8) | buf[6]);
-  dig_P2 = (int16_t)((buf[9] << 8) | buf[8]);
-  dig_P3 = (int16_t)((buf[11] << 8) | buf[10]);
-  dig_P4 = (int16_t)((buf[13] << 8) | buf[12]);
-  dig_P5 = (int16_t)((buf[15] << 8) | buf[14]);
-  dig_P6 = (int16_t)((buf[17] << 8) | buf[16]);
-  dig_P7 = (int16_t)((buf[19] << 8) | buf[18]);
-  dig_P8 = (int16_t)((buf[21] << 8) | buf[20]);
-  dig_P9 = (int16_t)((buf[23] << 8) | buf[22]);
+  if (BMx280_Read(dev, BMX280_CALIB1, 26)) return (ERROR);
+  
+  dig_T1 = (uint16_t)((dev->RawBufPtr[1] << 8) | dev->RawBufPtr[0]);
+  dig_T2 = (int16_t)((dev->RawBufPtr[3] << 8) | dev->RawBufPtr[2]);
+  dig_T3 = (int16_t)((dev->RawBufPtr[5] << 8) | dev->RawBufPtr[4]);
+  dig_P1 = (uint16_t)((dev->RawBufPtr[7] << 8) | dev->RawBufPtr[6]);
+  dig_P2 = (int16_t)((dev->RawBufPtr[9] << 8) | dev->RawBufPtr[8]);
+  dig_P3 = (int16_t)((dev->RawBufPtr[1] << 8) | dev->RawBufPtr[0]);
+  dig_P4 = (int16_t)((dev->RawBufPtr[3] << 8) | dev->RawBufPtr[2]);
+  dig_P5 = (int16_t)((dev->RawBufPtr[5] << 8) | dev->RawBufPtr[4]);
+  dig_P6 = (int16_t)((dev->RawBufPtr[7] << 8) | dev->RawBufPtr[6]);
+  dig_P7 = (int16_t)((dev->RawBufPtr[9] << 8) | dev->RawBufPtr[8]);
+  dig_P8 = (int16_t)((dev->RawBufPtr[21] << 8) | dev->RawBufPtr[20]);
+  dig_P9 = (int16_t)((dev->RawBufPtr[23] << 8) | dev->RawBufPtr[22]);
 
   /* If the sensor is BME280, read additianal block of calibration data */
-  if (sensor->sensorType == BME280) {
-    dig_H1 = (uint8_t)buf[25];
+  if (dev->DevID == BME280_ID) {
+    dig_H1 = (uint8_t)dev->RawBufPtr[25];
 
-    if (BMx280_Read(sensor, BMX280_CALIB2, buf, 16)) {
-      return (ERROR);
-    }
-    dig_H2 = (int16_t)((buf[1] << 8) | buf[0]);
-    dig_H3 = (uint8_t)buf[2];
-    dig_H4 = (int16_t)((buf[3] << 4) | (buf[4] & 0x0f));
-    dig_H5 = (int16_t)((buf[5] << 4) | ((buf[4] >> 4) & 0x0f));
-    dig_H6 = (int8_t)buf[6];
+    if (BMx280_Read(dev, BMX280_CALIB2, 16))return (ERROR);
+    
+    dig_H2 = (int16_t)((dev->RawBufPtr[1] << 8) | dev->RawBufPtr[0]);
+    dig_H3 = (uint8_t)dev->RawBufPtr[2];
+    dig_H4 = (int16_t)((dev->RawBufPtr[3] << 4) | (dev->RawBufPtr[4] & 0x0f));
+    dig_H5 = (int16_t)((dev->RawBufPtr[5] << 4) | ((dev->RawBufPtr[4] >> 4) & 0x0f));
+    dig_H6 = (int8_t)dev->RawBufPtr[6];
   }
 
   /* Set filter coefficient to 8 and 1s inactive duration in normal mode */
-  buf[0] = BMX280_SETTINGS;
-  buf[1] = 0xac;
-  if (BMx280_Write(sensor, buf, 2)) {
-    return (ERROR);
-  }
+  dev->RawBufPtr[0] = BMX280_SETTINGS;
+  dev->RawBufPtr[1] = 0xac;
+  if (BMx280_Write(dev, 2)) return (ERROR);
 
   /* Set the humidity oversampling to 16 (highest precision) */
-  buf[0] = BMX280_CTRL_HUM;
-  buf[1] = 0x05;
-  if (BMx280_Write(sensor, buf, 2)) {
-    return (ERROR);
-  }
+  dev->RawBufPtr[0] = BMX280_CTRL_HUM;
+  dev->RawBufPtr[1] = 0x05;
+  if (BMx280_Write(dev, 2)) return (ERROR);
 
   /* Set the temperature and pressure oversampling to 16 (highest precision) */
-  buf[0] = BMX280_CTRL_MEAS;
-  buf[1] = 0xb4;
-  if (BMx280_Write(sensor, buf, 2)) {
-    return (ERROR);
-  }
+  dev->RawBufPtr[0] = BMX280_CTRL_MEAS;
+  dev->RawBufPtr[1] = 0xb4;
+  if (BMx280_Write(dev, 2)) return (ERROR);
+
+  dev->Lock = ENABLE;
   return (SUCCESS);
 }
 
@@ -161,37 +156,35 @@ ErrorStatus BMx280_Init(BMx280_ItemTypeDef *sensor) {
   * @param  None
   * @return Error status
   */
-ErrorStatus BMx280_Measurment(BMx280_ItemTypeDef *sensor, int32_t *output) {
-  uint8_t buf[8];
+ErrorStatus BMx280_Measurment(BMxX80_TypeDef *dev) {
 
-  /* Run conversion in forse mode, keep oversampling */
-  buf[0] = BMX280_CTRL_MEAS;
-  buf[1] = 0xb5;
-  if (BMx280_Write(sensor, buf, 2)) {
-    return (ERROR);
-  }
+  if (dev->Lock == ENABLE) dev->Lock = DISABLE; else return (ERROR);
+
+  /* Run conversion in force mode, keep oversampling */
+  dev->RawBufPtr[0] = BMX280_CTRL_MEAS;
+  dev->RawBufPtr[1] = 0xb5;
+  if (BMx280_Write(dev, 2)) return (ERROR);
 
   /* Read the status register and check measuring busy flag, wait for conversion */
-  if (BMx280_Read(sensor, BMX280_STATUS, buf, 1)) {
-    return (ERROR);
-  }
-  if (buf[0] == 0x08) {
+  
+  /* TODO realize waiting in a circle with timeoute reading the status byte */
+  if (BMx280_Read(dev, BMX280_STATUS, 1)) return (ERROR);
+  if (dev->RawBufPtr[0] == 0x08) {
     _delay_ms(20);
   }
 
   /* Read raw data */
-  if (BMx280_Read(sensor, BMX280_DATA, buf, 8)) {
-    return (ERROR);
-  }
+  if (BMx280_Read(dev, BMX280_DATA, 8)) return (ERROR);
 
-  BMx280_S32_t adc_P = (((buf[0] << 8) | buf[1]) << 4) | (buf[2] >> 4);
-  BMx280_S32_t adc_T = (((buf[3] << 8) | buf[4]) << 4) | (buf[5] >> 4);
-  BMx280_S32_t adc_H = (buf[6] << 8) | buf[7];
+  BMx280_S32_t adc_P = (((dev->RawBufPtr[0] << 8) | dev->RawBufPtr[1]) << 4) | (dev->RawBufPtr[2] >> 4);
+  BMx280_S32_t adc_T = (((dev->RawBufPtr[3] << 8) | dev->RawBufPtr[4]) << 4) | (dev->RawBufPtr[5] >> 4);
+  BMx280_S32_t adc_H = (dev->RawBufPtr[6] << 8) | dev->RawBufPtr[7];
 
-  output[0] = bmx280_compensate_T_int32(adc_T);
-  output[1] = bmx280_compensate_P_int32(adc_P);
-  output[2] = bmx280_compensate_H_int32(adc_H);
+  dev->ResBufPtr[0] = bmx280_compensate_T_int32(adc_T);
+  dev->ResBufPtr[1] = bmx280_compensate_P_int32(adc_P);
+  dev->ResBufPtr[2] = bmx280_compensate_H_int32(adc_H);
 
+  dev->Lock = ENABLE;
   return (SUCCESS);
 }
 
@@ -206,15 +199,19 @@ ErrorStatus BMx280_Measurment(BMx280_ItemTypeDef *sensor, int32_t *output) {
   * @param  len: length of the buffer
   * @return Error status
   */
-static ErrorStatus BMx280_Read(BMx280_ItemTypeDef *item, uint8_t reg, uint8_t *buf, uint8_t len) {
-  if (item->busType == BMx280_I2C) {
-    if (I2C_Read(item->bus, BMX280_I2C_ADDR, reg, buf, len)) {
-      return (ERROR);
-    }
-  } else {
-    // ToDo SPI read handler
-  }
-  return (SUCCESS);
+static ErrorStatus BMx280_Read(BMxX80_TypeDef *dev, uint8_t reg, uint8_t len) {
+  if (dev->I2CBus != NULL) {
+    if (I2C_Read(dev->I2CBus, BMX280_I2C_ADDR, reg, dev->RawBufPtr, len)) return (ERROR);
+    return (SUCCESS);
+  } 
+
+  if (dev->SPIBus != NULL) {
+
+    /* TODO realize SPI bus, probably with BME680 */
+    return (SUCCESS);
+  } 
+
+  return (ERROR);
 }
 
 
@@ -228,15 +225,19 @@ static ErrorStatus BMx280_Read(BMx280_ItemTypeDef *item, uint8_t reg, uint8_t *b
   * @param  len: length of the buffer
   * @return Error status
   */
-static ErrorStatus BMx280_Write(BMx280_ItemTypeDef *item, uint8_t *buf, uint8_t len) {
-  if (item->busType == BMx280_I2C) {
-    if (I2C_Write(item->bus, BMX280_I2C_ADDR, buf, len)) {
-      return (ERROR);
-    }
-  } else {
-    // ToDo SPI write handler
-  }
-  return (SUCCESS);
+static ErrorStatus BMx280_Write(BMxX80_TypeDef *dev, uint8_t len) {
+  if (dev->I2CBus != NULL) {
+    if (I2C_Write(dev->I2CBus, BMX280_I2C_ADDR, dev->RawBufPtr, len)) return (ERROR);
+    return (SUCCESS);
+  } 
+
+  if (dev->SPIBus != NULL) {
+
+    /* TODO realize SPI bus, probably with BME680 */
+    return (SUCCESS);
+  } 
+
+  return (ERROR);
 }
 
 

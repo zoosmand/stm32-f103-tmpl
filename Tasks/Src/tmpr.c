@@ -44,12 +44,24 @@ static task_scheduler_t dsScheduler = {
   .entranceFlag   = 31,
 };
 
-static int32_t bosch_data[3];
+// static int32_t bosch_data[3];
 
-static BMx280_ItemTypeDef bosch_0 = {
-  .sensorType = BMP280,
-  .busType = BMx280_I2C,
-  .bus = I2C1
+// static BMx280_ItemTypeDef bosch_0 = {
+//   .sensorType = BMP280,
+//   .busType = BMx280_I2C,
+//   .bus = I2C1
+// };
+
+static uint8_t boschRawData[32];
+static int32_t boschResults[3];
+
+static BMxX80_TypeDef bosch_0 = {
+  .DevID      = 0,
+  .RawBufPtr  = boschRawData,
+  .ResBufPtr  = boschResults,
+  .Lock       = ENABLE,
+  .I2CBus     = I2C1,
+  .SPIBus     = NONE,
 };
 
 
@@ -73,7 +85,7 @@ void BoschMeasurment_CronHandler(void) {
 
     FLAG_CLR(boschScheduler.counterReg, boschScheduler.entranceFlag);
     
-    if (BMx280_Measurment(&bosch_0, bosch_data)) printf("Cannot collect Bosch device data\n");
+    if (BMx280_Measurment(&bosch_0)) printf("Cannot collect Bosch device data\n");
 
     /* TODO handle Bosch data usage */
   }
@@ -84,7 +96,7 @@ void BoschMeasurment_CronHandler(void) {
 
 // ----------------------------------------------------------------------------
 
-BMx280_ItemTypeDef* Get_BoschDevice(void) {
+BMxX80_TypeDef* Get_BoschDevice(void) {
   
   return &bosch_0;
 }

@@ -59,32 +59,13 @@
 #define ResetValue            0xb6
 #define BMP280_ID             0x58
 #define BME280_ID             0x60
-
-
-/* Types demanded by BMx280 datasheet */
-typedef int32_t               BMP280_S32_t;
-typedef uint32_t              BMP280_U32_t;
+#define BME680_ID             0x62
 
 
 /* Global variables ----------------------------------------------------------*/
 
 
 /* Private defines -----------------------------------------------------------*/
-// typedef enum {
-//   BMP280  = 0x58,
-//   BME280  = 0x60
-// } BMx280_SensorTypeDef;
-
-// typedef enum {
-//   BMx280_SPI  = 0,
-//   BMx280_I2C  = !BMx280_SPI
-// } BMx280_BusTypeDef;
-
-// typedef struct {  
-//   BMx280_SensorTypeDef sensorType;
-//   BMx280_BusTypeDef busType;
-//   I2C_TypeDef *bus;
-// } BMx280_ItemTypeDef;
 
 #define BMX280_I2C_ADDR   0x76
 
@@ -99,14 +80,11 @@ typedef uint32_t              BMP280_U32_t;
 #define BMX280_RESET      0xe0
 #define BMX280_RESET_VAL  0xb6
 
-/* Types demanded by BMx280 datasheet */
+/* The redefined by Bosch types of integers from the dedicated datasheet */
 typedef int32_t           BMx280_S32_t;
 typedef uint32_t          BMx280_U32_t;
 
-/* BMX280 Registry Flags */
 
-
-extern ErrorStatus bmx280Status;
 
 /* Exported functions prototypes ---------------------------------------------*/
 
@@ -115,9 +93,9 @@ extern ErrorStatus bmx280Status;
  * @param   dev: pointer to the Bosch BMx280 device struct
  * @retval  status of operation
  */
-ErrorStatus BMx280_Init(BMx280_ItemTypeDef*);
+ErrorStatus BMx280_Init(BMxX80_TypeDef*);
 
-ErrorStatus BMx280_Measurment(BMx280_ItemTypeDef*, int32_t*);
+ErrorStatus BMx280_Measurment(BMxX80_TypeDef*);
 
 
 #ifdef __cplusplus

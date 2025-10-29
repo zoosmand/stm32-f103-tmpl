@@ -168,6 +168,8 @@
 
 
 
+// ----------------------------------------------------------------------------
+
 /**
  * @brief Data transmit diretion mode struct
  * 
@@ -187,31 +189,36 @@ typedef enum {
 } DataTransmitDirection_TypeDef;
 
 
-typedef enum {
-  BMP280  = 0x58,
-  BME280  = 0x60
-} BMx280_SensorTypeDef;
-
-typedef enum {
-  BMx280_SPI  = 0,
-  BMx280_I2C  = !BMx280_SPI
-} BMx280_BusTypeDef;
-
-typedef struct {  
-  BMx280_SensorTypeDef sensorType;
-  BMx280_BusTypeDef busType;
-  I2C_TypeDef *bus;
-} BMx280_ItemTypeDef;
-
+// ----------------------------------------------------------------------------
 
 /**
  * @brief   Bosch BMx280 device type definition struct.
  */
-typedef struct {
-  uint8_t       ID;
-  I2C_TypeDef*  I2Cx;
-  uint8_t*      BufPtr;
-} BMx280_TypeDef;
+typedef struct {  
+  uint8_t         DevID;
+  uint8_t*        RawBufPtr;
+  int32_t*        ResBufPtr;
+  FunctionalState Lock;
+  I2C_TypeDef*    I2CBus;
+  SPI_TypeDef*    SPIBus;
+} BMxX80_TypeDef;
+
+
+// ----------------------------------------------------------------------------
+
+/* Linked List prototype structures  */
+// typedef struct {
+//   uint32_t  ItemPtr;
+//   uint32_t  NextItemPtr;
+//   uint32_t  PrevItemPtr;
+// } list_item_t;
+
+
+// typedef struct {
+//   uint32_t      LastUsedItemPtr;
+//   uint32_t      Capacity;
+//   list_item_t*  ItemListPtr;
+// } linked_list_t;
 
 
 

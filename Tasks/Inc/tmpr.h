@@ -50,7 +50,7 @@ void DsMeasurment_CronHandler(void);
  * @brief Return BMx Bosch device struct pointer.
  * @return device struct pointer
  */
-BMx280_ItemTypeDef* Get_BoschDevice(void);
+BMxX80_TypeDef* Get_BoschDevice(void);
 
 
 #ifdef __cplusplus
