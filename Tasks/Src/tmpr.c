@@ -22,6 +22,8 @@
 
 
 /* Private includes ----------------------------------------------------------*/
+
+/* Bosch related data */
 __attribute__((section(".cron"))) static uint32_t boschTaskCnt    = 0;
 __attribute__((section(".cron"))) static uint32_t boschTaskReg    = 0;
 
@@ -32,25 +34,6 @@ static task_scheduler_t boschScheduler = {
   .counterReg     = &boschTaskReg,
   .entranceFlag   = 31,
 };
-
-__attribute__((section(".cron"))) static uint32_t dsTaskCnt       = 0;
-__attribute__((section(".cron"))) static uint32_t dsTaskReg       = 0;
-
-static task_scheduler_t dsScheduler = {
-  .counter        = &dsTaskCnt,
-  .counterSrc     = &secCnt,
-  .period         = 5,
-  .counterReg     = &dsTaskReg,
-  .entranceFlag   = 31,
-};
-
-// static int32_t bosch_data[3];
-
-// static BMx280_ItemTypeDef bosch_0 = {
-//   .sensorType = BMP280,
-//   .busType = BMx280_I2C,
-//   .bus = I2C1
-// };
 
 static uint8_t boschRawData[32];
 static int32_t boschResults[3];
@@ -63,6 +46,19 @@ static BMxX80_TypeDef bosch_0 = {
   .I2CBus     = I2C1,
   .SPIBus     = NONE,
 };
+
+/* Dallas DS related data */
+__attribute__((section(".cron"))) static uint32_t dsTaskCnt       = 0;
+__attribute__((section(".cron"))) static uint32_t dsTaskReg       = 0;
+
+static task_scheduler_t dsScheduler = {
+  .counter        = &dsTaskCnt,
+  .counterSrc     = &secCnt,
+  .period         = 5,
+  .counterReg     = &dsTaskReg,
+  .entranceFlag   = 31,
+};
+
 
 
 /* Private function prototypes ----------------------------------------------*/
