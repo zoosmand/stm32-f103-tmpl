@@ -47,6 +47,7 @@ extern "C" {
 #include "eeprom.h"
 #include "max72xx.h"
 #include "bmx280.h"
+#include "bmx680.h"
 #include "tmpr.h"
 #include "display.h"
 
