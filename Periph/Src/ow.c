@@ -24,6 +24,13 @@ __STATIC_INLINE void OneWire_WriteBit(uint8_t);
 
 
 // -------------------------------------------------------------  
+int OneWireBus_Init(void) {
+  return OneWire_Reset();
+}
+
+
+
+// -------------------------------------------------------------  
 int OneWire_Reset(void) {
 
   OneWire_High;

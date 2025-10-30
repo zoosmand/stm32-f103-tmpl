@@ -86,21 +86,8 @@
 #define GPIO_PIN_15_Pos             GPIO_PIN_15
 #define GPIO_PIN_15_Mask            0xf0000000
 #define GPIO_PIN_ALL                (uint16_t)0xffff /*!< Select all pins */
-/* GPIO Modes bit definitions */
-// #define GPIO_MODE_OUT               0b01 /* GPIO output mode */
-// #define GPIO_MODE_IN                0b00 /* GPIO input mode */
-// #define GPIO_MODE_AF                0b10 /* GPIO alternate function mode */ 
-// #define GPIO_MODE_AN                0b11 /* GPIO analog mode */
-// #define GPIO_OTYPE_PP               0b0  /* GPIO output push-pull mode */ 
-// #define GPIO_OTYPE_OD               0b1  /* GPIO output open-drain mode */
-// #define GPIO_SPEED_L                0b00 /* GPIO low speed ~2MHz */
-// #define GPIO_SPEED_M                0b01 /* GPIO medium speed ~10MHz */
-// #define GPIO_SPEED_H                0b10 /* GPIO high speed ~25MHz */
-// #define GPIO_SPEED_V                0b11 /* GPIO very high speed ~100MHz */
-// #define GPIO_PUPD_NO                0b00 /* GPIO neither pull-up, no pull-down */
-// #define GPIO_PUPD_PU                0b01 /* GPIO pull-up */
-// #define GPIO_PUPD_PD                0b10 /* GPIO pull-down */
 
+/* GPIO Modes bit definitions */
 #define GPIO_GPO_PP                 0b0000 // General purpose output push-pull
 #define GPIO_GPO_OD                 0b0100 // General purpose output open drain
 #define GPIO_IOS_2                  0b0010 // I/O speed is 2 MHz
@@ -180,12 +167,96 @@
 #define TASK_CTRL(task)                                         if (FLAG_CHECK(task.scheduler->counterReg, task.scheduler->entranceFlag)) task.callback((uint32_t*)&task);
 
 
-#define BIT_2_0(per)        (per * 2U)
-#define BIT_2_1(per)        (per * 2U + 1U)
-#define BIT_4_0(per)        (per * 4U)
-#define BIT_4_1(per)        (per * 4U + 1U)
-#define BIT_4_2(per)        (per * 4U + 2U)
-#define BIT_4_3(per)        (per * 4U + 3U)
+
+// ----------------------------------------------------------------------------
+
+/**
+ * @brief Data transmit diretion mode struct
+ * 
+ * - TX - transmission from an MCU bus to a peripheral device
+ * 
+ * - RX - transmission from a peripheral device to an MCU bus
+ * 
+ * - NONE - no transmission (dummy mode)
+ * 
+ * ---
+ * 
+ */
+typedef enum {
+  TX    = 0,
+  RX    = 1,
+  NOTR  = (!TX & !RX)
+} DataTransmitDirection_TypeDef;
+
+
+// ----------------------------------------------------------------------------
+
+/**
+ * @brief   Bosch BMx280 device type definition struct.
+ */
+typedef struct {  
+  uint8_t         DevID;
+  uint8_t*        RawBufPtr;
+  int32_t*        ResBufPtr;
+  FunctionalState Lock;
+  I2C_TypeDef*    I2CBus;
+  SPI_TypeDef*    SPIBus;
+} BMxX80_TypeDef;
+
+
+// ----------------------------------------------------------------------------
+
+/**
+ * @brief   EEPROM W25Qxx device type definition struct.
+ */
+typedef struct {
+  uint8_t               ID;
+  uint8_t               ManID;
+  uint8_t               Type;
+  uint64_t              UniqID;
+  uint16_t              BlockCount;
+  uint32_t              Capacity;
+  FunctionalState       Lock;
+  SPI_TypeDef*          SPIx;
+  DMA_TypeDef*          DMAx;
+  DMA_Channel_TypeDef*  DMAxTx;
+  DMA_Channel_TypeDef*  DMAxRx;
+} W25qxx_TypeDef;
+
+
+// ----------------------------------------------------------------------------
+
+/**
+ * @brief   MAX7219 device type definition struct.
+ */
+typedef struct {
+  uint8_t               SegCnt;
+  uint8_t               MaxSegCnt;
+  uint16_t*             BufPtr;
+  FunctionalState       Lock;
+  SPI_TypeDef*          SPIx;
+  DMA_TypeDef*          DMAx;
+  DMA_Channel_TypeDef*  DMAxTx;
+  DMA_Channel_TypeDef*  DMAxRx;
+} Max72xx_TypeDef;
+
+
+// ----------------------------------------------------------------------------
+
+/* Linked List prototype structures  */
+// typedef struct {
+//   uint32_t  ItemPtr;
+//   uint32_t  NextItemPtr;
+//   uint32_t  PrevItemPtr;
+// } list_item_t;
+
+
+// typedef struct {
+//   uint32_t      LastUsedItemPtr;
+//   uint32_t      Capacity;
+//   list_item_t*  ItemListPtr;
+// } linked_list_t;
+
 
 
 /* Exported functions prototypes ---------------------------------------------*/

@@ -37,13 +37,18 @@ extern "C" {
 #include "stm32f1xx.h"
 
 /* Private includes ----------------------------------------------------------*/
+#include "common.h"
 #include "i2c.h"
 #include "spi.h"
 #include "whxxxx.h"
 #include "ssd13xx.h"
 #include "fonts.h"
 #include "w25qxx.h"
+#include "eeprom.h"
 #include "max72xx.h"
+#include "bmx280.h"
+#include "tmpr.h"
+#include "display.h"
 
 
 #if defined(USE_FULL_ASSERT)
@@ -73,12 +78,15 @@ extern uint32_t secCnt;
 
 
 /** Rediness Services Register Flags */
-#define OneWireBus_RF   0
-#define SSDDisplay_RF   1
-#define WHDisplay_RF    2
-#define SPI1_RF         3
-#define W25QXX_RF       4
-#define MAX72XX_RF      5
+#define OneWireBus_RF     0
+#define SSDDisplay_RF     1
+#define WHDisplay_RF      2
+#define SPI1_RF           3
+#define EEPROM_RF         4
+#define MAXDSPL_RF        5
+#define BMX280_RF         6
+#define I2C1_RF           7
+#define BMX680_RF         8
 
 
 /* Exported defines -----------------------------------------------------------*/

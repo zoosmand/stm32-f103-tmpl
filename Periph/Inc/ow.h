@@ -22,6 +22,12 @@ extern __attribute__((section(".cron"))) uint32_t _OWREG_;
 
 /* Exported functions prototypes ---------------------------------------------*/
 
+/**
+ * @brief   Inializes OneWire Bus pulling reset.
+ * @return  status of operation
+ */
+int OneWireBus_Init(void);
+
 int OneWire_Reset(void);
 
 void OneWire_WriteByte(uint8_t);

@@ -51,22 +51,6 @@
 #define NSS_1_L         PIN_L(SPI_Port, NSS_1_Pin_Pos)
 
 
-typedef enum {
-  NEUTRAL   = 2,
-  READ      = 1,
-  WRITE     = 0
-} SPIDir_TypeDef;
-
-// typedef enum {
-//   SPIBufLen_8bit      = 0,
-//   SPIBufLen_16bit     = 1
-// } SPIBufLen_TypeDef;
-
-// typedef struct {
-//   GPIO_TypeDef* GPIOx;
-//   uint8_t       Pin;
-// } SPINss_TypeDef;
-
 
 /* Exported functions prototypes ---------------------------------------------*/
 
