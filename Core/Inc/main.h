@@ -44,6 +44,7 @@ extern "C" {
 #include "ssd13xx.h"
 #include "fonts.h"
 #include "w25qxx.h"
+#include "eeprom.h"
 #include "max72xx.h"
 #include "bmx280.h"
 #include "tmpr.h"
@@ -80,7 +81,7 @@ extern uint32_t secCnt;
 #define SSDDisplay_RF   1
 #define WHDisplay_RF    2
 #define SPI1_RF         3
-#define W25QXX_RF       4
+#define EEPROM_RF       4
 #define MAX72XX_RF      5
 #define BMX280_RF       6
 #define I2C1_RF         7

@@ -17,11 +17,11 @@
   */
 
 
-  /* Includes ------------------------------------------------------------------*/
+/* Includes ------------------------------------------------------------------*/
 #include "tmpr.h"
 
 
-/* Private includes ----------------------------------------------------------*/
+/* Private variables ---------------------------------------------------------*/
 
 /* Bosch related data */
 __attribute__((section(".cron"))) static uint32_t boschTaskCnt    = 0;
@@ -44,7 +44,7 @@ static BMxX80_TypeDef bosch_0 = {
   .ResBufPtr  = boschResults,
   .Lock       = ENABLE,
   .I2CBus     = I2C1,
-  .SPIBus     = NONE,
+  .SPIBus     = NULL,
 };
 
 /* Dallas DS related data */
@@ -129,5 +129,4 @@ void DsMeasurment_CronHandler(void) {
     /* TODO handle DS data usage */
     __NOP();
   }
-
 }

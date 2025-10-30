@@ -53,7 +53,7 @@ const uint16_t w25q[] = {
  * @param   buf: pointer to a buffer to write/read the data
  * @retval  (int) status of operation
  */
-static int SPI_Transfer_DMA(W25qxx_TypeDef*, const uint16_t, const SPIDir_TypeDef, const uint32_t, uint8_t*);
+static int SPI_Transfer_DMA(W25qxx_TypeDef*, const uint16_t, const DataTransmitDirection_TypeDef, const uint32_t, uint8_t*);
 
 /**
  * @brief Transfers SPI commands and service data to/from EEPROM via SPI bus.
@@ -65,7 +65,7 @@ static int SPI_Transfer_DMA(W25qxx_TypeDef*, const uint16_t, const SPIDir_TypeDe
  * @param   buf: pointer to a buffer to write/read the data
  * @retval  (int) status of operation
  */
-static int SPI_Transfer(W25qxx_TypeDef*, const uint8_t, int32_t, uint16_t, const SPIDir_TypeDef, const uint32_t, uint8_t*);
+static int SPI_Transfer(W25qxx_TypeDef*, const uint8_t, int32_t, uint16_t, const DataTransmitDirection_TypeDef, const uint32_t, uint8_t*);
 
 /**
  * @brief Adjusts SPI bus according to EEPROM parameters.
@@ -129,11 +129,11 @@ __STATIC_INLINE void SPI_Adjust(W25qxx_TypeDef* dev) {
 
 
 // ----------------------------------------------------------------------------
-static int SPI_Transfer_DMA(W25qxx_TypeDef* dev, const uint16_t cnt, const SPIDir_TypeDef dir, const uint32_t offset, uint8_t *buf) {
+static int SPI_Transfer_DMA(W25qxx_TypeDef* dev, const uint16_t cnt, const DataTransmitDirection_TypeDef dir, const uint32_t offset, uint8_t *buf) {
   uint8_t pump = 0;
   uint32_t tmout = 0;
 
-  if (dir == WRITE) {
+  if (dir == TX) {
     /* Enable from memory to peripheral DMA transfer */
     PREG_SET(dev->SPIx->CR2, SPI_CR2_TXDMAEN_Pos);
     /* Enable incremental and wait until it ready */
@@ -196,7 +196,7 @@ static int SPI_Transfer_DMA(W25qxx_TypeDef* dev, const uint16_t cnt, const SPIDi
   /* Clear complete transger flag */
   SET_BIT(dev->DMAx->IFCR, DMA_IFCR_CTCIF3);
   
-  if (dir == WRITE) {
+  if (dir == TX) {
     /* Wait white SPI is busy */
     tmout = SPI_BUS_TMOUT;
     while((PREG_CHECK(dev->SPIx->SR, SPI_SR_BSY_Pos))) {
@@ -239,7 +239,7 @@ static int SPI_Transfer_DMA(W25qxx_TypeDef* dev, const uint16_t cnt, const SPIDi
 
 
 // ----------------------------------------------------------------------------
-static int SPI_Transfer(W25qxx_TypeDef* dev, const uint8_t cmd, int32_t addr, const uint16_t cnt, const SPIDir_TypeDef dir, const uint32_t offset, uint8_t *buf) {
+static int SPI_Transfer(W25qxx_TypeDef* dev, const uint8_t cmd, int32_t addr, const uint16_t cnt, const DataTransmitDirection_TypeDef dir, const uint32_t offset, uint8_t *buf) {
 
   uint32_t tmout = 0;
   /* Activate slave and wait the level is low */
@@ -349,16 +349,16 @@ int W25qxx_Init(W25qxx_TypeDef* dev) {
   int ret = 0;
 
 
-  if (SPI_Transfer(dev, W25Qxx_Read_JedecID, -1, 4, READ, 0, buf)) return (1);
+  if (SPI_Transfer(dev, W25Qxx_Read_JedecID, -1, 4, RX, 0, buf)) return (1);
   dev->ManID = buf[0];
   dev->Type = buf[1];
   dev->BlockCount = w25q[((buf[2] - 1) & 0x0f)];  
   dev->Capacity = dev->BlockCount * W25Qxx_BLOCK_SIZE;
 
-  if (SPI_Transfer(dev, W25Qxx_Read_UniqueID, -1, 12, READ, 0, buf)) return (1);
+  if (SPI_Transfer(dev, W25Qxx_Read_UniqueID, -1, 12, RX, 0, buf)) return (1);
   dev->UniqID = *(uint64_t*)(&buf[4]);
 
-  if (SPI_Transfer(dev, W25Qxx_Read_DeviceID, -1, 4, READ, 0, buf)) return (1);
+  if (SPI_Transfer(dev, W25Qxx_Read_DeviceID, -1, 4, RX, 0, buf)) return (1);
   dev->ID = buf[3];
 
   dev->Lock = 0;
@@ -395,7 +395,7 @@ int W25qxx_Read(W25qxx_TypeDef* dev, const uint32_t addr, const uint16_t cnt, ui
   phy_addr += W25Qxx_SECTOR_SIZE * ((addr >> 4) & 0xf);
   phy_addr += W25Qxx_PAGE_SIZE * (addr & 0xf);
   
-  if (SPI_Transfer(dev, W25Qxx_FastRead, (phy_addr << 8), cnt, READ, 0, buf)) return (1);
+  if (SPI_Transfer(dev, W25Qxx_FastRead, (phy_addr << 8), cnt, RX, 0, buf)) return (1);
 
   SPI_Disable(dev->SPIx);
   return (0);
@@ -422,15 +422,15 @@ int W25qxx_Write(W25qxx_TypeDef* dev, uint32_t addr, uint16_t cnt, uint8_t *buf)
   uint32_t i = 0;
   
   for (i = 0; i < (cnt / 256); i++) {
-    if (SPI_Transfer(dev, W25Qxx_WriteEnable, -1, 0, NEUTRAL, 0, &pump)) return (1);
-    if (SPI_Transfer(dev, W25Qxx_PageProgram, (phy_addr << 8), 256, WRITE, i, buf)) return (1);
+    if (SPI_Transfer(dev, W25Qxx_WriteEnable, -1, 0, NOTR, 0, &pump)) return (1);
+    if (SPI_Transfer(dev, W25Qxx_PageProgram, (phy_addr << 8), 256, TX, i, buf)) return (1);
     phy_addr += W25Qxx_PAGE_SIZE;
     if (W25qxx_IsBusy(dev)) return (1);
   }
   
   if (cnt % 256) {
-    if (SPI_Transfer(dev, W25Qxx_WriteEnable, -1, 0, NEUTRAL, 0, &pump)) return (1);
-    if (SPI_Transfer(dev, W25Qxx_PageProgram, (phy_addr << 8), (cnt % 256), WRITE, i, buf)) return (1);
+    if (SPI_Transfer(dev, W25Qxx_WriteEnable, -1, 0, NOTR, 0, &pump)) return (1);
+    if (SPI_Transfer(dev, W25Qxx_PageProgram, (phy_addr << 8), (cnt % 256), TX, i, buf)) return (1);
     if (W25qxx_IsBusy(dev)) return (1);
   }
 
@@ -457,14 +457,14 @@ int W25qxx_Erase(W25qxx_TypeDef* dev, uint32_t addr, uint16_t sectors) {
       // *******************************  
       uint32_t blocks = (sectors / 16);
       for (int i = 0; i < blocks; i++) {
-        if (SPI_Transfer(dev, W25Qxx_WriteEnable, -1, 0, NEUTRAL, 0, &pump)) return (1);
-        if (SPI_Transfer(dev, W25Qxx_Erase_Block_64, (phy_addr << 8), 0, NEUTRAL, 0, &pump)) return (1);
+        if (SPI_Transfer(dev, W25Qxx_WriteEnable, -1, 0, NOTR, 0, &pump)) return (1);
+        if (SPI_Transfer(dev, W25Qxx_Erase_Block_64, (phy_addr << 8), 0, NOTR, 0, &pump)) return (1);
         phy_addr += W25Qxx_BLOCK_SIZE;
         if (W25qxx_IsBusy(dev)) return (1);
       }
       uint32_t remain_addr = (addr & 0xffffff00) + (blocks << 8);
       if (sectors % 16) {
-        if (SPI_Transfer(dev, W25Qxx_WriteEnable, -1, 0, NEUTRAL, 0, &pump)) return (1);
+        if (SPI_Transfer(dev, W25Qxx_WriteEnable, -1, 0, NOTR, 0, &pump)) return (1);
         if (W25qxx_Erase(dev, remain_addr, (sectors % 16))) return (1);
         if (W25qxx_IsBusy(dev)) return (1);
       }
@@ -475,13 +475,13 @@ int W25qxx_Erase(W25qxx_TypeDef* dev, uint32_t addr, uint16_t sectors) {
         phy_addr += W25Qxx_SECTOR_SIZE * ((addr >> 4) & 0xf);
       }
 
-      if (SPI_Transfer(dev, W25Qxx_WriteEnable, -1, 0, NEUTRAL, 0, &pump)) return (1);
-      if (SPI_Transfer(dev, W25Qxx_Erase_Block_32, (phy_addr << 8), 0, NEUTRAL, 0, &pump)) return (1);
+      if (SPI_Transfer(dev, W25Qxx_WriteEnable, -1, 0, NOTR, 0, &pump)) return (1);
+      if (SPI_Transfer(dev, W25Qxx_Erase_Block_32, (phy_addr << 8), 0, NOTR, 0, &pump)) return (1);
       uint32_t remain_addr = (addr & 0xffffff80) + (8 << 4);
       if (W25qxx_IsBusy(dev)) return (1);
       
       if (sectors - 8) {
-        if (SPI_Transfer(dev, W25Qxx_WriteEnable, -1, 0, NEUTRAL, 0, &pump)) return (1);
+        if (SPI_Transfer(dev, W25Qxx_WriteEnable, -1, 0, NOTR, 0, &pump)) return (1);
         if (W25qxx_Erase(dev, remain_addr, sectors - 8)) return (1);
         if (W25qxx_IsBusy(dev)) return (1);
       }
@@ -491,8 +491,8 @@ int W25qxx_Erase(W25qxx_TypeDef* dev, uint32_t addr, uint16_t sectors) {
     // *******************************  
     phy_addr += W25Qxx_SECTOR_SIZE * ((addr >> 4) & 0xf);
     for (int i = 0; i < sectors; i++) {
-      if (SPI_Transfer(dev, W25Qxx_WriteEnable, -1, 0, NEUTRAL, 0, &pump)) return (1);
-      if (SPI_Transfer(dev, W25Qxx_Erase_Sector, (phy_addr << 8), 0, NEUTRAL, 0, &pump)) return (1);
+      if (SPI_Transfer(dev, W25Qxx_WriteEnable, -1, 0, NOTR, 0, &pump)) return (1);
+      if (SPI_Transfer(dev, W25Qxx_Erase_Sector, (phy_addr << 8), 0, NOTR, 0, &pump)) return (1);
       phy_addr += W25Qxx_SECTOR_SIZE;
       if (W25qxx_IsBusy(dev)) return (1);
     }
@@ -512,7 +512,7 @@ static int W25qxx_IsBusy(W25qxx_TypeDef* dev) {
   uint32_t tmout = SPI_BUS_TMOUT * 5;
 
   while (pump & W25Qxx_BUSY) {
-    if (SPI_Transfer(dev, W25Qxx_Read_StatusRegister_1, -1, 1, READ, 0, &pump)) return (1);
+    if (SPI_Transfer(dev, W25Qxx_Read_StatusRegister_1, -1, 1, RX, 0, &pump)) return (1);
     if (!(--tmout)) {
       SPI_Disable(dev->SPIx);
       return (1);
@@ -533,10 +533,10 @@ int W25qxx_Reset(W25qxx_TypeDef* dev) {
   SPI_Adjust(dev);
   SPI_Enable(dev->SPIx);
 
-  if (SPI_Transfer(dev, W25Qxx_EnableReset, -1, 0, NEUTRAL, 0, &pump)) return (1);
-  if (SPI_Transfer(dev, W25Qxx_ResetProccess, -1, 0, NEUTRAL, 0, &pump)) return (1);
+  if (SPI_Transfer(dev, W25Qxx_EnableReset, -1, 0, NOTR, 0, &pump)) return (1);
+  if (SPI_Transfer(dev, W25Qxx_ResetProccess, -1, 0, NOTR, 0, &pump)) return (1);
   _delay_ms(10);
-  if (SPI_Transfer(dev, W25Qxx_ReleasePowerDown, -1, 0, NEUTRAL, 0, &pump)) return (1);
+  if (SPI_Transfer(dev, W25Qxx_ReleasePowerDown, -1, 0, NOTR, 0, &pump)) return (1);
 
   SPI_Disable(dev->SPIx);
   return (0);
@@ -554,12 +554,12 @@ uint8_t W25qxx_WriteStatusRegister(W25qxx_TypeDef* dev, uint8_t type, uint8_t st
   SPI_Enable(dev->SPIx);
 
   if (type) {
-    if (SPI_Transfer(dev, W25Qxx_Write_StatusNVRegEnable, -1, 0, NEUTRAL, 0, &pump)) return (1);
+    if (SPI_Transfer(dev, W25Qxx_Write_StatusNVRegEnable, -1, 0, NOTR, 0, &pump)) return (1);
   } else {
-    if (SPI_Transfer(dev, W25Qxx_WriteEnable, -1, 0, NEUTRAL, 0, &pump)) return (1);
+    if (SPI_Transfer(dev, W25Qxx_WriteEnable, -1, 0, NOTR, 0, &pump)) return (1);
   }
   
-  if (SPI_Transfer(dev, W25Qxx_Write_StatusRegister_1, -1, 1, WRITE, 0, &status)) return (1);
+  if (SPI_Transfer(dev, W25Qxx_Write_StatusRegister_1, -1, 1, TX, 0, &status)) return (1);
 
   /* Skip one trash bytes */
   uint32_t tmout = SPI_BUS_TMOUT;
@@ -573,7 +573,7 @@ uint8_t W25qxx_WriteStatusRegister(W25qxx_TypeDef* dev, uint8_t type, uint8_t st
   dev->SPIx->DR;
 
   if (W25qxx_IsBusy(dev)) return (1);
-  if (SPI_Transfer(dev, W25Qxx_Read_StatusRegister_1, -1, 1, READ, 0, &pump)) return (1);
+  if (SPI_Transfer(dev, W25Qxx_Read_StatusRegister_1, -1, 1, RX, 0, &pump)) return (1);
 
   SPI_Disable(dev->SPIx);
   return (pump);
