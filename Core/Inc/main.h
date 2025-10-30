@@ -78,14 +78,15 @@ extern uint32_t secCnt;
 
 
 /** Rediness Services Register Flags */
-#define OneWireBus_RF   0
-#define SSDDisplay_RF   1
-#define WHDisplay_RF    2
-#define SPI1_RF         3
-#define EEPROM_RF       4
-#define MAXDSPL_RF      5
-#define BMX280_RF       6
-#define I2C1_RF         7
+#define OneWireBus_RF     0
+#define SSDDisplay_RF     1
+#define WHDisplay_RF      2
+#define SPI1_RF           3
+#define EEPROM_RF         4
+#define MAXDSPL_RF        5
+#define BMX280_RF         6
+#define I2C1_RF           7
+#define BMX680_RF         8
 
 
 /* Exported defines -----------------------------------------------------------*/

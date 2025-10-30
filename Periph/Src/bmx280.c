@@ -98,7 +98,7 @@ ErrorStatus BMx280_Init(BMxX80_TypeDef* dev) {
   
   dev->DevID = dev->RawBufPtr[0];
 
-  if (!((dev->DevID == BMP280_ID) || (dev->DevID == BME280_ID) || (dev->DevID == BME680_ID))) return (ERROR);
+  if (!((dev->DevID == BMP280_ID) || (dev->DevID == BME280_ID))) return (ERROR);
 
   /* Read calibration data. This is common for both sensor's types */
   if (BMx280_Read(dev, BMX280_CALIB1, 26)) return (ERROR);
@@ -129,19 +129,22 @@ ErrorStatus BMx280_Init(BMxX80_TypeDef* dev) {
     dig_H6 = (int8_t)dev->RawBufPtr[6];
   }
 
-  /* Set filter coefficient to 8 and 1s inactive duration in normal mode */
+  /* Set filter coefficient and inactive duration in normal mode */
   dev->RawBufPtr[0] = BMX280_SETTINGS;
-  dev->RawBufPtr[1] = 0xac;
+  dev->RawBufPtr[1] = (BMX280_ConfigInactive_250 << BMX280_ConfigInactive_Pos)
+                    | (BMX280_ConfigFilter_4 << BMX280_ConfigFilter_Pos);
   if (BMx280_Write(dev, 2)) return (ERROR);
 
-  /* Set the humidity oversampling to 16 (highest precision) */
+  /* Set the humidity oversampling precision */
   dev->RawBufPtr[0] = BMX280_CTRL_HUM;
-  dev->RawBufPtr[1] = 0x05;
+  dev->RawBufPtr[1] = (BMX280_HumidityOvs_x4 << BMX280_HumidityOvs_Pos);
   if (BMx280_Write(dev, 2)) return (ERROR);
 
-  /* Set the temperature and pressure oversampling to 16 (highest precision) */
+  /* Set the temperature and pressure oversampling precision */
   dev->RawBufPtr[0] = BMX280_CTRL_MEAS;
-  dev->RawBufPtr[1] = 0xb4;
+  dev->RawBufPtr[1] = (BMX280_TemperatureOvs_x4 << BMX280_TemperatureOvs_Pos) 
+                    | (BMX280_PressureOvs_x4 << BMX280_PressureOvs_Pos)
+                    | (BMX280_NormalMode << BMX280_Mode_Pos);
   if (BMx280_Write(dev, 2)) return (ERROR);
 
   dev->Lock = ENABLE;
@@ -162,15 +165,20 @@ ErrorStatus BMx280_Measurment(BMxX80_TypeDef *dev) {
 
   /* Run conversion in force mode, keep oversampling */
   dev->RawBufPtr[0] = BMX280_CTRL_MEAS;
-  dev->RawBufPtr[1] = 0xb5;
+  dev->RawBufPtr[1] = (BMX280_TemperatureOvs_x4 << BMX280_TemperatureOvs_Pos) 
+                    | (BMX280_PressureOvs_x4 << BMX280_PressureOvs_Pos)
+                    | (BMX280_ForceMode << BMX280_Mode_Pos);
   if (BMx280_Write(dev, 2)) return (ERROR);
 
   /* Read the status register and check measuring busy flag, wait for conversion */
+  uint8_t wait_status_threshold = 250;
   
-  /* TODO realize waiting in a circle with timeoute reading the status byte */
   if (BMx280_Read(dev, BMX280_STATUS, 1)) return (ERROR);
-  if (dev->RawBufPtr[0] == 0x08) {
-    _delay_ms(20);
+  dev->RawBufPtr[0] = BMX280_Measuring;
+  while (dev->RawBufPtr[0] & BMX280_Measuring) {
+    _delay_ms(1);
+    if (BMx280_Read(dev, BMX280_STATUS, 1)) return (ERROR);
+    if (!(wait_status_threshold--)) return (ERROR);
   }
 
   /* Read raw data */
