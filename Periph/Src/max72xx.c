@@ -1,7 +1,7 @@
 /**
   ******************************************************************************
   * @file           : max72xx.c
-  * @brief          : This file contains MAX 7219 display
+  * @brief          : This file contains MAX 72xx display
   ******************************************************************************
   * @attention
   *
@@ -57,14 +57,14 @@ __STATIC_INLINE void SPI_Adjust(Max72xx_TypeDef*);
 int MAX72xx_Init(Max72xx_TypeDef* dev) {
   if ((dev->SPIx == NULL) || (dev->DMAx == NULL) || (dev->DMAxRx == NULL) || (dev->DMAxTx == NULL)) return (1); 
 
-  dev->Lock = 1;
+  if (dev->Lock == ENABLE) dev->Lock = DISABLE; else return (ERROR);
 
   SPI_Adjust(dev);
   if (SPI_Enable(dev->SPIx)) return (1);
   
   _delay_ms(5);
   
-  const uint16_t maxInit[15] = {
+  uint16_t maxInit[15] = {
     0x0c00, // 0x0c - Shutdown,     0x00 - Shutdown
     0x0f00, // 0x0f - DisplayTest,  0x00 - Off, 0x01 - On
     0x0900, // 0x09 - Decode Mode,  0x00 - No decode for digits 7�0, 0xff - Code B decode for digits 7�0
@@ -92,8 +92,8 @@ int MAX72xx_Init(Max72xx_TypeDef* dev) {
     }
     NSS_1_H;
   }
-  dev->Lock = 0;
-  
+
+  dev->Lock = ENABLE;
   return (0);
 }
 
@@ -104,7 +104,7 @@ int MAX72xx_Init(Max72xx_TypeDef* dev) {
 __STATIC_INLINE void SPI_Adjust(Max72xx_TypeDef* dev) {
   /* adjust frequency divider, 0b010 = 8, (PCLK)72/8 = 9MHz */
   /* set 16-bit data buffer length */ 
-  MODIFY_REG(dev->SPIx->CR1, (SPI_CR1_BR_Msk, SPI_CR1_DFF_Msk), (SPI_CR1_BR_1 | SPI_CR1_DFF));
+  MODIFY_REG(dev->SPIx->CR1, (SPI_CR1_BR_Msk | SPI_CR1_DFF_Msk), (SPI_CR1_BR_1 | SPI_CR1_DFF));
   PREG_CLR(dev->SPIx->CR2, SPI_CR2_SSOE_Pos);
   dev->DMAxTx->CCR = 0UL;
   dev->DMAxRx->CCR = 0UL;
@@ -118,6 +118,8 @@ __STATIC_INLINE void SPI_Adjust(Max72xx_TypeDef* dev) {
 
 // ----------------------------------------------------------------------------
 static int mAX72xx_PrintBuf(Max72xx_TypeDef* dev, uint16_t len) {
+
+  if (dev->Lock == ENABLE) dev->Lock = DISABLE; else return (ERROR);
 
   SPI_Adjust(dev);
   if (SPI_Enable(dev->SPIx)) return (1);
@@ -133,6 +135,8 @@ static int mAX72xx_PrintBuf(Max72xx_TypeDef* dev, uint16_t len) {
   }
 
   if (SPI_Disable(dev->SPIx)) return (1);
+
+  dev->Lock = ENABLE;
   return (0);
 }
 

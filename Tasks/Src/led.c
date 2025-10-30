@@ -10,9 +10,11 @@
   */
 
   /* Includes ------------------------------------------------------------------*/
-#include "main.h"
+#include "led.h"
 
 /* Private includes ----------------------------------------------------------*/
+
+/* Private variables ---------------------------------------------------------*/
 __attribute__((section(".cron"))) static uint32_t ledRedTaskCnt           = 0;
 __attribute__((section(".cron"))) static uint32_t ledRedTaskReg           = 0;
 __attribute__((section(".cron"))) static uint32_t ledRedTaskPauseCnt_1    = 0;
@@ -29,7 +31,7 @@ __attribute__((section(".cron"))) static uint32_t ledGreenTaskPauseCnt_1  = 0;
 __attribute__((section(".cron"))) static uint32_t ledGreenTaskPauseCnt_2  = 0;
 
 
-/* Private variables ---------------------------------------------------------*/
+/* ----------------------------------------------------------------------------- */
 static task_scheduler_t ledRedScheduler = {
   .counter        = &ledRedTaskCnt,
   .counterSrc     = &secCnt,
@@ -50,7 +52,6 @@ static task_led_toggle_t ledRedTask = {
   .srcPauseCnt_2  = &sysCnt,
   .pauseValue_2   = 50,
 };
-
 
 /* ----------------------------------------------------------------------------- */
 static task_scheduler_t ledBlueScheduler = {
@@ -75,8 +76,6 @@ static task_led_toggle_t ledBlueTask = {
 };
 
 /* ----------------------------------------------------------------------------- */
-
-
 static task_scheduler_t ledGreenScheduler = {
   .counter        = &ledGreenTaskCnt,
   .counterSrc     = &secCnt,

@@ -72,22 +72,22 @@
 #define W25Qxx_BLOCK_SIZE               0x00010000 // 64536
 
 
-/**
- * @brief   EEPROM W25Qxx device type definition struct.
- */
-typedef struct {
-  uint8_t               ID;
-  uint8_t               ManID;
-  uint8_t               Type;
-  uint64_t              UniqID;
-  uint16_t              BlockCount;
-  uint32_t              Capacity;
-  uint8_t               Lock;
-  SPI_TypeDef*          SPIx;
-  DMA_TypeDef*          DMAx;
-  DMA_Channel_TypeDef*  DMAxTx;
-  DMA_Channel_TypeDef*  DMAxRx;
-} W25qxx_TypeDef;
+// /**
+//  * @brief   EEPROM W25Qxx device type definition struct.
+//  */
+// typedef struct {
+//   uint8_t               ID;
+//   uint8_t               ManID;
+//   uint8_t               Type;
+//   uint64_t              UniqID;
+//   uint16_t              BlockCount;
+//   uint32_t              Capacity;
+//   uint8_t               Lock;
+//   SPI_TypeDef*          SPIx;
+//   DMA_TypeDef*          DMAx;
+//   DMA_Channel_TypeDef*  DMAxTx;
+//   DMA_Channel_TypeDef*  DMAxRx;
+// } W25qxx_TypeDef;
 
 
 

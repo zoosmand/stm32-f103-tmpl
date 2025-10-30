@@ -1,7 +1,7 @@
 /**
   ******************************************************************************
-  * @file           : max7219.h
-  * @brief          : This file contains header definitions MAX 7219 display
+  * @file           : max72xx.h
+  * @brief          : This file contains header definitions MAX 72xx display
   ******************************************************************************
   * @attention
   *
@@ -28,19 +28,19 @@
 #define MAX72XX_SEG_CNT       4
 #define MAX72XX_MAX_SEG_CNT   (MAX72XX_SEG_CNT * 8)
 
-/**
- * @brief   MAX7219 device type definition struct.
- */
-typedef struct {
-  uint8_t               SegCnt;
-  uint8_t               MaxSegCnt;
-  uint16_t*             BufPtr;
-  uint8_t               Lock;
-  SPI_TypeDef*          SPIx;
-  DMA_TypeDef*          DMAx;
-  DMA_Channel_TypeDef*  DMAxTx;
-  DMA_Channel_TypeDef*  DMAxRx;
-} Max72xx_TypeDef;
+// /**
+//  * @brief   MAX7219 device type definition struct.
+//  */
+// typedef struct {
+//   uint8_t               SegCnt;
+//   uint8_t               MaxSegCnt;
+//   uint16_t*             BufPtr;
+//   uint8_t               Lock;
+//   SPI_TypeDef*          SPIx;
+//   DMA_TypeDef*          DMAx;
+//   DMA_Channel_TypeDef*  DMAxTx;
+//   DMA_Channel_TypeDef*  DMAxRx;
+// } Max72xx_TypeDef;
 
 
 /**

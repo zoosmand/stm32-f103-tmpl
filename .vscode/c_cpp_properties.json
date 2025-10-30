@@ -13,7 +13,7 @@
             "${workspaceRoot}/Drivers/CMSIS/Device/ST/STM32F1xx/Include",
             "${workspaceRoot}/Core/Inc",
             "${workspaceRoot}/Periph/Inc",
-            "${workspaceRoot}/Tasks/Led/Inc"
+            "${workspaceRoot}/Tasks/Inc"
          ],
          "defines": [
             "DEBUG",
@@ -30,7 +30,7 @@
             "PREFETCH_ENABLE=1",
             "STM32F103xB",
             "SWO_ITM=0",
-            "DSPL_OUT=putc_dspl_dh2004"
+            "DSPL_OUT=putc_dspl_wh2004"
          ],
          "intelliSenseMode": "macos-clang-arm64",
          "cStandard": "c23",
@@ -58,7 +58,7 @@
             "${workspaceRoot}/Drivers/CMSIS/Device/ST/STM32F1xx/Include",
             "${workspaceRoot}/Core/Inc",
             "${workspaceRoot}/Periph/Inc",
-            "${workspaceRoot}/Tasks/Led/Inc"
+            "${workspaceRoot}/Tasks/Inc"
          ],
          "defines": [
             "DEBUG",

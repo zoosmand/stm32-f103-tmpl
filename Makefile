@@ -39,18 +39,20 @@ BUILD_DIR = build
 C_SOURCES =  \
 $(wildcard Core/Src/*.c) \
 $(wildcard Periph/Src/*.c) \
-$(wildcard Tasks/Led/Src/*.c)
+$(wildcard Tasks/Src/*.c)
 
 # ASM sources
 ASM_SOURCES =  \
 startup_stm32f103xb.s \
 $(wildcard Core/*.s) \
-$(wildcard Periph/*.s)
+$(wildcard Periph/*.s) \
+$(wildcard Tasks/*.s)
 
 # ASM sources
 ASMM_SOURCES = \
 $(wildcard Core/*.S) \
-$(wildcard Periph/*.S)
+$(wildcard Periph/*.S) \
+$(wildcard Tasks/*.S)
 
 
 #######################################
@@ -111,7 +113,7 @@ AS_DEFS = $(C_DEFS) \
 C_INCLUDES =  \
 -ICore/Inc \
 -IPeriph/Inc \
--ITasks/Led/Inc \
+-ITasks/Inc \
 -IDrivers/CMSIS/Device/ST/STM32F1xx/Include \
 -IDrivers/CMSIS/Include
 
@@ -134,7 +136,7 @@ ASFLAGS += $(DEBUGFLAGS)
 endif
 
 ifeq ($(OUTPUT), 1)
-OUTPUTFLAGS = -DDSPL_OUT=putc_dspl_wh1602
+OUTPUTFLAGS = -DDSPL_OUT=putc_dspl_wh2004
 ifeq ($(SYS), Darwin)
 OUTPUTFLAGS += -DSWO_ITM=0 
 else ifeq ($(SYS), Linux)
