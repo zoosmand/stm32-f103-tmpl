@@ -48,6 +48,7 @@ extern "C" {
 #include "max72xx.h"
 #include "bmx280.h"
 #include "tmpr.h"
+#include "display.h"
 
 
 #if defined(USE_FULL_ASSERT)
@@ -82,7 +83,7 @@ extern uint32_t secCnt;
 #define WHDisplay_RF    2
 #define SPI1_RF         3
 #define EEPROM_RF       4
-#define MAX72XX_RF      5
+#define MAXDSPL_RF      5
 #define BMX280_RF       6
 #define I2C1_RF         7
 

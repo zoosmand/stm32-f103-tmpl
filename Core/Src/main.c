@@ -37,16 +37,6 @@ static __attribute__((section(".cron"))) uint32_t secCntCache   = 0;
 
 
 
-static uint16_t max_0[(MAX72XX_MAX_SEG_CNT * 8)];
-static Max72xx_TypeDef maxDisplay = {
-  .SegCnt     = MAX72XX_SEG_CNT,
-  .MaxSegCnt  = MAX72XX_MAX_SEG_CNT,
-  .BufPtr     = max_0,
-  .SPIx       = SPI1,
-  .DMAx       = DMA1,
-  .DMAxTx     = DMA1_Channel3,
-  .DMAxRx     = DMA1_Channel2,
-};
 
 
 
@@ -71,9 +61,7 @@ int main(void) {
     
     if (FLAG_CHECK(&_ASREG_, BMX280_RF)) { BoschMeasurment_CronHandler(); }
 
-    if (FLAG_CHECK(&_ASREG_, MAX72XX_RF)) {
-      MAX72xx_Print(&maxDisplay, "1234567890");
-    }
+    if (FLAG_CHECK(&_ASREG_, MAXDSPL_RF)) { MaxDisplay_CronHandler(); }
  
     if (FLAG_CHECK(&_ASREG_, EEPROM_RF)) { EepromHealthCheck_CronHandler(); }
 
@@ -103,7 +91,7 @@ void Cron_Handler(void) {
 
   if (FLAG_CHECK(&_ASREG_, SPI1_RF)) {
     if (!W25qxx_Init(Get_EepromDevice())) FLAG_SET(&_ASREG_, EEPROM_RF);
-    // if (!MAX72xx_Init(&max_0)) FLAG_SET(&_ASREG_, MAX72XX_RF);
+    if (!MAX72xx_Init(Get_MaxDiplayDevice())) FLAG_SET(&_ASREG_, MAXDSPL_RF);
   }
   
   if (FLAG_CHECK(&_ASREG_, I2C1_RF)) {

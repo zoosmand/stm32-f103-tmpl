@@ -38,12 +38,13 @@ static W25qxx_TypeDef eeprom_0 = {
   .DMAx   = DMA1,
   .DMAxTx = DMA1_Channel3,
   .DMAxRx = DMA1_Channel2,
+  .Lock   = ENABLE,
 };
 
 
 /* Private function prototypes ----------------------------------------------*/
 
-static ErrorStatus EepromHealthCheck_Task(W25qxx_TypeDef*);
+static ErrorStatus eepromHealthCheck_Task(W25qxx_TypeDef*);
 
 
 
@@ -60,7 +61,10 @@ void EepromHealthCheck_CronHandler(void) {
 
     FLAG_CLR(eepromScheduler.counterReg, eepromScheduler.entranceFlag);
     
-    if (EepromHealthCheck_Task(&eeprom_0)) printf("Cannot provide a health check for EEPROM device\n");
+    if (eepromHealthCheck_Task(&eeprom_0)) {
+      /* TODO reinitialize, overwise clear rediness flag */
+      printf("Cannot provide a health check for EEPROM device\n");
+    }
 
     /* TODO handle EEPROM data usage */
     __NOP();
@@ -71,9 +75,13 @@ void EepromHealthCheck_CronHandler(void) {
 
 // ----------------------------------------------------------------------------
 
-static ErrorStatus EepromHealthCheck_Task(W25qxx_TypeDef* dev) {
-  __IO static uint8_t dataBuf[16];
-  __IO static uint8_t dataBuf2[256];
+static ErrorStatus eepromHealthCheck_Task(W25qxx_TypeDef* dev) {
+
+  if (dev->Lock == ENABLE) dev->Lock = DISABLE; else return (ERROR);
+
+  /* TODO realize a propert health check */
+  static uint8_t dataBuf[16];
+  static uint8_t dataBuf2[256];
   dataBuf[0] = 200;
   dataBuf[1] = 201;
   dataBuf[2] = 202;
@@ -100,6 +108,7 @@ static ErrorStatus EepromHealthCheck_Task(W25qxx_TypeDef* dev) {
 
   __NOP();
 
+  dev->Lock = ENABLE;
   return (SUCCESS);
 }
 

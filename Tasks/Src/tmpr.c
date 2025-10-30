@@ -81,7 +81,10 @@ void BoschMeasurment_CronHandler(void) {
 
     FLAG_CLR(boschScheduler.counterReg, boschScheduler.entranceFlag);
     
-    if (BMx280_Measurment(&bosch_0)) printf("Cannot collect Bosch device data\n");
+    if (BMx280_Measurment(&bosch_0)) {
+      /* TODO reinitialize device overwise clear rediness flag */
+      printf("Cannot collect Bosch device data\n");
+    }
 
     /* TODO handle Bosch data usage */
     __NOP();
@@ -108,6 +111,8 @@ void DsMeasurment_CronHandler(void) {
   if (FLAG_CHECK(dsScheduler.counterReg, dsScheduler.entranceFlag)) {
 
     FLAG_CLR(dsScheduler.counterReg, dsScheduler.entranceFlag);
+
+    /* TODO reinitialize device overwise clear rediness flag */
     
     OneWireDevice_t* devs = Get_OwDevices();
 

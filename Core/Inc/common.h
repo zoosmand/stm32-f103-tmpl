@@ -216,12 +216,29 @@ typedef struct {
   uint64_t              UniqID;
   uint16_t              BlockCount;
   uint32_t              Capacity;
-  uint8_t               Lock;
+  FunctionalState       Lock;
   SPI_TypeDef*          SPIx;
   DMA_TypeDef*          DMAx;
   DMA_Channel_TypeDef*  DMAxTx;
   DMA_Channel_TypeDef*  DMAxRx;
 } W25qxx_TypeDef;
+
+
+// ----------------------------------------------------------------------------
+
+/**
+ * @brief   MAX7219 device type definition struct.
+ */
+typedef struct {
+  uint8_t               SegCnt;
+  uint8_t               MaxSegCnt;
+  uint16_t*             BufPtr;
+  FunctionalState       Lock;
+  SPI_TypeDef*          SPIx;
+  DMA_TypeDef*          DMAx;
+  DMA_Channel_TypeDef*  DMAxTx;
+  DMA_Channel_TypeDef*  DMAxRx;
+} Max72xx_TypeDef;
 
 
 // ----------------------------------------------------------------------------

@@ -340,7 +340,7 @@ int W25qxx_Init(W25qxx_TypeDef* dev) {
 
   if ((dev->SPIx == NULL) || (dev->DMAx == NULL) || (dev->DMAxRx == NULL) || (dev->DMAxTx == NULL)) return (1); 
 
-  dev->Lock = 1;
+  if (dev->Lock == ENABLE) dev->Lock = DISABLE; else return (ERROR);
 
   SPI_Adjust(dev);
   SPI_Enable(dev->SPIx);
@@ -361,18 +361,18 @@ int W25qxx_Init(W25qxx_TypeDef* dev) {
   if (SPI_Transfer(dev, W25Qxx_Read_DeviceID, -1, 4, RX, 0, buf)) return (1);
   dev->ID = buf[3];
 
-  dev->Lock = 0;
-
+  
   if (!(dev->ManID == 0xef) && !(dev->Type == 0x40)) ret = 1;
-
+  
   /* protect first 32K */
   // uint8_t stub;
   // stub = W25qxx_WriteStatusRegister(dev, 0, (W25Qxx_SEC | W25Qxx_TB | W25Qxx_BP2));
   // SPI_Transfer(dev, W25Qxx_Read_StatusRegister_1, -1, 1, READ, 0, &stub);
   // printf("%x\n", stub);
-
+  
   SPI_Disable(dev->SPIx);
-
+  
+  dev->Lock = ENABLE;
   return ret;
 }
 
@@ -384,6 +384,8 @@ int W25qxx_Init(W25qxx_TypeDef* dev) {
 
 // -------------------------------------------------------------  
 int W25qxx_Read(W25qxx_TypeDef* dev, const uint32_t addr, const uint16_t cnt, uint8_t *buf) {
+
+  if (dev->Lock == ENABLE) dev->Lock = DISABLE; else return (ERROR);
 
   SPI_Adjust(dev);
   SPI_Enable(dev->SPIx);
@@ -398,6 +400,8 @@ int W25qxx_Read(W25qxx_TypeDef* dev, const uint32_t addr, const uint16_t cnt, ui
   if (SPI_Transfer(dev, W25Qxx_FastRead, (phy_addr << 8), cnt, RX, 0, buf)) return (1);
 
   SPI_Disable(dev->SPIx);
+
+  dev->Lock = ENABLE;
   return (0);
 }
 
@@ -407,6 +411,9 @@ int W25qxx_Read(W25qxx_TypeDef* dev, const uint32_t addr, const uint16_t cnt, ui
 
 // -------------------------------------------------------------  
 int W25qxx_Write(W25qxx_TypeDef* dev, uint32_t addr, uint16_t cnt, uint8_t *buf) {
+
+  if (dev->Lock == ENABLE) dev->Lock = DISABLE; else return (ERROR);
+
   uint8_t pump = 0;
   uint32_t phy_addr = 0;
 
@@ -435,6 +442,8 @@ int W25qxx_Write(W25qxx_TypeDef* dev, uint32_t addr, uint16_t cnt, uint8_t *buf)
   }
 
   SPI_Disable(dev->SPIx);
+
+  dev->Lock = ENABLE;
   return (0);
 }
 
@@ -445,6 +454,9 @@ int W25qxx_Write(W25qxx_TypeDef* dev, uint32_t addr, uint16_t cnt, uint8_t *buf)
 
 // -------------------------------------------------------------  
 int W25qxx_Erase(W25qxx_TypeDef* dev, uint32_t addr, uint16_t sectors) {
+
+  if (dev->Lock == ENABLE) dev->Lock = DISABLE; else return (ERROR);
+
   uint8_t pump = 0;
   uint32_t phy_addr = 0;
   phy_addr = W25Qxx_BLOCK_SIZE * ((addr >> 8) & 0xffff);
@@ -500,6 +512,8 @@ int W25qxx_Erase(W25qxx_TypeDef* dev, uint32_t addr, uint16_t sectors) {
   }
 
   SPI_Disable(dev->SPIx);
+
+  dev->Lock = ENABLE;
   return (0);
 }
 
@@ -528,6 +542,9 @@ static int W25qxx_IsBusy(W25qxx_TypeDef* dev) {
 
 // -------------------------------------------------------------  
 int W25qxx_Reset(W25qxx_TypeDef* dev) {
+
+  if (dev->Lock == ENABLE) dev->Lock = DISABLE; else return (ERROR);
+
   uint8_t pump = 0;
 
   SPI_Adjust(dev);
@@ -539,6 +556,8 @@ int W25qxx_Reset(W25qxx_TypeDef* dev) {
   if (SPI_Transfer(dev, W25Qxx_ReleasePowerDown, -1, 0, NOTR, 0, &pump)) return (1);
 
   SPI_Disable(dev->SPIx);
+
+  dev->Lock = ENABLE;
   return (0);
 }
 
@@ -548,6 +567,9 @@ int W25qxx_Reset(W25qxx_TypeDef* dev) {
 /* type: 0 - non-volatile bits, 1 - volatile bits*/
 // -------------------------------------------------------------  
 uint8_t W25qxx_WriteStatusRegister(W25qxx_TypeDef* dev, uint8_t type, uint8_t status) {
+
+  if (dev->Lock == ENABLE) dev->Lock = DISABLE; else return (ERROR);
+
   uint8_t pump = 0;
 
   SPI_Adjust(dev);
@@ -576,6 +598,8 @@ uint8_t W25qxx_WriteStatusRegister(W25qxx_TypeDef* dev, uint8_t type, uint8_t st
   if (SPI_Transfer(dev, W25Qxx_Read_StatusRegister_1, -1, 1, RX, 0, &pump)) return (1);
 
   SPI_Disable(dev->SPIx);
+
+  dev->Lock = ENABLE;
   return (pump);
 }
 

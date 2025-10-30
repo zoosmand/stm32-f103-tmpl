@@ -57,7 +57,7 @@ __STATIC_INLINE void SPI_Adjust(Max72xx_TypeDef*);
 int MAX72xx_Init(Max72xx_TypeDef* dev) {
   if ((dev->SPIx == NULL) || (dev->DMAx == NULL) || (dev->DMAxRx == NULL) || (dev->DMAxTx == NULL)) return (1); 
 
-  dev->Lock = 1;
+  if (dev->Lock == ENABLE) dev->Lock = DISABLE; else return (ERROR);
 
   SPI_Adjust(dev);
   if (SPI_Enable(dev->SPIx)) return (1);
@@ -92,8 +92,8 @@ int MAX72xx_Init(Max72xx_TypeDef* dev) {
     }
     NSS_1_H;
   }
-  dev->Lock = 0;
-  
+
+  dev->Lock = ENABLE;
   return (0);
 }
 
@@ -119,6 +119,8 @@ __STATIC_INLINE void SPI_Adjust(Max72xx_TypeDef* dev) {
 // ----------------------------------------------------------------------------
 static int mAX72xx_PrintBuf(Max72xx_TypeDef* dev, uint16_t len) {
 
+  if (dev->Lock == ENABLE) dev->Lock = DISABLE; else return (ERROR);
+
   SPI_Adjust(dev);
   if (SPI_Enable(dev->SPIx)) return (1);
 
@@ -133,6 +135,8 @@ static int mAX72xx_PrintBuf(Max72xx_TypeDef* dev, uint16_t len) {
   }
 
   if (SPI_Disable(dev->SPIx)) return (1);
+
+  dev->Lock = ENABLE;
   return (0);
 }
 
