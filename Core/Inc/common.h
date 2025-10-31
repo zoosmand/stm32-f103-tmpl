@@ -243,6 +243,13 @@ typedef struct {
 
 // ----------------------------------------------------------------------------
 
+typedef struct {
+  FunctionalState       Lock;
+  uint8_t*              BufPtr;
+} TM163x_TypeDef;
+
+// ----------------------------------------------------------------------------
+
 /* Linked List prototype structures  */
 // typedef struct {
 //   uint32_t  ItemPtr;

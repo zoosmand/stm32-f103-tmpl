@@ -2,7 +2,7 @@
   ******************************************************************************
   * @file           : bmx280.h
   * @brief          : This file contains header definitions BOSCH BMx280 
-  *                   temperature, humidity, ans atmospheric pressue
+  *                   temperature, humidity, and atmospheric pressue censor.
   ******************************************************************************
   * @attention
   *

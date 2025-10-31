@@ -2,7 +2,7 @@
   ******************************************************************************
   * @file           : bmx280.c
   * @brief          : This file contains header definitions BOSCH BMx280 
-  *                   temperature, humidity, ans atmospheric pressue
+  *                   temperature, humidity, ans atmospheric pressue sensor.
   ******************************************************************************
   * @attention
   *
@@ -88,7 +88,6 @@ static int I2C_Read(I2C_TypeDef*, uint8_t, uint8_t, uint8_t*, uint16_t);
 // ----------------------------------------------------------------------------
 
 ErrorStatus BMx280_Init(BMxX80_TypeDef* dev) {
-  // uint8_t buf[32];
 
   if (dev->Lock == ENABLE) dev->Lock = DISABLE; else return (ERROR);
 

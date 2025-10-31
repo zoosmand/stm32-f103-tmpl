@@ -50,6 +50,7 @@ extern "C" {
 #include "bmx680.h"
 #include "tmpr.h"
 #include "display.h"
+#include "tm163x.h"
 
 
 #if defined(USE_FULL_ASSERT)

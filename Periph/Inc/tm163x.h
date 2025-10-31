@@ -1,8 +1,8 @@
 /**
   ******************************************************************************
-  * @file           : bmx680.h
-  * @brief          : This file contains header definitions BOSCH BMx680 
-  *                   temperature, humidity, and atmospheric pressue sensor.
+  * @file           : tm163x.h
+  * @brief          : This file contains header definitions of TM163x Two Wire
+  *                   shift register for a digital display code.
   ******************************************************************************
   * @attention
   *
@@ -17,8 +17,8 @@
   */
 
 
-#ifndef __BMX680_H
-#define __BMX680_H
+#ifndef __TM163X_H
+#define __TM163X_H
 
 #include "main.h"
 
@@ -30,25 +30,28 @@
 
 /* Private defines -----------------------------------------------------------*/
 
-#define BMX680_I2C_ADDR             0x76
-#define BME680_ID                   0x61
 
 
 
 /* Exported functions prototypes ---------------------------------------------*/
 
 /**
- * @brief   Initializes the given Bosch BMx280 device.
- * @param   dev: pointer to the Bosch BMx280 device struct
+ * @brief   Initializes the given TM163x device.
+ * @param   dev pointer to the TM163x device struct
  * @retval  status of operation
  */
-ErrorStatus BMx680_Init(BMxX80_TypeDef*);
+ErrorStatus TM163x_Init(TM163x_TypeDef*);
 
-ErrorStatus BMx680_Measurment(BMxX80_TypeDef*);
+/**
+ * @brief   Prints digits in the given display.
+ * @param   dev pointer to the TM163x device struct
+ * @return  status of operation
+ */
+ErrorStatus TM163x_Print(TM163x_TypeDef*);
 
 
 #ifdef __cplusplus
 }
 #endif
-#endif /* __BMX680_H */
+#endif /* __TM163X_H */
 
