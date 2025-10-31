@@ -38,6 +38,7 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 #include "common.h"
+#include "gpio.h"
 #include "i2c.h"
 #include "spi.h"
 #include "whxxxx.h"
@@ -89,6 +90,8 @@ extern uint32_t secCnt;
 #define BMX280_RF         6
 #define I2C1_RF           7
 #define BMX680_RF         8
+#define GPIOLED_RF        9
+#define GPIOTM_RF         10
 
 
 /* Exported defines -----------------------------------------------------------*/

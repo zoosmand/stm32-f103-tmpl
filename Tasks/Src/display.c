@@ -22,14 +22,14 @@
 
 /* Private variables ----------------------------------------------------------*/
 /* MAX display related data */
-__attribute__((section(".cron"))) static uint32_t maxDisplayTaskCnt    = 0;
-__attribute__((section(".cron"))) static uint32_t maxDisplayTaskReg    = 0;
+__attribute__((section(".cron"))) static uint32_t displayHealthCheckTaskCnt    = 0;
+__attribute__((section(".cron"))) static uint32_t displayHealthCheckTaskReg    = 0;
 
-static task_scheduler_t maxDisplayScheduler = {
-  .counter        = &maxDisplayTaskCnt,
+static task_scheduler_t displayHealthCheckScheduler = {
+  .counter        = &displayHealthCheckTaskCnt,
   .counterSrc     = &secCnt,
   .period         = 8,
-  .counterReg     = &maxDisplayTaskReg,
+  .counterReg     = &displayHealthCheckTaskReg,
   .entranceFlag   = 31,
 };
 
@@ -46,10 +46,17 @@ static Max72xx_TypeDef maxDisplay_0 = {
 };
 
 
+static uint8_t tmDisplay_0_data[4];
+static TM163x_TypeDef tmDisplay_0 = {
+  .BufPtr     = tmDisplay_0_data,
+  .Lock       = ENABLE,
+};
+
 
 /* Private function prototypes ----------------------------------------------*/
 
-static ErrorStatus maxDisplay_Task(Max72xx_TypeDef*);
+static ErrorStatus maxDisplayHealthCheck_Task(Max72xx_TypeDef*);
+static ErrorStatus tmDisplayHealthCheck_Task(TM163x_TypeDef*);
 
 
 
@@ -58,20 +65,24 @@ static ErrorStatus maxDisplay_Task(Max72xx_TypeDef*);
 
 // ----------------------------------------------------------------------------
 
-void MaxDisplay_CronHandler(void) {
+void DisplayHealthCheck_CronHandler(void) {
 
-  Scheduler_Handler(&maxDisplayScheduler);
+  Scheduler_Handler(&displayHealthCheckScheduler);
 
-  if (FLAG_CHECK(maxDisplayScheduler.counterReg, maxDisplayScheduler.entranceFlag)) {
+  if (FLAG_CHECK(displayHealthCheckScheduler.counterReg, displayHealthCheckScheduler.entranceFlag)) {
 
-    FLAG_CLR(maxDisplayScheduler.counterReg, maxDisplayScheduler.entranceFlag);
+    FLAG_CLR(displayHealthCheckScheduler.counterReg, displayHealthCheckScheduler.entranceFlag);
     
-    if (maxDisplay_Task(&maxDisplay_0)) {
+    if (maxDisplay_displayHealthCheck_Taskask(&maxDisplay_0)) {
       /* TODO reinitialize, overwise clear rediness flag */
-      printf("Cannot run display device\n");
+      printf("Cannot run MAX72xx display device\n");
     }
 
-    /* TODO handle EEPROM data usage */
+    if (tmDisplay_displayHealthCheck_Taskask(&maxDisplay_0)) {
+      /* TODO reinitialize, overwise clear rediness flag */
+      printf("Cannot run TM163x display device\n");
+    }
+
     __NOP();
   }
 }
@@ -80,7 +91,7 @@ void MaxDisplay_CronHandler(void) {
 
 // ----------------------------------------------------------------------------
 
-static ErrorStatus maxDisplay_Task(Max72xx_TypeDef* dev) {
+static ErrorStatus maxDisplayHealthCheck_Task(Max72xx_TypeDef* dev) {
 
   if (dev->Lock == ENABLE) dev->Lock = DISABLE; else return (ERROR);
     
@@ -99,4 +110,31 @@ static ErrorStatus maxDisplay_Task(Max72xx_TypeDef* dev) {
 Max72xx_TypeDef* Get_MaxDiplayDevice(void) {
   return &maxDisplay_0;
 }
+
+
+
+// ----------------------------------------------------------------------------
+
+static ErrorStatus tmDisplayHealthCheck_Task(TM163x_TypeDef* dev) {
+
+  if (dev->Lock == ENABLE) dev->Lock = DISABLE; else return (ERROR);
+
+  dev->BufPtr = &("1234");
+    
+  TM163x_Print(dev);
+
+  __NOP();
+  
+  dev->Lock = ENABLE;
+  return (SUCCESS);
+}
+
+
+
+// ----------------------------------------------------------------------------
+
+TM163x_TypeDef* Get_TmDiplayDevice(void) {
+  return &tmDisplay_0_data;
+}
+
 

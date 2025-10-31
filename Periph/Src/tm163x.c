@@ -76,7 +76,7 @@ ErrorStatus TM163x_Init(TM163x_TypeDef* dev) {
 
 // ----------------------------------------------------------------------------
 
-ErrorStatus TM163x_Print(BMxX80_TypeDef *dev) {
+ErrorStatus TM163x_Print(TM163x_TypeDef *dev) {
   
   if (dev->Lock == ENABLE) dev->Lock = DISABLE; else return (ERROR);
   
