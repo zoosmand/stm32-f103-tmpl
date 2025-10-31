@@ -78,6 +78,15 @@ ErrorStatus TM163x_Init(TM163x_TypeDef* dev) {
 
 ErrorStatus TM163x_Print(TM163x_TypeDef *dev) {
   
+  return (SUCCESS);
+}
+
+
+
+// ----------------------------------------------------------------------------
+
+static ErrorStatus tm163x_Start(TM163x_TypeDef* dev) {
+  
   if (dev->Lock == ENABLE) dev->Lock = DISABLE; else return (ERROR);
   
   
@@ -89,17 +98,12 @@ ErrorStatus TM163x_Print(TM163x_TypeDef *dev) {
 
 // ----------------------------------------------------------------------------
 
-static ErrorStatus tm163x_Start(TM163x_TypeDef* dev) {
+static ErrorStatus tm163x_Stop(TM163x_TypeDef* dev) {
   
-  return (SUCCESS);
-}
-
-
-
-// ----------------------------------------------------------------------------
-
-static ErrorStatus tm163x_Stop(TM163x_TypeDef*) {
+  if (dev->Lock == ENABLE) dev->Lock = DISABLE; else return (ERROR);
   
+  
+  dev->Lock = ENABLE;
   return (SUCCESS);
 }
 
@@ -109,6 +113,10 @@ static ErrorStatus tm163x_Stop(TM163x_TypeDef*) {
 
 static ErrorStatus tm163x_WriteByte(TM163x_TypeDef* dev, uint8_t byte) {
 
+  if (dev->Lock == ENABLE) dev->Lock = DISABLE; else return (ERROR);
+  
+  
+  dev->Lock = ENABLE;
   return (SUCCESS);
 }
 

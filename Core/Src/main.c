@@ -61,10 +61,9 @@ int main(void) {
     
     if (FLAG_CHECK(&_ASREG_, BMX280_RF)) { BoschMeasurment_CronHandler(); }
 
-    if (FLAG_CHECK(&_ASREG_, MAXDSPL_RF)) { MaxDisplay_CronHandler(); }
- 
     if (FLAG_CHECK(&_ASREG_, EEPROM_RF)) { EepromHealthCheck_CronHandler(); }
-
+    
+    if (FLAG_CHECK(&_ASREG_, MAXDSPL_RF) || FLAG_CHECK(&_ASREG_, TMDSPL_RF) ) { DisplayHealthCheck_CronHandler(); }
 
   }
 

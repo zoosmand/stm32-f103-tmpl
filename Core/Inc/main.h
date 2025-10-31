@@ -92,6 +92,7 @@ extern uint32_t secCnt;
 #define BMX680_RF         8
 #define GPIOLED_RF        9
 #define GPIOTM_RF         10
+#define TMDSPL_RF         11
 
 
 /* Exported defines -----------------------------------------------------------*/

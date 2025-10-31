@@ -73,17 +73,15 @@ void DisplayHealthCheck_CronHandler(void) {
 
     FLAG_CLR(displayHealthCheckScheduler.counterReg, displayHealthCheckScheduler.entranceFlag);
     
-    if (maxDisplay_displayHealthCheck_Taskask(&maxDisplay_0)) {
+    if (maxDisplayHealthCheck_Task(&maxDisplay_0)) {
       /* TODO reinitialize, overwise clear rediness flag */
       printf("Cannot run MAX72xx display device\n");
     }
 
-    if (tmDisplay_displayHealthCheck_Taskask(&maxDisplay_0)) {
+    if (tmDisplayHealthCheck_Task(&tmDisplay_0)) {
       /* TODO reinitialize, overwise clear rediness flag */
       printf("Cannot run TM163x display device\n");
     }
-
-    __NOP();
   }
 }
 
@@ -93,13 +91,11 @@ void DisplayHealthCheck_CronHandler(void) {
 
 static ErrorStatus maxDisplayHealthCheck_Task(Max72xx_TypeDef* dev) {
 
-  if (dev->Lock == ENABLE) dev->Lock = DISABLE; else return (ERROR);
+  // if (dev->Lock == ENABLE) dev->Lock = DISABLE; else return (ERROR);
+  // dev->Lock = ENABLE;
     
   MAX72xx_Print(dev, "1234567890");
 
-  __NOP();
-  
-  dev->Lock = ENABLE;
   return (SUCCESS);
 }
 
@@ -117,15 +113,13 @@ Max72xx_TypeDef* Get_MaxDiplayDevice(void) {
 
 static ErrorStatus tmDisplayHealthCheck_Task(TM163x_TypeDef* dev) {
 
-  if (dev->Lock == ENABLE) dev->Lock = DISABLE; else return (ERROR);
+  // if (dev->Lock == ENABLE) dev->Lock = DISABLE; else return (ERROR);
+  // dev->Lock = ENABLE;
 
-  dev->BufPtr = &("1234");
+  dev->BufPtr = ("1234");
     
   TM163x_Print(dev);
 
-  __NOP();
-  
-  dev->Lock = ENABLE;
   return (SUCCESS);
 }
 
@@ -134,7 +128,7 @@ static ErrorStatus tmDisplayHealthCheck_Task(TM163x_TypeDef* dev) {
 // ----------------------------------------------------------------------------
 
 TM163x_TypeDef* Get_TmDiplayDevice(void) {
-  return &tmDisplay_0_data;
+  return &tmDisplay_0;
 }
 
 
