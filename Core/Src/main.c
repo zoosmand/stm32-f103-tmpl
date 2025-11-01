@@ -96,6 +96,7 @@ void Cron_Handler(void) {
 
 
   if (!GPIO_LED_Init())     FLAG_SET(&_ASREG_, GPIOLED_RF);
+  if (!GPIO_TM163x_Init())  FLAG_SET(&_ASREG_, GPIOTM_RF);
   if (!OneWireBus_Init())   FLAG_SET(&_ASREG_, OneWireBus_RF);
   if (!SPI_Init(SPI1))      FLAG_SET(&_ASREG_, SPI1_RF);
   if (!I2C_Init(I2C1))      FLAG_SET(&_ASREG_, I2C1_RF);
@@ -113,6 +114,11 @@ void Cron_Handler(void) {
     // if (!SSD13xx_Init(I2C1))  FLAG_SET(&_ASREG_, SSDDisplay_RF);
     if (!WHxxxx_Init(I2C1))   FLAG_SET(&_ASREG_, WHDisplay_RF);
   }
+
+  if (FLAG_CHECK(&_ASREG_, GPIOTM_RF)) {
+    if (!TM163x_Init(Get_TmDiplayDevice())) FLAG_SET(&_ASREG_, TMDSPL_RF);
+  }
+
   /* Display calibration */
   printf("\n");
 

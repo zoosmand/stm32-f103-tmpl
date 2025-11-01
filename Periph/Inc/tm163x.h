@@ -30,6 +30,12 @@
 
 /* Private defines -----------------------------------------------------------*/
 
+#define TM_DIO_Low            PIN_L(TM_DIO_Port, TM_DIO_Pin)
+#define TM_DIO_High           PIN_H(TM_DIO_Port, TM_DIO_Pin)
+#define TM_SCK_Low            PIN_L(TM_SCK_Port, TM_SCK_Pin)
+#define TM_SCK_High           PIN_H(TM_SCK_Port, TM_SCK_Pin)
+
+#define TM_DIO_Level          (PIN_LEVEL(TM_DIO_Port, TM_DIO_Pin))
 
 
 

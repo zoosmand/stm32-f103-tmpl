@@ -29,20 +29,32 @@
 
 
 /* Private defines -----------------------------------------------------------*/
-#define LED_GREEN_Pin        GPIO_PIN_13
-#define LED_GREEN_Pin_Pos    GPIO_PIN_13_Pos
-#define LED_GREEN_Pin_Mask   GPIO_PIN_13_Mask
-#define LED_GREEN_Port       GPIOB
+#define LED_GREEN_Pin         GPIO_PIN_13
+#define LED_GREEN_Pin_Pos     GPIO_PIN_13_Pos
+#define LED_GREEN_Pin_Mask    GPIO_PIN_13_Mask
+#define LED_GREEN_Port        GPIOB
 
-#define LED_BLUE_Pin         GPIO_PIN_15
-#define LED_BLUE_Pin_Pos     GPIO_PIN_15_Pos
-#define LED_BLUE_Pin_Mask    GPIO_PIN_15_Mask
-#define LED_BLUE_Port        GPIOB
+#define LED_BLUE_Pin          GPIO_PIN_15
+#define LED_BLUE_Pin_Pos      GPIO_PIN_15_Pos
+#define LED_BLUE_Pin_Mask     GPIO_PIN_15_Mask
+#define LED_BLUE_Port         GPIOB
 
-#define LED_RED_Pin          GPIO_PIN_8
-#define LED_RED_Pin_Pos      GPIO_PIN_8_Pos
-#define LED_RED_Pin_Mask     GPIO_PIN_8_Mask
-#define LED_RED_Port         GPIOA
+#define LED_RED_Pin           GPIO_PIN_8
+#define LED_RED_Pin_Pos       GPIO_PIN_8_Pos
+#define LED_RED_Pin_Mask      GPIO_PIN_8_Mask
+#define LED_RED_Port          GPIOA
+
+
+
+#define TM_DIO_Pin            GPIO_PIN_4
+#define TM_DIO_Pin_Pos        GPIO_PIN_4_Pos
+#define TM_DIO_Pin_Mask       GPIO_PIN_4_Mask
+#define TM_DIO_Port           GPIOB
+
+#define TM_SCK_Pin            GPIO_PIN_3
+#define TM_SCK_Pin_Pos        GPIO_PIN_3_Pos
+#define TM_SCK_Pin_Mask       GPIO_PIN_3_Mask
+#define TM_SCK_Port           GPIOB
 
 
 
