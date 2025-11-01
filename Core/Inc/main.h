@@ -77,6 +77,7 @@ extern uint32_t secCnt;
 
 
 /** Global Events Register Flags */
+#define _SYSTICKF_        0
 #define _SYSSECF_         1
 
 

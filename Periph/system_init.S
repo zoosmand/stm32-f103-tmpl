@@ -43,7 +43,6 @@ SystemInit:
   @ bl IWatchdogInit
   bl PeripheralInit
   @ bl WWatchdogInit
-  bl LedInit
   bl Usart1Init
   bl OwInit
 

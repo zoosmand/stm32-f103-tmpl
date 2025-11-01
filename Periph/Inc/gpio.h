@@ -29,6 +29,20 @@
 
 
 /* Private defines -----------------------------------------------------------*/
+#define LED_GREEN_Pin        GPIO_PIN_13
+#define LED_GREEN_Pin_Pos    GPIO_PIN_13_Pos
+#define LED_GREEN_Pin_Mask   GPIO_PIN_13_Mask
+#define LED_GREEN_Port       GPIOB
+
+#define LED_BLUE_Pin         GPIO_PIN_15
+#define LED_BLUE_Pin_Pos     GPIO_PIN_15_Pos
+#define LED_BLUE_Pin_Mask    GPIO_PIN_15_Mask
+#define LED_BLUE_Port        GPIOB
+
+#define LED_RED_Pin          GPIO_PIN_8
+#define LED_RED_Pin_Pos      GPIO_PIN_8_Pos
+#define LED_RED_Pin_Mask     GPIO_PIN_8_Mask
+#define LED_RED_Port         GPIOA
 
 
 

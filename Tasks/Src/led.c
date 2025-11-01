@@ -104,7 +104,7 @@ static task_led_toggle_t ledGreenTask = {
 /* ----------------------------------------------------------------------------- */
 /* ----------------------------------------------------------------------------- */
 
-void Led_Handler(void) {
+void Led_CronHandler(void) {
 
   Scheduler_Handler(&ledRedScheduler);
   Scheduler_Handler(&ledBlueScheduler);

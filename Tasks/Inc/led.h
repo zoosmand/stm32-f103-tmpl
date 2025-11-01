@@ -35,7 +35,7 @@ typedef struct {
 } task_led_toggle_t;
 
 
-void Led_Handler(void);
+void Led_CronHandler(void);
 void LedToggle_Task(uint32_t*);
 
 

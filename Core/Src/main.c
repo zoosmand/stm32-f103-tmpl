@@ -51,6 +51,9 @@ static __attribute__((section(".cron"))) uint32_t secCntCache   = 0;
  */
 int main(void) {
   
+  /* ----------------------------------*/
+  /* ----------------------------------*/
+  /* ----------------------------------*/
   if (CRON_SEC_EVENT) {
     
     // printf("The long test message, that might stuck the program but now it does not at all...\n");
@@ -67,9 +70,19 @@ int main(void) {
 
   }
 
-  Led_Handler();
+  /* ----------------------------------*/
+  /* ----------------------------------*/
+  /* ----------------------------------*/
+  if (CRON_SYSTICK_EVENT) {
+
+    if (FLAG_CHECK(&_ASREG_, GPIOLED_RF)) { Led_CronHandler(); }
+
+  }
 
 }
+
+
+
 
 
 /**
@@ -81,6 +94,8 @@ void Cron_Handler(void) {
   __NVIC_SetPriorityGrouping(NVIC_PRIORITYGROUP_4);
   SET_BIT(CoreDebug->DEMCR, CoreDebug_DEMCR_TRCENA_Msk);
 
+
+  if (!GPIO_LED_Init())     FLAG_SET(&_ASREG_, GPIOLED_RF);
   if (!OneWireBus_Init())   FLAG_SET(&_ASREG_, OneWireBus_RF);
   if (!SPI_Init(SPI1))      FLAG_SET(&_ASREG_, SPI1_RF);
   if (!I2C_Init(I2C1))      FLAG_SET(&_ASREG_, I2C1_RF);
@@ -105,6 +120,10 @@ void Cron_Handler(void) {
   while (1) {
     __disable_irq();
     
+    if (FLAG_CHECK(&_GEREG_, _SYSTICKF_)) {
+      FLAG_CLR(&_GEREG_, _SYSTICKF_);
+    }
+
     if (FLAG_CHECK(&_GEREG_, _SYSSECF_)) {
       FLAG_CLR(&_GEREG_, _SYSSECF_);
       IWDG->KR = IWDG_KEY_RELOAD;

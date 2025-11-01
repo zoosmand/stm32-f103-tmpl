@@ -163,6 +163,7 @@
 #define PREG_CHECK(peripheral, key)                             (GET_PERIPH_BB_VAL((uint32_t)&peripheral, 0, key))
 
 /* --- Task control --- */
+#define CRON_SYSTICK_EVENT                                      FLAG_CHECK(&_GEREG_, _SYSTICKF_)
 #define CRON_SEC_EVENT                                          FLAG_CHECK(&_GEREG_, _SYSSECF_)
 #define TASK_CTRL(task)                                         if (FLAG_CHECK(task.scheduler->counterReg, task.scheduler->entranceFlag)) task.callback((uint32_t*)&task);
 

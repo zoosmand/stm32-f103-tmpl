@@ -44,6 +44,24 @@
 
 ErrorStatus GPIO_LED_Init(void) {
 
+  MODIFY_REG(
+    LED_GREEN_Port->CRH, 
+    LED_GREEN_Pin_Mask, 
+    ((GPIO_GPO_PP | GPIO_IOS_2) << ((LED_GREEN_Pin_Pos - 8) * 4))
+  );
+
+  MODIFY_REG(
+    LED_BLUE_Port->CRH, 
+    LED_BLUE_Pin_Mask, 
+    ((GPIO_GPO_PP | GPIO_IOS_2) << ((LED_BLUE_Pin_Pos - 8) * 4))
+  );
+
+  MODIFY_REG(
+    LED_RED_Port->CRH, 
+    LED_RED_Pin_Mask, 
+    ((GPIO_GPO_PP | GPIO_IOS_2) << ((LED_RED_Pin_Pos - 8) * 4))
+  );
+
   return (SUCCESS);
 }
 
