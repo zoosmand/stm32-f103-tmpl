@@ -46,15 +46,15 @@
 
 
 
-#define TM_DIO_Pin            GPIO_PIN_4
-#define TM_DIO_Pin_Pos        GPIO_PIN_4_Pos
-#define TM_DIO_Pin_Mask       GPIO_PIN_4_Mask
-#define TM_DIO_Port           GPIOB
+#define TM_DIO_Pin            GPIO_PIN_12
+#define TM_DIO_Pin_Pos        GPIO_PIN_12_Pos
+#define TM_DIO_Pin_Mask       GPIO_PIN_12_Mask
+#define TM_DIO_Port           GPIOA
 
-#define TM_SCK_Pin            GPIO_PIN_3
-#define TM_SCK_Pin_Pos        GPIO_PIN_3_Pos
-#define TM_SCK_Pin_Mask       GPIO_PIN_3_Mask
-#define TM_SCK_Port           GPIOB
+#define TM_SCK_Pin            GPIO_PIN_11
+#define TM_SCK_Pin_Pos        GPIO_PIN_11_Pos
+#define TM_SCK_Pin_Mask       GPIO_PIN_11_Mask
+#define TM_SCK_Port           GPIOA
 
 
 

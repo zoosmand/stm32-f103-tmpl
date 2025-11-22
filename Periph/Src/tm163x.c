@@ -118,7 +118,7 @@ ErrorStatus TM163x_Init(TM163x_TypeDef* dev) {
 ErrorStatus TM163x_Print(TM163x_TypeDef *dev) {
 
   for (uint8_t i = 0; i < 4; i++) {
-    tm163x_WriteByte(dev, 0x78);
+    tm163x_WriteByte(dev, 0xff);
   }
 
   return (SUCCESS);
@@ -135,7 +135,7 @@ static ErrorStatus tm163x_Start(TM163x_TypeDef* dev) {
   TM_SCK_High;
   TM_DIO_High;
   
-  _delay_us(2);
+  _delay_us(4);
   TM_DIO_Low;
 
   // dev->Lock = ENABLE;
@@ -151,16 +151,16 @@ static ErrorStatus tm163x_Stop(TM163x_TypeDef* dev) {
   // if (dev->Lock == ENABLE) dev->Lock = DISABLE; else return (ERROR);
   
   TM_SCK_Low;
-  _delay_us(2);
+  _delay_us(4);
   
   TM_DIO_Low;
-  _delay_us(2);
+  _delay_us(4);
   
   TM_SCK_High;
-  _delay_us(2);
+  _delay_us(4);
   
   TM_DIO_High;
-  _delay_us(2);
+  _delay_us(4);
 
   // dev->Lock = ENABLE;
   return (SUCCESS);
@@ -182,16 +182,16 @@ static ErrorStatus tm163x_WriteByte(TM163x_TypeDef* dev, uint8_t byte) {
       TM_DIO_Low;
     }
     byte >>= 1;
-    _delay_us(3);
+    _delay_us(6);
     TM_SCK_High;
-    _delay_us(3);
+    _delay_us(6);
   }
   
   TM_SCK_Low;
-  _delay_us(5);
+  _delay_us(10);
   if (TM_DIO_Level) {
     TM_SCK_High;
-    _delay_us(2);
+    _delay_us(4);
     TM_SCK_Low;
   }
   // dev->Lock = ENABLE;
