@@ -29,6 +29,7 @@
 
 
 /* Private defines -----------------------------------------------------------*/
+#define TM_BUS_TMOUT   5000 /* cycles timeout on TM bus operations */
 
 #define TM_DIO_Low            PIN_L(TM_DIO_Port, TM_DIO_Pin)
 #define TM_DIO_High           PIN_H(TM_DIO_Port, TM_DIO_Pin)

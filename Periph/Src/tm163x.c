@@ -55,16 +55,23 @@ const uint8_t symbols[] = {
 /**
   * @brief  Sends a start command to the given shift register.
   * @param  dev pointer of the given device
-  * @return status of operation
+  * @return none
   */
-static ErrorStatus tm163x_Start(TM163x_TypeDef*);
+static void tm163x_Start(TM163x_TypeDef*);
 
 /**
   * @brief  Sends a stop command to the given shift register.
   * @param  dev pointer of the given device
+  * @return none
+  */
+static void tm163x_Stop(TM163x_TypeDef*);
+
+/**
+  * @brief  Reads an ACK from the bus.
+  * @param  dev pointer of the given device
   * @return status of operation
   */
-static ErrorStatus tm163x_Stop(TM163x_TypeDef*);
+static ErrorStatus tm163x_ReadAck(TM163x_TypeDef*);
 
 /**
   * @brief  Writes the given byte to the given shift register.
@@ -89,23 +96,22 @@ ErrorStatus TM163x_Init(TM163x_TypeDef* dev) {
   
   // if (dev->Lock == ENABLE) dev->Lock = DISABLE; else return (ERROR);
   
-  uint32_t displayPack = 0;
-  
   tm163x_Start(dev);
-  tm163x_WriteByte(dev, 0x40);
+  if (tm163x_WriteByte(dev, 0x40)) return (ERROR);
   tm163x_Stop(dev);
   
+  /* clear display from the 1-st address */
+  /* TODO for TM1638 that have 16-bit output */
   tm163x_Start(dev);
-  tm163x_WriteByte(dev, 0xc0);
+  if (tm163x_WriteByte(dev, 0xc0)) return (ERROR);
   for(int i = 0; i < 4; i++) {
-    tm163x_WriteByte(dev, 0x00);
+    if (tm163x_WriteByte(dev, 0xff)) return (ERROR);
   }
   tm163x_Stop(dev);
   
   tm163x_Start(dev);
-  tm163x_WriteByte(dev, 0x8a);
+  if (tm163x_WriteByte(dev, 0x8a)) return (ERROR);
   tm163x_Stop(dev);    
-
 
   // dev->Lock = ENABLE;
   return (SUCCESS);
@@ -117,9 +123,13 @@ ErrorStatus TM163x_Init(TM163x_TypeDef* dev) {
 
 ErrorStatus TM163x_Print(TM163x_TypeDef *dev) {
 
+  tm163x_Start(dev);
+  tm163x_WriteByte(dev, 0xc0);
   for (uint8_t i = 0; i < 4; i++) {
-    tm163x_WriteByte(dev, 0xff);
+    // tm163x_WriteByte(dev, symbols[dev->BufPtr[i]]);
+    tm163x_WriteByte(dev, symbols[2]);
   }
+  tm163x_Stop(dev); 
 
   return (SUCCESS);
 }
@@ -128,41 +138,55 @@ ErrorStatus TM163x_Print(TM163x_TypeDef *dev) {
 
 // ----------------------------------------------------------------------------
 
-static ErrorStatus tm163x_Start(TM163x_TypeDef* dev) {
+static void tm163x_Start(TM163x_TypeDef* dev) {
+  PIN_H(dev->PortSck, dev->PinSck);
+  PIN_H(dev->PortDio, dev->PinDio);
   
-  // if (dev->Lock == ENABLE) dev->Lock = DISABLE; else return (ERROR);
-  
-  TM_SCK_High;
-  TM_DIO_High;
-  
-  _delay_us(4);
-  TM_DIO_Low;
-
-  // dev->Lock = ENABLE;
-  return (SUCCESS);
+  _delay_us(2);
+  PIN_L(dev->PortDio, dev->PinDio);
 }
 
 
 
 // ----------------------------------------------------------------------------
 
-static ErrorStatus tm163x_Stop(TM163x_TypeDef* dev) {
+static void tm163x_Stop(TM163x_TypeDef* dev) {
+  PIN_L(dev->PortSck, dev->PinSck);
+  _delay_us(2);
   
-  // if (dev->Lock == ENABLE) dev->Lock = DISABLE; else return (ERROR);
+  PIN_L(dev->PortDio, dev->PinDio);
+  _delay_us(2);
   
-  TM_SCK_Low;
-  _delay_us(4);
+  PIN_H(dev->PortSck, dev->PinSck);
+  _delay_us(2);
   
-  TM_DIO_Low;
-  _delay_us(4);
-  
-  TM_SCK_High;
-  _delay_us(4);
-  
-  TM_DIO_High;
-  _delay_us(4);
+  PIN_H(dev->PortDio, dev->PinDio);
+}
 
-  // dev->Lock = ENABLE;
+
+
+// ----------------------------------------------------------------------------
+
+static ErrorStatus tm163x_ReadAck(TM163x_TypeDef* dev) {
+
+  uint32_t tmout = TM_BUS_TMOUT;
+  
+  MODIFY_REG(
+    TM_DIO_Port->CRH, 
+    TM_DIO_Pin_Mask, 
+    (GPIO_IN_PD << ((TM_DIO_Pin_Pos - 8) * 4))
+  );
+  
+  _delay_us(5);
+
+  while (TM_DIO_Level) { if (!(--tmout)) return (ERROR); }
+
+  MODIFY_REG(
+    TM_DIO_Port->CRH, 
+    TM_DIO_Pin_Mask, 
+    ((GPIO_GPO_PP | GPIO_IOS_10) << ((TM_DIO_Pin_Pos - 8) * 4))
+  );
+
   return (SUCCESS);
 }
 
@@ -182,19 +206,19 @@ static ErrorStatus tm163x_WriteByte(TM163x_TypeDef* dev, uint8_t byte) {
       TM_DIO_Low;
     }
     byte >>= 1;
-    _delay_us(6);
+    _delay_us(3);
     TM_SCK_High;
-    _delay_us(6);
+    _delay_us(3);
   }
   
   TM_SCK_Low;
-  _delay_us(10);
-  if (TM_DIO_Level) {
-    TM_SCK_High;
-    _delay_us(4);
-    TM_SCK_Low;
-  }
-  // dev->Lock = ENABLE;
+  TM_DIO_Low;
+
+  if (tm163x_ReadAck(dev)) return (ERROR);
+
+  TM_SCK_High;
+  _delay_us(2);
+  TM_SCK_Low;
   return (SUCCESS);
 }
 

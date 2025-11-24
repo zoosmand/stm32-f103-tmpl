@@ -246,7 +246,14 @@ typedef struct {
 
 typedef struct {
   FunctionalState       Lock;
-  uint8_t*              BufPtr;
+  GPIO_TypeDef*         PortSck;
+  GPIO_TypeDef*         PortDio;
+  uint16_t              PinSck;
+  uint16_t              PinDio;
+  uint8_t               Dig0;
+  uint8_t               Dig1;
+  uint8_t               Dig2;
+  uint8_t               Dig3;
 } TM163x_TypeDef;
 
 // ----------------------------------------------------------------------------
