@@ -46,7 +46,6 @@ static Max72xx_TypeDef maxDisplay_0 = {
 };
 
 
-static uint8_t tmDisplay_0_data[4];
 static TM163x_TypeDef tmDisplay_0 = {
   .PortSck    = GPIOA,
   .PortDio    = GPIOA,
@@ -120,14 +119,14 @@ Max72xx_TypeDef* Get_MaxDiplayDevice(void) {
 
 static ErrorStatus tmDisplayHealthCheck_Task(TM163x_TypeDef* dev) {
 
-  // if (dev->Lock == ENABLE) dev->Lock = DISABLE; else return (ERROR);
-  // dev->Lock = ENABLE;
+  if (!dev->Lock) return (ERROR);
 
-  // uint8_t tmp_buf[4];
-  // sprintf(tmp_buf, "%ld", secCnt);
-  // dev->BufPtr = tmp_buf;
+  dev->Dig0 = 0;
+  dev->Dig1 = 1;
+  dev->Dig2 = 2;
+  dev->Dig3 = 3;
     
-  TM163x_Print(dev);
+  if (TM163x_Print(dev)) return (ERROR);
 
   return (SUCCESS);
 }

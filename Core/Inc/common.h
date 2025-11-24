@@ -254,6 +254,10 @@ typedef struct {
   uint8_t               Dig1;
   uint8_t               Dig2;
   uint8_t               Dig3;
+  uint8_t               Dig4;
+  uint8_t               Dig5;
+  uint8_t               Dig6;
+  uint8_t               Dig7;
 } TM163x_TypeDef;
 
 // ----------------------------------------------------------------------------

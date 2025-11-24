@@ -72,20 +72,9 @@ ErrorStatus GPIO_LED_Init(void) {
 // ----------------------------------------------------------------------------
 ErrorStatus GPIO_TM163x_Init(void) {
 
-  MODIFY_REG(
-    TM_SCK_Port->CRH, 
-    TM_SCK_Pin_Mask, 
-    ((GPIO_GPO_PP | GPIO_IOS_10) << ((TM_SCK_Pin_Pos - 8) * 4))
-  );
-
-  MODIFY_REG(
-    TM_DIO_Port->CRH, 
-    TM_DIO_Pin_Mask, 
-    ((GPIO_GPO_PP | GPIO_IOS_10) << ((TM_DIO_Pin_Pos - 8) * 4))
-  );
-
-  PIN_H(TM_DIO_Port, TM_DIO_Pin);
-  PIN_H(TM_SCK_Port, TM_SCK_Pin);
+  /* Check if pins are not locked */
+  if (PREG_CHECK(TM_SCK_Port->LCKR, TM_DIO_Pin_Pos)) return (ERROR);
+  if (PREG_CHECK(TM_DIO_Port->LCKR, TM_DIO_Pin_Pos)) return (ERROR);
 
   return (SUCCESS);
 }

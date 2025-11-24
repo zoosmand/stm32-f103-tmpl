@@ -94,18 +94,48 @@ static ErrorStatus tm163x_WriteByte(TM163x_TypeDef*, uint8_t);
 
 ErrorStatus TM163x_Init(TM163x_TypeDef* dev) {
   
-  // if (dev->Lock == ENABLE) dev->Lock = DISABLE; else return (ERROR);
-  
+  if (dev->Lock == ENABLE) dev->Lock = DISABLE; else return (ERROR);
+
+  /* Init GPIO */
+  if (dev->PinDio > 7) {
+    MODIFY_REG(
+      dev->PortDio->CRH, 
+      (0x0f << ((dev->PinDio - 8) * 4)), 
+      ((GPIO_GPO_PP | GPIO_IOS_10) << ((dev->PinDio - 8) * 4))
+    );
+  } else {
+    MODIFY_REG(
+      dev->PortDio->CRL, 
+      (0x0f << ((dev->PinDio - 8) * 4)), 
+      ((GPIO_GPO_PP | GPIO_IOS_10) << (dev->PinDio * 4))
+    );
+  }
+
+  if (dev->PinSck > 7) {
+    MODIFY_REG(
+      dev->PortSck->CRH, 
+      (0x0f << ((dev->PinSck - 8) * 4)), 
+      ((GPIO_GPO_PP | GPIO_IOS_10) << ((dev->PinSck - 8) * 4))
+    );
+  } else {
+    MODIFY_REG(
+      dev->PortSck->CRL, 
+      (0x0f << ((dev->PinSck - 8) * 4)), 
+      ((GPIO_GPO_PP | GPIO_IOS_10) << (dev->PinSck * 4))
+    );
+  }
+
+  /* Clear diaplae segments */
   tm163x_Start(dev);
   if (tm163x_WriteByte(dev, 0x40)) return (ERROR);
   tm163x_Stop(dev);
   
   /* clear display from the 1-st address */
-  /* TODO for TM1638 that have 16-bit output */
+  /* TODO Modify the output for TM1638 */
   tm163x_Start(dev);
   if (tm163x_WriteByte(dev, 0xc0)) return (ERROR);
   for(int i = 0; i < 4; i++) {
-    if (tm163x_WriteByte(dev, 0xff)) return (ERROR);
+    if (tm163x_WriteByte(dev, symbols[10])) return (ERROR);
   }
   tm163x_Stop(dev);
   
@@ -113,7 +143,7 @@ ErrorStatus TM163x_Init(TM163x_TypeDef* dev) {
   if (tm163x_WriteByte(dev, 0x8a)) return (ERROR);
   tm163x_Stop(dev);    
 
-  // dev->Lock = ENABLE;
+  dev->Lock = ENABLE;
   return (SUCCESS);
 }
 
@@ -124,11 +154,14 @@ ErrorStatus TM163x_Init(TM163x_TypeDef* dev) {
 ErrorStatus TM163x_Print(TM163x_TypeDef *dev) {
 
   tm163x_Start(dev);
-  tm163x_WriteByte(dev, 0xc0);
-  for (uint8_t i = 0; i < 4; i++) {
-    // tm163x_WriteByte(dev, symbols[dev->BufPtr[i]]);
-    tm163x_WriteByte(dev, symbols[2]);
-  }
+  if (tm163x_WriteByte(dev, 0xc0)) return (ERROR);
+
+  /* TODO Modify the output for TM1638 */
+  if (tm163x_WriteByte(dev, symbols[dev->Dig0])) return (ERROR);
+  if (tm163x_WriteByte(dev, symbols[dev->Dig1])) return (ERROR);
+  if (tm163x_WriteByte(dev, symbols[dev->Dig2])) return (ERROR);
+  if (tm163x_WriteByte(dev, symbols[dev->Dig3])) return (ERROR);
+
   tm163x_Stop(dev); 
 
   return (SUCCESS);
@@ -170,22 +203,38 @@ static void tm163x_Stop(TM163x_TypeDef* dev) {
 static ErrorStatus tm163x_ReadAck(TM163x_TypeDef* dev) {
 
   uint32_t tmout = TM_BUS_TMOUT;
-  
-  MODIFY_REG(
-    TM_DIO_Port->CRH, 
-    TM_DIO_Pin_Mask, 
-    (GPIO_IN_PD << ((TM_DIO_Pin_Pos - 8) * 4))
-  );
-  
+
+  if (dev->PinDio > 7) {
+    MODIFY_REG(
+      dev->PortDio->CRH, 
+      (0x0f << ((dev->PinDio - 8) * 4)), 
+      (GPIO_IN_PD << ((dev->PinDio - 8) * 4))
+    );
+  } else {
+    MODIFY_REG(
+      dev->PortDio->CRL, 
+      (0x0f << ((dev->PinDio - 8) * 4)), 
+      (GPIO_IN_PD << (dev->PinDio * 4))
+    );
+  }
+    
   _delay_us(5);
 
   while (TM_DIO_Level) { if (!(--tmout)) return (ERROR); }
 
-  MODIFY_REG(
-    TM_DIO_Port->CRH, 
-    TM_DIO_Pin_Mask, 
-    ((GPIO_GPO_PP | GPIO_IOS_10) << ((TM_DIO_Pin_Pos - 8) * 4))
-  );
+  if (dev->PinDio > 7) {
+    MODIFY_REG(
+      dev->PortDio->CRH, 
+      (0x0f << ((dev->PinDio - 8) * 4)), 
+      ((GPIO_GPO_PP | GPIO_IOS_10) << ((dev->PinDio - 8) * 4))
+    );
+  } else {
+    MODIFY_REG(
+      dev->PortDio->CRL, 
+      (0x0f << ((dev->PinDio - 8) * 4)), 
+      ((GPIO_GPO_PP | GPIO_IOS_10) << (dev->PinDio * 4))
+    );
+  }
 
   return (SUCCESS);
 }
@@ -196,15 +245,9 @@ static ErrorStatus tm163x_ReadAck(TM163x_TypeDef* dev) {
 
 static ErrorStatus tm163x_WriteByte(TM163x_TypeDef* dev, uint8_t byte) {
 
-  // if (dev->Lock == ENABLE) dev->Lock = DISABLE; else return (ERROR);
-  
   for (uint8_t i = 0; i < 8; i++) {
     TM_SCK_Low;
-    if (byte & 0x01) {
-      TM_DIO_High;
-    } else {
-      TM_DIO_Low;
-    }
+    if (byte & 0x01) { TM_DIO_High; } else { TM_DIO_Low; }
     byte >>= 1;
     _delay_us(3);
     TM_SCK_High;
