@@ -207,12 +207,12 @@ ErrorStatus BMx280_Measurment(BMxX80_TypeDef *dev) {
   * @return Error status
   */
 static ErrorStatus BMx280_Read(BMxX80_TypeDef *dev, uint8_t reg, uint8_t len) {
-  if (dev->I2CBus != NULL) {
-    if (I2C_Read(dev->I2CBus, BMX280_I2C_ADDR, reg, dev->RawBufPtr, len)) return (ERROR);
+  if (dev->I2Cx != NULL) {
+    if (I2C_Read(dev->I2Cx, BMX280_I2C_ADDR, reg, dev->RawBufPtr, len)) return (ERROR);
     return (SUCCESS);
   } 
 
-  if (dev->SPIBus != NULL) {
+  if (dev->SPIx != NULL) {
 
     /* TODO realize SPI bus, probably with BME680 */
     return (SUCCESS);
@@ -233,12 +233,12 @@ static ErrorStatus BMx280_Read(BMxX80_TypeDef *dev, uint8_t reg, uint8_t len) {
   * @return Error status
   */
 static ErrorStatus BMx280_Write(BMxX80_TypeDef *dev, uint8_t len) {
-  if (dev->I2CBus != NULL) {
-    if (I2C_Write(dev->I2CBus, BMX280_I2C_ADDR, dev->RawBufPtr, len)) return (ERROR);
+  if (dev->I2Cx != NULL) {
+    if (I2C_Write(dev->I2Cx, BMX280_I2C_ADDR, dev->RawBufPtr, len)) return (ERROR);
     return (SUCCESS);
   } 
 
-  if (dev->SPIBus != NULL) {
+  if (dev->SPIx != NULL) {
 
     /* TODO realize SPI bus, probably with BME680 */
     return (SUCCESS);

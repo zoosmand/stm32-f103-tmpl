@@ -43,8 +43,8 @@ static BMxX80_TypeDef bosch_0 = {
   .RawBufPtr  = boschRawData_0,
   .ResBufPtr  = boschResults_0,
   .Lock       = DISABLE,
-  .I2CBus     = I2C1,
-  .SPIBus     = NULL,
+  .I2Cx       = I2C1,
+  .SPIx       = NULL,
 };
 
 static uint8_t boschRawData_1[42];
@@ -55,8 +55,13 @@ static BMxX80_TypeDef bosch_1 = {
   .RawBufPtr  = boschRawData_1,
   .ResBufPtr  = boschResults_1,
   .Lock       = DISABLE,
-  .I2CBus     = NULL,
-  .SPIBus     = SPI1,
+  .I2Cx       = NULL,
+  .SPIx       = SPI1,
+  .SPINssPort = GPIOA,
+  .SPINssPin  = 2,
+  .DMAx       = DMA1,
+  .DMAxTx     = DMA1_Channel3,
+  .DMAxRx     = DMA1_Channel2,
 };
 
 /* Dallas DS related data */

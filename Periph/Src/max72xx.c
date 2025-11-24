@@ -93,6 +93,7 @@ int MAX72xx_Init(Max72xx_TypeDef* dev) {
     NSS_1_H;
   }
 
+  SPI_Disable(dev->SPIx);
   dev->Lock = DISABLE;
   return (0);
 }

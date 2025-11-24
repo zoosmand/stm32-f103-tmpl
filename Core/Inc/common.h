@@ -196,12 +196,17 @@ typedef enum {
  * @brief   Bosch BMx280 device type definition struct.
  */
 typedef struct {  
-  uint8_t         DevID;
-  uint8_t*        RawBufPtr;
-  int32_t*        ResBufPtr;
-  FunctionalState Lock;
-  I2C_TypeDef*    I2CBus;
-  SPI_TypeDef*    SPIBus;
+  uint8_t               DevID;
+  uint8_t*              RawBufPtr;
+  int32_t*              ResBufPtr;
+  FunctionalState       Lock;
+  I2C_TypeDef*          I2Cx;
+  SPI_TypeDef*          SPIx;
+  GPIO_TypeDef*         SPINssPort;
+  uint16_t              SPINssPin;
+  DMA_TypeDef*          DMAx;
+  DMA_Channel_TypeDef*  DMAxTx;
+  DMA_Channel_TypeDef*  DMAxRx;
 } BMxX80_TypeDef;
 
 
