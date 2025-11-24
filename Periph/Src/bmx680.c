@@ -39,14 +39,16 @@ static ErrorStatus BMx680_Write(BMxX80_TypeDef*, uint8_t);
   * @param  data: a byte to send
   * @return status of operation
   */
-static int I2C_Write(I2C_TypeDef*, uint8_t, uint8_t*, uint16_t);
+static ErrorStatus I2C_Write(I2C_TypeDef*, uint8_t, uint8_t*, uint16_t);
 
 /**
   * @brief  Reads 8 bit data via I2C
   * @param  I2Cx: pointer to an I2C instance
   * @return status of operation
   */
-static int I2C_Read(I2C_TypeDef*, uint8_t, uint8_t, uint8_t*, uint16_t);
+static ErrorStatus I2C_Read(I2C_TypeDef*, uint8_t, uint8_t, uint8_t*, uint16_t);
+
+static ErrorStatus SPI_Read(BMxX80_TypeDef*, uint8_t, uint16_t);
 
 /**
  * @brief Adjusts SPI bus according to device requirements.
@@ -126,38 +128,45 @@ ErrorStatus BMx680_Init(BMxX80_TypeDef* dev) {
   
   _delay_us(10);
   
-  SPI_Adjust(dev);
-  if (SPI_Enable(dev->SPIx)) return (ERROR);
+  // SPI_Adjust(dev);
+  // if (SPI_Enable(dev->SPIx)) return (ERROR);
   
-  PIN_L(dev->SPINssPort, dev->SPINssPin);
-  while (PREG_CHECK(dev->SPINssPort->IDR, dev->SPINssPin));
+  // PIN_L(dev->SPINssPort, dev->SPINssPin);
+  // while (PREG_CHECK(dev->SPINssPort->IDR, dev->SPINssPin));
   
-  /* write a command, a dummy byte has to be read further */
-  *(__IO uint8_t*)&dev->SPIx->DR = 0x50 | 0x80;
+  // /* write a command, a dummy byte has to be read further */
+  // *(__IO uint8_t*)&dev->SPIx->DR = 0x50 | 0x80;
   
 
-  uint32_t tmout = SPI_BUS_TMOUT;
-  while(!(PREG_CHECK(dev->SPIx->SR, SPI_SR_TXE_Pos))) {
-    if (!(--tmout)) {
-      SPI_Disable(dev->SPIx);
-      return (1);
-    }
-  }
+  // uint32_t tmout = SPI_BUS_TMOUT;
+  // while(!(PREG_CHECK(dev->SPIx->SR, SPI_SR_TXE_Pos))) {
+  //   if (!(--tmout)) {
+  //     SPI_Disable(dev->SPIx);
+  //     return (1);
+  //   }
+  // }
   
-  tmout = SPI_BUS_TMOUT;
-  while(!(PREG_CHECK(dev->SPIx->SR, SPI_SR_RXNE_Pos))) {
-    if (!(--tmout)) {
-      SPI_Disable(dev->SPIx);
-      return (1);
-    }
-  }
+  // tmout = SPI_BUS_TMOUT;
+  // while(!(PREG_CHECK(dev->SPIx->SR, SPI_SR_RXNE_Pos))) {
+  //   if (!(--tmout)) {
+  //     SPI_Disable(dev->SPIx);
+  //     return (1);
+  //   }
+  // }
   
-  uint8_t regNum = dev->SPIx->DR;
+  // uint8_t regNum = dev->SPIx->DR;
+  // // uint8_t regNum;
 
-  PIN_H(dev->SPINssPort, dev->SPINssPin);
-  if (SPI_Disable(dev->SPIx)) return (ERROR);
+  // // SPI_Read_8b(dev->SPIx, &regNum, 1);
 
-  if (regNum != BME680_ID) return (ERROR);
+  // PIN_H(dev->SPINssPort, dev->SPINssPin);
+  // if (SPI_Disable(dev->SPIx)) return (ERROR);
+
+  // if (regNum != BME680_ID) return (ERROR);
+
+  SPI_Read(dev, BMx680_SPI_DEV_ID_REG, 1);
+
+  if (dev->RawBufPtr[0] != BME680_ID) return (ERROR);
 
   dev->Lock = DISABLE;
   return (SUCCESS);
@@ -200,6 +209,7 @@ static ErrorStatus BMx680_Read(BMxX80_TypeDef *dev, uint8_t reg, uint8_t len) {
   if (dev->SPIx != NULL) {
 
     /* TODO realize SPI bus, probably with BME680 */
+    SPI_Read(dev, reg, len);
     return (SUCCESS);
   } 
 
@@ -239,34 +249,70 @@ static ErrorStatus BMx680_Write(BMxX80_TypeDef *dev, uint8_t len) {
 
 
 
+// ----------------------------------------------------------------------------
 
-/**
-  * @brief  Writes 8 bit data via I2C
-  * @param  I2Cx: pointer to an I2C instance
-  * @param  data: a byte to send
-  * @return None
-  */
-static int I2C_Write(I2C_TypeDef *I2Cx, uint8_t slaveAddr, uint8_t *buf, uint16_t len) {
+static ErrorStatus I2C_Write(I2C_TypeDef *I2Cx, uint8_t slaveAddr, uint8_t *buf, uint16_t len) {
   if (I2C_Master_Send(I2Cx, slaveAddr, buf, len)) return (ERROR);
-  return (0);
+  return (SUCCESS);
 }
 
 
 
 
 
+// ----------------------------------------------------------------------------
 
-/**
-  * @brief  Reads 8 bit data via I2C
-  * @param  I2Cx: pointer to an I2C instance
-  * @return  a received byte
-  */
-static int I2C_Read(I2C_TypeDef *I2Cx, uint8_t slaveAddr, uint8_t reg, uint8_t *buf, uint16_t len) {
+static ErrorStatus I2C_Read(I2C_TypeDef *I2Cx, uint8_t slaveAddr, uint8_t reg, uint8_t *buf, uint16_t len) {
   if (I2C_Master_Send(I2Cx, slaveAddr, &reg, 1)) return (ERROR);
-
   I2C_Master_Receive(I2Cx, slaveAddr, buf, len);
+  return (SUCCESS);
+}
 
-  return (0);
+
+
+// ----------------------------------------------------------------------------
+
+static ErrorStatus SPI_Read(BMxX80_TypeDef *dev, uint8_t reg, uint16_t len) {
+  SPI_Adjust(dev);
+  if (SPI_Enable(dev->SPIx)) return (ERROR);
+  
+  PIN_L(dev->SPINssPort, dev->SPINssPin);
+  while (PREG_CHECK(dev->SPINssPort->IDR, dev->SPINssPin));
+  
+  /* write a command, a dummy byte has to be read further */
+  *(__IO uint8_t*)&dev->SPIx->DR = reg | BMx680_RW_BIT;
+  
+
+  uint32_t tmout = SPI_BUS_TMOUT;
+  while(!(PREG_CHECK(dev->SPIx->SR, SPI_SR_TXE_Pos))) {
+    if (!(--tmout)) {
+      SPI_Disable(dev->SPIx);
+      return (ERROR);
+    }
+  }
+  
+  tmout = SPI_BUS_TMOUT;
+  while(!(PREG_CHECK(dev->SPIx->SR, SPI_SR_RXNE_Pos))) {
+    if (!(--tmout)) {
+      SPI_Disable(dev->SPIx);
+      return (ERROR);
+    }
+  }
+  
+  for (uint16_t i = 0; i < len; i++) {
+    *(uint8_t*)(dev->RawBufPtr++) = (uint8_t)dev->SPIx->DR;
+  }
+  // uint8_t regNum = dev->SPIx->DR;
+  // uint8_t regNum;
+
+  // SPI_Read_8b(dev->SPIx, &regNum, 1);
+
+  PIN_H(dev->SPINssPort, dev->SPINssPin);
+  if (SPI_Disable(dev->SPIx)) return (ERROR);
+
+  // if (regNum != BME680_ID) return (ERROR);
+
+  return (SUCCESS);
 }
 
 

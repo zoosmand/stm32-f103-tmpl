@@ -33,6 +33,10 @@
 #define BMX680_I2C_ADDR             0x76
 #define BME680_ID                   0x61
 
+#define BMx680_RW_BIT               0x80
+
+#define BMx680_SPI_DEV_ID_REG       0x50
+
 
 
 /* Exported functions prototypes ---------------------------------------------*/
