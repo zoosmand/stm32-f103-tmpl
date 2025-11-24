@@ -260,30 +260,6 @@ typedef struct {
   uint8_t               Dig7;
 } TM163x_TypeDef;
 
-// ----------------------------------------------------------------------------
-
-typedef enum {
-  DIGITS = 4,
-  CLOCK = 3,
-  DIG_W_DOT_1 = 2,
-  DIG_W_DOT_2 = 1,
-  DIG_W_DOT_3 = 0
-} DisplayInfo_TypeDef;
-
-typedef enum
-{
-  ERR_0 = 0, 
-  ERR_1 = 1, 
-  ERR_2 = 2, 
-  ERR_3 = 3, 
-  ERR_4 = 4,
-  ERR_5 = 5,
-  ERR_6 = 6,
-  ERR_7 = 7,
-  ERR_8 = 8,
-  ERR_9 = 9,
-  NO_ERR = 0xff
-} ErrorLevel_TypeDev;
 
 // ----------------------------------------------------------------------------
 

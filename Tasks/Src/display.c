@@ -42,20 +42,20 @@ static Max72xx_TypeDef maxDisplay_0 = {
   .DMAx       = DMA1,
   .DMAxTx     = DMA1_Channel3,
   .DMAxRx     = DMA1_Channel2,
-  .Lock       = ENABLE,
+  .Lock       = DISABLE,
 };
 
 
 static TM163x_TypeDef tmDisplay_0 = {
-  .PortSck    = GPIOA,
-  .PortDio    = GPIOA,
-  .PinSck     = 11,
-  .PinDio     = 12,
+  .PortSck    = TM_SCK_Port,
+  .PortDio    = TM_DIO_Port,
+  .PinSck     = TM_SCK_Pin_Pos,
+  .PinDio     = TM_DIO_Pin_Pos,
   .Dig1       = 0,
   .Dig1       = 0,
   .Dig2       = 0,
   .Dig3       = 0,
-  .Lock       = ENABLE,
+  .Lock       = DISABLE,
 };
 
 
@@ -97,11 +97,8 @@ void DisplayHealthCheck_CronHandler(void) {
 
 static ErrorStatus maxDisplayHealthCheck_Task(Max72xx_TypeDef* dev) {
 
-  // if (dev->Lock == ENABLE) dev->Lock = DISABLE; else return (ERROR);
-  // dev->Lock = ENABLE;
-    
-  MAX72xx_Print(dev, "1234567890");
-
+  if (dev->Lock) return (ERROR);
+  
   return (SUCCESS);
 }
 
@@ -118,15 +115,8 @@ Max72xx_TypeDef* Get_MaxDiplayDevice(void) {
 // ----------------------------------------------------------------------------
 
 static ErrorStatus tmDisplayHealthCheck_Task(TM163x_TypeDef* dev) {
-
-  if (!dev->Lock) return (ERROR);
-
-  dev->Dig0 = 0;
-  dev->Dig1 = 1;
-  dev->Dig2 = 2;
-  dev->Dig3 = 3;
-    
-  if (TM163x_Print(dev)) return (ERROR);
+  
+  if (dev->Lock) return (ERROR);
 
   return (SUCCESS);
 }

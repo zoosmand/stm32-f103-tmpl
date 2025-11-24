@@ -94,7 +94,7 @@ static ErrorStatus tm163x_WriteByte(TM163x_TypeDef*, uint8_t);
 
 ErrorStatus TM163x_Init(TM163x_TypeDef* dev) {
   
-  if (dev->Lock == ENABLE) dev->Lock = DISABLE; else return (ERROR);
+  if (dev->Lock == DISABLE) dev->Lock = ENABLE; else return (ERROR);
 
   /* Init GPIO */
   if (dev->PinDio > 7) {
@@ -143,7 +143,7 @@ ErrorStatus TM163x_Init(TM163x_TypeDef* dev) {
   if (tm163x_WriteByte(dev, 0x8a)) return (ERROR);
   tm163x_Stop(dev);    
 
-  dev->Lock = ENABLE;
+  dev->Lock = DISABLE;
   return (SUCCESS);
 }
 
@@ -153,17 +153,23 @@ ErrorStatus TM163x_Init(TM163x_TypeDef* dev) {
 
 ErrorStatus TM163x_Print(TM163x_TypeDef *dev) {
 
+  dev->Lock = ENABLE;
+  
   tm163x_Start(dev);
   if (tm163x_WriteByte(dev, 0xc0)) return (ERROR);
 
+  uint8_t cop = 0;
+  if (dev->Dig0 >= 0x30) cop = 0x30;
+
   /* TODO Modify the output for TM1638 */
-  if (tm163x_WriteByte(dev, symbols[dev->Dig0])) return (ERROR);
-  if (tm163x_WriteByte(dev, symbols[dev->Dig1])) return (ERROR);
-  if (tm163x_WriteByte(dev, symbols[dev->Dig2])) return (ERROR);
-  if (tm163x_WriteByte(dev, symbols[dev->Dig3])) return (ERROR);
+  if (tm163x_WriteByte(dev, symbols[dev->Dig0 - cop])) return (ERROR);
+  if (tm163x_WriteByte(dev, (symbols[dev->Dig1 - cop]) | 0x80)) return (ERROR);
+  if (tm163x_WriteByte(dev, symbols[dev->Dig2 - cop])) return (ERROR);
+  if (tm163x_WriteByte(dev, symbols[dev->Dig3 - cop])) return (ERROR);
 
   tm163x_Stop(dev); 
 
+  dev->Lock = DISABLE;
   return (SUCCESS);
 }
 
@@ -263,151 +269,4 @@ static ErrorStatus tm163x_WriteByte(TM163x_TypeDef* dev, uint8_t byte) {
   _delay_us(2);
   TM_SCK_Low;
   return (SUCCESS);
-}
-
-
-/* ------------------------------------------------------------------------------- */
-/* ------------------------------------------------------------------------------- */
-/* ------------------------------------------------------------------------------- */
-
-
-// -------------------------------------------------------------
-void TM1637_Run(TM163x_TypeDef* dev, uint16_t __com_addr, uint8_t byte) {
-  uint8_t __command = __com_addr & 0xff;
-  uint8_t __address = (__com_addr >> 8) & 0xff;
-  
-  switch (__command) {
-  	case 0x40:
-  	case 0x44:
-      goto TM1637_Run_Run;
-  		break;
-  	default:
-      printf("Error!");
-      Error_Handler();
-  		break;
-  }
-  
-  TM1637_Run_Run:
-    tm163x_Start(dev);
-    tm163x_WriteByte(dev, __command);
-    tm163x_Stop(dev); 
-
-    tm163x_Start(dev);
-    tm163x_WriteByte(dev, __address);    
-
-    if ((__com_addr & 0xff) == 0x40) {
-      for(int i = 0; i < 4; i++) {
-        tm163x_WriteByte(dev, byte);
-      }
-    } else {
-      tm163x_WriteByte(dev, byte);
-    }
-    tm163x_Stop(dev);
-}
-
-
-
-
-
-// -------------------------------------------------------------
-uint8_t Display(int32_t __data, DisplayInfo_TypeDef __info_type, ErrorLevel_TypeDev __er_state) {
-  
-  uint32_t displayData = 0;
-  uint8_t tick = 0;
-
-  if (__er_state == NO_ERR) {
-
-    switch (__info_type) {
-      case CLOCK:
-        displayData |= 
-            symbols[(__data/1000) ? __data/1000 : 0x0a]
-          | ((symbols[__data%1000/100] | tick) << 8)
-          | (symbols[__data%100/10] << 16)
-          | (symbols[__data%10] << 24);
-        break;
-      case DIG_W_DOT_1:
-      case DIG_W_DOT_2:
-      case DIG_W_DOT_3:
-        displayData |= (0x80 << (8*__info_type));
-        if (__data >= 0) {
-          if (__data >= 10000) {
-            Display(0, DIGITS, ERR_1);
-            break;
-          }
-          if (__data < 1000) {
-            if (__info_type == DIG_W_DOT_3) {
-              displayData |= symbols[0];
-            }
-          }
-          if (__data < 100) {
-            if ((__info_type == DIG_W_DOT_2) || (__info_type == DIG_W_DOT_3)) {
-              displayData |= symbols[0] << 8; 
-            }
-          }
-          if (__data < 10) {
-            displayData |= symbols[0] << 16; 
-          }
-
-          displayData |= 
-              symbols[(__data/1000) ? __data/1000 : 0x0a]
-            | ((symbols[(__data%1000/100) ? __data%1000/100 : 0x0a]) << 8)
-            | ((symbols[(__data%100/10) ? __data%100/10 : 0x0a]) << 16)
-            | (symbols[__data%10] << 24);
-        } else {
-          __data *= -1;
-          if ((__data >= 1000) || (__info_type == DIG_W_DOT_3)) {
-            Display(0, DIGITS, ERR_2);
-            break;
-          }
-          if (__info_type == DIG_W_DOT_2) {
-            displayData |= 
-                symbols[(__data < 1000) ? 0x0b : (__data < 100) ? 0x0b : 0x0a]
-              | ((symbols[(__data < 100) ? 0 : (__data < 10) ? 0x0b : (__data%1000/100)]) << 8);
-          }
-          if (__info_type == DIG_W_DOT_1) {
-            displayData |= 
-                symbols[(__data > 99) ? 0x0b : 0x0a]
-            | ((symbols[(__data < 100) ? 0x0b : (__data < 10) ? 0x0b : (__data%1000/100)]) << 8);
-          }
-
-          displayData |= 
-              ((symbols[(__data < 10) ? 0 : (__data%100/10)]) << 16)
-            | (symbols[__data%10] << 24);
-        }
-        break;
-        
-      default:
-        if (__data >= 0) {
-          if (__data >= 10000) {
-            Display(0, DIGITS, ERR_1);
-            break;
-          }
-          displayData |= 
-              symbols[(__data/1000) ? __data/1000 : 0x0a]
-            | ((symbols[(__data%1000/100) ? __data%1000/100 : 0x0a]) << 8)
-            | ((symbols[(__data%100/10) ? __data%100/10 : 0x0a]) << 16)
-            | (symbols[__data%10] << 24);
-        } else {
-          __data *= -1;
-          if (__data >= 1000) {
-            Display(0, DIGITS, ERR_2);
-            break;
-          }
-          displayData |= 
-              symbols[(__data > 99) ? 0x0b : 0x0a]
-            | ((symbols[(__data < 100) ? (__data < 10) ? 0x0a : 0x0b : (__data%1000/100)]) << 8)
-            | ((symbols[(__data < 10) ? (__data < 0) ? 0x0a : 0x0b : (__data%100/10)]) << 16)
-            | (symbols[__data%10] << 24);
-        }
-        break;
-    }
-  }
-  else {
-    displayData = 
-        symbols[0x0d]
-      | (symbols[0x0e]<< 8)
-      | (symbols[0x0e] << 16)
-      | (symbols[__er_state] << 24);
-  }
-  return (tick) ? 0 : 0x80;
 }

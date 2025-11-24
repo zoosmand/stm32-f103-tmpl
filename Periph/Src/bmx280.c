@@ -89,7 +89,7 @@ static int I2C_Read(I2C_TypeDef*, uint8_t, uint8_t, uint8_t*, uint16_t);
 
 ErrorStatus BMx280_Init(BMxX80_TypeDef* dev) {
 
-  if (dev->Lock == ENABLE) dev->Lock = DISABLE; else return (ERROR);
+  if (dev->Lock == DISABLE) dev->Lock = ENABLE; else return (ERROR);
 
   /* Read Device ID and if it isn't equal to the current, exit. */
   dev->RawBufPtr[0] = 0;
@@ -146,7 +146,7 @@ ErrorStatus BMx280_Init(BMxX80_TypeDef* dev) {
                     | (BMX280_NormalMode << BMX280_Mode_Pos);
   if (BMx280_Write(dev, 2)) return (ERROR);
 
-  dev->Lock = ENABLE;
+  dev->Lock = DISABLE;
   return (SUCCESS);
 }
 
@@ -160,7 +160,7 @@ ErrorStatus BMx280_Init(BMxX80_TypeDef* dev) {
   */
 ErrorStatus BMx280_Measurment(BMxX80_TypeDef *dev) {
 
-  if (dev->Lock == ENABLE) dev->Lock = DISABLE; else return (ERROR);
+  if (dev->Lock == DISABLE) dev->Lock = ENABLE; else return (ERROR);
 
   /* Run conversion in force mode, keep oversampling */
   dev->RawBufPtr[0] = BMX280_CTRL_MEAS;
@@ -191,7 +191,7 @@ ErrorStatus BMx280_Measurment(BMxX80_TypeDef *dev) {
   dev->ResBufPtr[1] = bmx280_compensate_P_int32(adc_P);
   dev->ResBufPtr[2] = bmx280_compensate_H_int32(adc_H);
 
-  dev->Lock = ENABLE;
+  dev->Lock = DISABLE;
   return (SUCCESS);
 }
 

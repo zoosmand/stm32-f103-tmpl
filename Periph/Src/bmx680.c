@@ -60,10 +60,10 @@ static int I2C_Read(I2C_TypeDef*, uint8_t, uint8_t, uint8_t*, uint16_t);
 
 ErrorStatus BMx680_Init(BMxX80_TypeDef* dev) {
 
-  if (dev->Lock == ENABLE) dev->Lock = DISABLE; else return (ERROR);
+  if (dev->Lock == DISABLE) dev->Lock = ENABLE; else return (ERROR);
 
 
-  dev->Lock = ENABLE;
+  dev->Lock = DISABLE;
   return (SUCCESS);
 }
 
@@ -77,10 +77,10 @@ ErrorStatus BMx680_Init(BMxX80_TypeDef* dev) {
   */
 ErrorStatus BMx680_Measurment(BMxX80_TypeDef *dev) {
 
-  if (dev->Lock == ENABLE) dev->Lock = DISABLE; else return (ERROR);
+  if (dev->Lock == DISABLE) dev->Lock = ENABLE; else return (ERROR);
 
 
-  dev->Lock = ENABLE;
+  dev->Lock = DISABLE;
   return (SUCCESS);
 }
 

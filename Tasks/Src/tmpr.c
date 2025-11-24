@@ -35,16 +35,28 @@ static task_scheduler_t boschScheduler = {
   .entranceFlag   = 31,
 };
 
-static uint8_t boschRawData[32];
-static int32_t boschResults[3];
+static uint8_t boschRawData_0[32];
+static int32_t boschResults_0[3];
 
 static BMxX80_TypeDef bosch_0 = {
   .DevID      = 0,
-  .RawBufPtr  = boschRawData,
-  .ResBufPtr  = boschResults,
-  .Lock       = ENABLE,
+  .RawBufPtr  = boschRawData_0,
+  .ResBufPtr  = boschResults_0,
+  .Lock       = DISABLE,
   .I2CBus     = I2C1,
   .SPIBus     = NULL,
+};
+
+static uint8_t boschRawData_1[42];
+static int32_t boschResults_1[4];
+
+static BMxX80_TypeDef bosch_1 = {
+  .DevID      = 0,
+  .RawBufPtr  = boschRawData_1,
+  .ResBufPtr  = boschResults_1,
+  .Lock       = DISABLE,
+  .I2CBus     = NULL,
+  .SPIBus     = SPI1,
 };
 
 /* Dallas DS related data */
@@ -83,11 +95,37 @@ void BoschMeasurment_CronHandler(void) {
     
     if (BMx280_Measurment(&bosch_0)) {
       /* TODO reinitialize device overwise clear rediness flag */
-      printf("Cannot collect Bosch device data\n");
+      printf("Cannot collect Bosch device (BMx280) data\n");
+      bosch_0.Lock = ENABLE;
+      return;
+    }
+
+    if (BMx680_Measurment(&bosch_1)) {
+      /* TODO reinitialize device overwise clear rediness flag */
+      printf("Cannot collect Bosch device (MBx680) data\n");
+      bosch_1.Lock = ENABLE;
+      return;
     }
 
     /* TODO handle Bosch data usage */
-    __NOP();
+    TM163x_TypeDef* tmDsplDev = Get_TmDiplayDevice();
+
+    if (tmDsplDev->Lock) {
+      printf("Cannot output data\n");
+      return;
+    }
+
+    uint8_t tmpBuf[4];
+
+    sprintf(tmpBuf, "%i", boschResults_0[0]);
+
+    tmDsplDev->Dig0 = tmpBuf[0];
+    tmDsplDev->Dig1 = tmpBuf[1];
+    tmDsplDev->Dig2 = tmpBuf[2];
+    tmDsplDev->Dig3 = tmpBuf[3];
+      
+    TM163x_Print(tmDsplDev);
+
   }
 }
 
@@ -96,9 +134,12 @@ void BoschMeasurment_CronHandler(void) {
 
 // ----------------------------------------------------------------------------
 
-BMxX80_TypeDef* Get_BoschDevice(void) {
+BMxX80_TypeDef* Get_BoschDevice(uint8_t devNum) {
   
-  return &bosch_0;
+  if (devNum == 0) return &bosch_0;
+  if (devNum == 1) return &bosch_1;
+
+  return NULL;
 }
 
 
