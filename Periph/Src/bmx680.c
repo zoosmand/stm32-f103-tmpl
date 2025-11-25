@@ -163,20 +163,20 @@ ErrorStatus BMx680_Init(BMxX80_TypeDef* dev) {
   _delay_us(10);
   
   /* Get device ID */
-  SPI_Read(dev, BMx680_dev_id, 1);
+  BMx680_Read(dev, BMx680_dev_id, 1);
   
   if (dev->RawBufPtr[0] != BME680_ID) return (ERROR);
   
   /* Get par_t1 calibration value */
-  SPI_Read(dev, BMx680_par_t1, 3);
+  BMx680_Read(dev, BMx680_par_t1, 3);
   par_t1 = *(int16_t*)dev->RawBufPtr;
 
   /* Get par_t2 calibration value */
-  SPI_Read(dev, BMx680_par_t2, 2);
+  BMx680_Read(dev, BMx680_par_t2, 2);
   par_t2 = *(int16_t*)dev->RawBufPtr;
 
   /* Get par_t3 calibration value */
-  SPI_Read(dev, BMx680_par_t2, 1);
+  BMx680_Read(dev, BMx680_par_t2, 1);
   par_t3 = *(int8_t*)dev->RawBufPtr;
 
 
@@ -274,6 +274,7 @@ static ErrorStatus SPI_Read(BMxX80_TypeDef *dev, uint8_t reg, uint16_t len) {
   SPI_Adjust(dev);
   if (SPI_Enable(dev->SPIx)) return (ERROR);
   
+  /* run the bus */
   PIN_L(dev->SPINssPort, dev->SPINssPin);
   while (PREG_CHECK(dev->SPINssPort->IDR, dev->SPINssPin));
   
@@ -296,11 +297,10 @@ static ErrorStatus SPI_Read(BMxX80_TypeDef *dev, uint8_t reg, uint16_t len) {
     }
   }
   
-  uint8_t* buf = dev->RawBufPtr;
-  for (uint16_t i = 0; i < len; i++) {
-    *buf++ = (uint8_t)dev->SPIx->DR;
-  }
+  /* read data from the bus */
+  SPI_Read_8b(dev->SPIx, dev->RawBufPtr, len);
 
+  /* stop the bus */
   PIN_H(dev->SPINssPort, dev->SPINssPin);
   if (SPI_Disable(dev->SPIx)) return (ERROR);
 

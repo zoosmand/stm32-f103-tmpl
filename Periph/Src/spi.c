@@ -103,7 +103,7 @@ int SPI_Disable(SPI_TypeDef* SPIx) {
   *         cnt: count of bytes to read.
   * @retval none
   */
-int SPI_Read_8b(SPI_TypeDef* SPIx, uint8_t *buf, uint8_t cnt) {
+int SPI_Read_8b(SPI_TypeDef* SPIx, uint8_t *buf, uint16_t cnt) {
   uint32_t tmout = 0;
 
   while (cnt--) {
@@ -141,7 +141,7 @@ int SPI_Read_8b(SPI_TypeDef* SPIx, uint8_t *buf, uint8_t cnt) {
   *         cnt: count of bytes to write.
   * @retval none
   */
-int SPI_Write_8b(SPI_TypeDef* SPIx, uint8_t *buf, uint8_t cnt) {
+int SPI_Write_8b(SPI_TypeDef* SPIx, uint8_t *buf, uint16_t cnt) {
   uint32_t tmout = 0;
 
   while (cnt--) {
@@ -161,7 +161,7 @@ int SPI_Write_8b(SPI_TypeDef* SPIx, uint8_t *buf, uint8_t cnt) {
       }
     }
 
-    SPIx->DR;
+    (SPIx->DR);
   }
 
   return (0);
@@ -177,7 +177,7 @@ int SPI_Write_8b(SPI_TypeDef* SPIx, uint8_t *buf, uint8_t cnt) {
   *         cnt: count of bytes to read.
   * @retval none
   */
-int SPI_Read_16b(SPI_TypeDef* SPIx, uint16_t *buf, uint8_t cnt) {
+int SPI_Read_16b(SPI_TypeDef* SPIx, uint16_t *buf, uint16_t cnt) {
   uint32_t tmout = 0;
 
   while (cnt--) {
@@ -215,7 +215,7 @@ int SPI_Read_16b(SPI_TypeDef* SPIx, uint16_t *buf, uint8_t cnt) {
   *         cnt: count of bytes to write.
   * @retval none
   */
-int SPI_Write_16b(SPI_TypeDef* SPIx, uint16_t *buf, uint8_t cnt) {
+int SPI_Write_16b(SPI_TypeDef* SPIx, uint16_t *buf, uint16_t cnt) {
   uint32_t tmout = 0;
 
   while (cnt--) {

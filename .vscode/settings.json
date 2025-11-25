@@ -1,28 +1,10 @@
 {
   "files.associations": {
-    "*.dbclient-js": "javascript",
     "*.c": "c",
     "*.h": "c",
     "*.s": "arm",
     "*.S": "arm",
-    "*.inc": "arm",
-    "osmemory": "c",
-    "__hash_table": "c",
-    "__tree": "c",
-    "any": "c",
-    "bitset": "c",
-    "memory": "c",
-    "future": "c",
-    "locale": "c",
-    "optional": "c",
-    "random": "c",
-    "regex": "c",
-    "coroutine": "c",
-    "istream": "c",
-    "memory_resource": "c",
-    "mutex": "c",
-    "ranges": "c",
-    "*.def": "c"
+    "*.inc": "arm"
   },
   "cortex-debug.variableUseNaturalFormat": false,
   "makefile.configureOnOpen": false
