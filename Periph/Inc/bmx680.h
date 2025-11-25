@@ -42,12 +42,17 @@
 /* Exported functions prototypes ---------------------------------------------*/
 
 /**
- * @brief   Initializes the given Bosch BMx280 device.
- * @param   dev: pointer to the Bosch BMx280 device struct
+ * @brief   Initializes the given Bosch BMx680 device.
+ * @param   dev: pointer to the Bosch BMx680 device struct
  * @retval  status of operation
  */
 ErrorStatus BMx680_Init(BMxX80_TypeDef*);
 
+/**
+ * @brief   Runs the measurment procedures on the given Bosch BMx680 device.
+ * @param   dev: pointer to the Bosch BMx680 device struct
+ * @retval  status of operation
+ */
 ErrorStatus BMx680_Measurment(BMxX80_TypeDef*);
 
 

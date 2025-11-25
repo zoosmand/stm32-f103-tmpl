@@ -201,6 +201,7 @@ typedef struct {
   int32_t*              ResBufPtr;
   FunctionalState       Lock;
   I2C_TypeDef*          I2Cx;
+  uint8_t               I2C_Address;
   SPI_TypeDef*          SPIx;
   GPIO_TypeDef*         SPINssPort;
   uint16_t              SPINssPin;

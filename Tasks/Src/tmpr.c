@@ -39,12 +39,13 @@ static uint8_t boschRawData_0[32];
 static int32_t boschResults_0[3];
 
 static BMxX80_TypeDef bosch_0 = {
-  .DevID      = 0,
-  .RawBufPtr  = boschRawData_0,
-  .ResBufPtr  = boschResults_0,
-  .Lock       = DISABLE,
-  .I2Cx       = I2C1,
-  .SPIx       = NULL,
+  .DevID        = 0,
+  .RawBufPtr    = boschRawData_0,
+  .ResBufPtr    = boschResults_0,
+  .Lock         = DISABLE,
+  .I2Cx         = I2C1,
+  .I2C_Address  = 0x76,
+  .SPIx         = NULL,
 };
 
 static uint8_t boschRawData_1[42];
