@@ -24,11 +24,14 @@
 
 /* Private function prototypes -----------------------------------------------*/
 
-/* Locaal variables ---------------------------------------------------------*/
+/* Locaal variables ----------------------------------------------------------*/
+static int16_t par_t1 = 0;
+static int16_t par_t2 = 0;
+static int8_t par_t3 = 0;
 
-/* Global variables ---------------------------------------------------------*/
+/* Global variables ----------------------------------------------------------*/
 
-/* Private function prototypes ----------------------------------------------*/
+/* Private function prototypes -----------------------------------------------*/
 
 /**
  * @brief  Writes/sends data to a BMx680 device.
@@ -160,9 +163,22 @@ ErrorStatus BMx680_Init(BMxX80_TypeDef* dev) {
   _delay_us(10);
   
   /* Get device ID */
-  SPI_Read(dev, BMx680_SPI_DEV_ID_REG, 1);
-
+  SPI_Read(dev, BMx680_dev_id, 1);
+  
   if (dev->RawBufPtr[0] != BME680_ID) return (ERROR);
+  
+  /* Get par_t1 calibration value */
+  SPI_Read(dev, BMx680_par_t1, 3);
+  par_t1 = *(int16_t*)dev->RawBufPtr;
+
+  /* Get par_t2 calibration value */
+  SPI_Read(dev, BMx680_par_t2, 2);
+  par_t2 = *(int16_t*)dev->RawBufPtr;
+
+  /* Get par_t3 calibration value */
+  SPI_Read(dev, BMx680_par_t2, 1);
+  par_t3 = *(int8_t*)dev->RawBufPtr;
+
 
   dev->Lock = DISABLE;
   return (SUCCESS);

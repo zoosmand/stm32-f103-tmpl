@@ -35,8 +35,13 @@
 
 #define BMx680_RW_BIT               0x80
 
-#define BMx680_SPI_DEV_ID_REG       0x50
 
+/* BMx680 Registers */
+#define BMx680_dev_id               0x50
+
+#define BMx680_par_t1               0xe9
+#define BMx680_par_t2               0x8a
+#define BMx680_par_t3               0x8c
 
 
 /* Exported functions prototypes ---------------------------------------------*/
