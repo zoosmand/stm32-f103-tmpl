@@ -189,10 +189,12 @@ ErrorStatus BMx680_Measurment(BMxX80_TypeDef *dev) {
 static ErrorStatus BMx680_Read(BMxX80_TypeDef *dev, uint8_t reg, uint8_t len) {
   if (dev->I2Cx != NULL) {
     if (I2C_Read(dev, reg, len)) return (ERROR);
+    return (SUCCESS);
   } 
 
   if (dev->SPIx != NULL) {
     if (SPI_Read(dev, reg, len)) return(ERROR);
+    return (SUCCESS);
   } 
   return (ERROR);
 }
@@ -204,6 +206,7 @@ static ErrorStatus BMx680_Read(BMxX80_TypeDef *dev, uint8_t reg, uint8_t len) {
 static ErrorStatus BMx680_Write(BMxX80_TypeDef *dev, uint8_t len) {
   if (dev->I2Cx != NULL) {
     if (I2C_Write(dev, len)) return (ERROR);
+    return (SUCCESS);
   } 
 
   if (dev->SPIx != NULL) {
