@@ -50,28 +50,67 @@ static BMx280_S32_t t_fine = 0;
 /* Global variables ---------------------------------------------------------*/
 
 /* Private function prototypes ----------------------------------------------*/
-static ErrorStatus BMx280_Read(BMxX80_TypeDef*, uint8_t, uint8_t);
+
+/**
+ * @brief  Writes/sends data to a BMx680 device.
+ * @param  dev: a Bocsh BMxX80 device structure pointer
+ * @param  len: number of bytes to send
+ * @return status of operation
+ */
 static ErrorStatus BMx280_Write(BMxX80_TypeDef*, uint8_t);
 
+/**
+  * @brief  Reads/receives data from a BMx680 device.
+  * @param  dev: a Bocsh BMxX80 device structure pointer
+  * @param  reg: a register address or command to send to the device
+  * @param  len: number of bytes to receive
+  * @return status of operation
+  */
+static ErrorStatus BMx280_Read(BMxX80_TypeDef*, uint8_t, uint8_t);
+
+/**
+ * @brief  Writes/sends data via I2C.
+ * @param  dev: a Bocsh BMxX80 device structure pointer
+ * @param  len: number of bytes to send
+ * @return status of operation
+ */
+static ErrorStatus I2C_Write(BMxX80_TypeDef*, uint16_t);
+
+/**
+ * @brief  Reads/receives data via I2C.
+ * @param  dev: a Bocsh BMxX80 device structure pointer
+ * @param  reg: a register address or command to send to the device
+ * @param  len: number of bytes to receive
+ * @return status of operation
+ */
+static ErrorStatus I2C_Read(BMxX80_TypeDef*, uint8_t, uint16_t);
+
+/**
+  * @brief  Calculates temperature in DegC, resolution is 0.01 DegC.
+  *         Output value of “5123” equals 51.23 DegC.
+  * @param  adc_T: Raw temperature data
+  * @return Measured temprerature
+  */
 static BMx280_S32_t bmx280_compensate_T_int32(BMx280_S32_t);
+
+/**
+  * @brief  Calcutales pressure in Pa as unsigned 32 bit integer.
+  *         Output value of “96386” equals 96386 Pa = 963.86 hPa
+  * @param  adc_P: Raw pressure data
+  * @return Measured pressure
+  */
 static BMx280_U32_t bmx280_compensate_P_int32(BMx280_S32_t);
+
+/**
+  * @brief  Calculates humidity in %RH as unsigned 32 bit integer in Q22.10 format 
+  *         (22 integer and 10 fractional bits).
+  *         Output value of “47445” represents 47445/1024 = 46.333 %RH
+  * @param  adc_H: Raw humidity data
+  * @return Measured humidity
+  */
 static BMx280_U32_t bmx280_compensate_H_int32(BMx280_S32_t);
 
 
-/**
-  * @brief  Writes 8 bit data via I2C
-  * @param  I2Cx: pointer to an I2C instance
-  * @param  data: a byte to send
-  * @return status of operation
-  */
-static int I2C_Write(I2C_TypeDef*, uint8_t, uint8_t*, uint16_t);
-
-/**
-  * @brief  Reads 8 bit data via I2C
-  * @param  I2Cx: pointer to an I2C instance
-  * @return status of operation
-  */
-static int I2C_Read(I2C_TypeDef*, uint8_t, uint8_t, uint8_t*, uint16_t);
 
 
 
@@ -208,7 +247,7 @@ ErrorStatus BMx280_Measurment(BMxX80_TypeDef *dev) {
   */
 static ErrorStatus BMx280_Read(BMxX80_TypeDef *dev, uint8_t reg, uint8_t len) {
   if (dev->I2Cx != NULL) {
-    if (I2C_Read(dev->I2Cx, BMX280_I2C_ADDR, reg, dev->RawBufPtr, len)) return (ERROR);
+    if (I2C_Read(dev, reg, len)) return (ERROR);
     return (SUCCESS);
   } 
 
@@ -234,7 +273,7 @@ static ErrorStatus BMx280_Read(BMxX80_TypeDef *dev, uint8_t reg, uint8_t len) {
   */
 static ErrorStatus BMx280_Write(BMxX80_TypeDef *dev, uint8_t len) {
   if (dev->I2Cx != NULL) {
-    if (I2C_Write(dev->I2Cx, BMX280_I2C_ADDR, dev->RawBufPtr, len)) return (ERROR);
+    if (I2C_Write(dev, len)) return (ERROR);
     return (SUCCESS);
   } 
 
@@ -250,23 +289,18 @@ static ErrorStatus BMx280_Write(BMxX80_TypeDef *dev, uint8_t len) {
 
 
 
-/* ------------------------------------------------------------------------------- */
-/* ------------------------------------------------------------------------------- */
-/* ------------------------------------------------------------------------------- */
+// ----------------------------------------------------------------------------
 /*
-  Here is a bunch of functions provided by Bosch sensor engineering 
-  and proposed by BMx280 datasheet. They were set here with minor
-  changed. The logic was kept.
+  The following is a set of functions provided by Bosch sensor engineering 
+  and proposed by the BMx280 datasheet. They were set here with minor changes. 
+  The logic has been kept.
   
   t_fine carries fine temperature as global value
 */
 
-/**
-  * @brief  Returns temperature in DegC, resolution is 0.01 DegC.
-  *         Output value of “5123” equals 51.23 DegC.
-  * @param  adc_T: Raw temperature data
-  * @return Measured temprerature
-  */
+// ----------------------------------------------------------------------------
+// ----------------------- Device specifiv function ---------------------------
+// ----------------------------------------------------------------------------
 static BMx280_S32_t bmx280_compensate_T_int32(BMx280_S32_t adc_T) {
   BMx280_S32_t var1, var2, T;
   var1 = ((((adc_T >> 3) - ((BMx280_S32_t)dig_T1 << 1))) * (BMx280_S32_t)dig_T2) >> 11;
@@ -279,12 +313,10 @@ static BMx280_S32_t bmx280_compensate_T_int32(BMx280_S32_t adc_T) {
 
 
 
-/**
-  * @brief  Returns pressure in Pa as unsigned 32 bit integer.
-  *         Output value of “96386” equals 96386 Pa = 963.86 hPa
-  * @param  adc_P: Raw pressure data
-  * @return Measured pressure
-  */
+// ----------------------------------------------------------------------------
+// ----------------------- Device specifiv function ---------------------------
+// ----------------------------------------------------------------------------
+
 static BMx280_U32_t bmx280_compensate_P_int32(BMx280_S32_t adc_P) {
   BMx280_S32_t var1, var2;
   BMx280_U32_t P;
@@ -294,19 +326,19 @@ static BMx280_U32_t bmx280_compensate_P_int32(BMx280_S32_t adc_P) {
   var2 = (var2 >> 2) + (((BMx280_S32_t)dig_P4) << 16);
   var1 = (((dig_P3 * (((var1 >> 2) * (var1 >> 2)) >> 13 )) >> 3) + ((((BMx280_S32_t)dig_P2) * var1) >> 1)) >> 18;
   var1 = ((((32768 + var1)) * ((BMx280_S32_t)dig_P1)) >> 15);
-
+  
   if (var1 == 0) return (0); // avoid excePtion caused by division by zero
-
+  
   P = (((BMx280_U32_t)(((BMx280_S32_t)1048576) - adc_P) - (var2 >> 12))) * 3125;
   if (P < 0x80000000) {
     P = (P << 1) / ((BMx280_U32_t)var1);
   } else {
     P = (P / (BMx280_U32_t)var1) * 2;
   }
-
+  
   var1 = (((BMx280_S32_t)dig_P9) * ((BMx280_S32_t)(((P >> 3) * (P >> 3)) >> 13))) >> 12;
   var2 = (((BMx280_S32_t)(P >> 2)) * ((BMx280_S32_t)dig_P8)) >> 13;
-
+  
   P = (BMx280_U32_t)((BMx280_S32_t)P + ((var1 + var2 + dig_P7) >> 4));
   return (P);
 }
@@ -314,12 +346,10 @@ static BMx280_U32_t bmx280_compensate_P_int32(BMx280_S32_t adc_P) {
 
 
 
-/**
-  * @brief  Returns humidity in %RH as unsigned 32 bit integer in Q22.10 format (22 integer and 10 fractional bits).
-  *         Output value of “47445” represents 47445/1024 = 46.333 %RH
-  * @param  adc_H: Raw humidity data
-  * @return Measured humidity
-  */
+// ----------------------------------------------------------------------------
+// ----------------------- Device specifiv function ---------------------------
+// ----------------------------------------------------------------------------
+
 static BMx280_U32_t bmx280_compensate_H_int32(BMx280_S32_t adc_H) {
   // varant 2
   BMx280_U32_t H;
@@ -338,33 +368,26 @@ static BMx280_U32_t bmx280_compensate_H_int32(BMx280_S32_t adc_H) {
 
 
 
-/**
-  * @brief  Writes 8 bit data via I2C
-  * @param  I2Cx: pointer to an I2C instance
-  * @param  data: a byte to send
-  * @return None
-  */
-static int I2C_Write(I2C_TypeDef *I2Cx, uint8_t slaveAddr, uint8_t *buf, uint16_t len) {
-  if (I2C_Master_Send(I2Cx, slaveAddr, buf, len)) return (ERROR);
-  return (0);
+// ----------------------------------------------------------------------------
+
+static ErrorStatus I2C_Write(BMxX80_TypeDef* dev, uint16_t len) {
+  
+  if (I2C_Master_Send(dev->I2Cx, dev->I2C_Address, dev->RawBufPtr, len)) return (ERROR);
+  
+  return (SUCCESS);
 }
 
 
 
 
+// ----------------------------------------------------------------------------
 
+static ErrorStatus I2C_Read(BMxX80_TypeDef *dev, uint8_t reg, uint16_t len) {
 
-/**
-  * @brief  Reads 8 bit data via I2C
-  * @param  I2Cx: pointer to an I2C instance
-  * @return  a received byte
-  */
-static int I2C_Read(I2C_TypeDef *I2Cx, uint8_t slaveAddr, uint8_t reg, uint8_t *buf, uint16_t len) {
-  if (I2C_Master_Send(I2Cx, slaveAddr, &reg, 1)) return (ERROR);
-
-  I2C_Master_Receive(I2Cx, slaveAddr, buf, len);
-
-  return (0);
+  if (I2C_Master_Send(dev->I2Cx, dev->I2C_Address, &reg, 1)) return (ERROR);
+  if (I2C_Master_Receive(dev->I2Cx, dev->I2C_Address, dev->RawBufPtr, len)) return (ERROR);
+  
+  return (SUCCESS);
 }
 
 

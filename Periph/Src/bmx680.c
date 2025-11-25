@@ -31,6 +31,14 @@
 /* Private function prototypes ----------------------------------------------*/
 
 /**
+ * @brief  Writes/sends data to a BMx680 device.
+ * @param  dev: a Bocsh BMxX80 device structure pointer
+ * @param  len: number of bytes to send
+ * @return status of operation
+ */
+static ErrorStatus BMx680_Write(BMxX80_TypeDef*, uint8_t);
+
+/**
   * @brief  Reads/receives data from a BMx680 device.
   * @param  dev: a Bocsh BMxX80 device structure pointer
   * @param  reg: a register address or command to send to the device
@@ -38,14 +46,6 @@
   * @return status of operation
   */
 static ErrorStatus BMx680_Read(BMxX80_TypeDef*, uint8_t, uint8_t);
-
-/**
-  * @brief  Writes/sends data to a BMx680 device.
-  * @param  dev: a Bocsh BMxX80 device structure pointer
-  * @param  len: number of bytes to send
-  * @return status of operation
-  */
-static ErrorStatus BMx680_Write(BMxX80_TypeDef*, uint8_t);
 
 /**
   * @brief  Writes/sends data via I2C.
@@ -82,10 +82,10 @@ static ErrorStatus SPI_Write(BMxX80_TypeDef*, uint16_t);
 static ErrorStatus SPI_Read(BMxX80_TypeDef*, uint8_t, uint16_t);
 
 /**
- * @brief   Adjusts SPI bus according to device requirements.
- * @param   dev: pointer to the device struct
- * @retval  none
- */
+  * @brief   Adjusts SPI bus according to device requirements.
+  * @param   dev: pointer to the device struct
+  * @retval  none
+  */
 __STATIC_INLINE void SPI_Adjust(BMxX80_TypeDef*);
 
 ////////////////////////////////////////////////////////////////////////////////
