@@ -110,6 +110,43 @@ static BMx280_U32_t bmx280_compensate_P_int32(BMx280_S32_t);
   */
 static BMx280_U32_t bmx280_compensate_H_int32(BMx280_S32_t);
 
+/**
+  * @brief   Adjusts SPI bus according to device requirements.
+  * @param   dev: pointer to the device struct
+  * @retval  none
+  */
+__STATIC_INLINE void I2C_Adjust(BMxX80_TypeDef*);
+
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+// ----------------------------------------------------------------------------
+__STATIC_INLINE void I2C_Adjust(BMxX80_TypeDef* dev) {
+
+  /* configure DMA, Channel7 - RX */
+  /* set priority high*/
+  /* set memory to increment */
+  /* clear dir bit, means reading from the bus */
+  MODIFY_REG(dev->DMAxRx->CCR, (DMA_CCR_PL_Msk | DMA_CCR_MINC_Msk | DMA_CCR_DIR_Msk), (DMA_CCR_PL_1 | DMA_CCR_MINC));
+  
+  /* set peripheral address */
+  dev->DMAxRx->CPAR = (uint32_t)&dev->I2Cx->DR;
+  /* set memory address */
+  dev->DMAxRx->CMAR = (uint32_t)dev->RawBufPtr;
+  
+  // dev->DMAxTx->CCR = 0UL;
+  // dev->DMAxRx->CCR = 0UL;
+  // /* Clear correspondents DMA interrupt flags */
+  // dev->DMAx->IFCR |= 0x0f000000;
+
+}
 
 
 
@@ -129,6 +166,7 @@ static BMx280_U32_t bmx280_compensate_H_int32(BMx280_S32_t);
 ErrorStatus BMx280_Init(BMxX80_TypeDef* dev) {
 
   if (dev->Lock == DISABLE) dev->Lock = ENABLE; else return (ERROR);
+
 
   /* Read Device ID and if it isn't equal to the current, exit. */
   dev->RawBufPtr[0] = 0;
@@ -384,8 +422,49 @@ static ErrorStatus I2C_Write(BMxX80_TypeDef* dev, uint16_t len) {
 
 static ErrorStatus I2C_Read(BMxX80_TypeDef *dev, uint8_t reg, uint16_t len) {
 
+  uint32_t tmout;
+
   if (I2C_Master_Send(dev->I2Cx, dev->I2C_Address, &reg, 1)) return (ERROR);
-  if (I2C_Master_Receive(dev->I2Cx, dev->I2C_Address, dev->RawBufPtr, len)) return (ERROR);
+  I2C_Adjust(dev);
+
+  /* Set counter */
+  dev->DMAxRx->CNDTR = len;
+
+  /* Enable transfer from peripheral to memory */
+  PREG_SET(dev->DMAxRx->CCR, DMA_CCR_EN_Pos);
+
+  /* Enable receiving DMA transfer */
+  PREG_SET(dev->I2Cx->CR2, I2C_CR2_DMAEN_Pos);
+  PREG_SET(dev->I2Cx->CR1, I2C_CR1_ACK_Pos);
+
+  /* Start bus transmission */
+  if (I2C_Start(dev->I2Cx)) return (ERROR);  
+  if (I2C_SendAddress(dev->I2Cx, dev->I2C_Address, RX)) return (ERROR);
+  
+  /* --- Read/receive data from the bus via DMA --- */
+  /* Wait for transfer is compete */
+  tmout = SPI_BUS_TMOUT;
+  while(!(PREG_CHECK(dev->DMAx->ISR, DMA_ISR_TCIF7_Pos))) {
+    if (!(--tmout)) {
+      return (ERROR);
+    }
+  }
+
+  /* Disable DMA transfer */
+  PREG_CLR(dev->I2Cx->CR2, I2C_CR2_DMAEN);
+
+  /* Disable transfer from peripheral to memory */
+  PREG_CLR(dev->DMAxRx->CCR, DMA_CCR_EN_Pos);
+
+  /* Clear correspondent DMA interrupt flags */
+  dev->DMAx->IFCR |= 0x0f000000;
+
+  /* Receive the last byte and NACK */
+  PREG_CLR(dev->I2Cx->CR1, I2C_CR1_ACK_Pos);
+  I2C_ReadByte(dev->I2Cx); 
+
+  /* Stop bus transmission */
+  I2C_Stop(dev->I2Cx);
   
   return (SUCCESS);
 }

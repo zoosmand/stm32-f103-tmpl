@@ -46,8 +46,8 @@
 /* Private defines -----------------------------------------------------------*/
 
 /* Exported functions prototypes ---------------------------------------------*/
-int I2C_Init(I2C_TypeDef*);
-int I2C_Start(I2C_TypeDef*);
+ErrorStatus I2C_Init(I2C_TypeDef*);
+ErrorStatus I2C_Start(I2C_TypeDef*);
 void I2C_Stop(I2C_TypeDef*);
 
 /**
@@ -57,9 +57,9 @@ void I2C_Stop(I2C_TypeDef*);
  * @param  dir: data transmission direction (READ|WRITE, RX|TX)
  * @retval (int) status of operation
  */
-int I2C_SendAddress(I2C_TypeDef*, uint8_t, DataTransmitDirection_TypeDef);
+ErrorStatus I2C_SendAddress(I2C_TypeDef*, uint8_t, DataTransmitDirection_TypeDef);
 
-int I2C_WriteByte(I2C_TypeDef*, uint8_t);
+ErrorStatus I2C_WriteByte(I2C_TypeDef*, uint8_t);
 uint8_t I2C_ReadByte(I2C_TypeDef*);
 
 

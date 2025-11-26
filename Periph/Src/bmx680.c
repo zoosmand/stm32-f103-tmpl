@@ -100,13 +100,14 @@ __STATIC_INLINE void SPI_Adjust(BMxX80_TypeDef*);
 // ----------------------------------------------------------------------------
 __STATIC_INLINE void SPI_Adjust(BMxX80_TypeDef* dev) {
 
+  /* The pump variable to complete DMA adjustments */
+  uint8_t pump = 0;
+
   /* adjust frequency divider, 0b010 = 8, (PCLK)72/8 = 9MHz */
   /* set 8-bit data buffer length */ 
   MODIFY_REG(dev->SPIx->CR1, (SPI_CR1_BR_Msk | SPI_CR1_DFF_Msk), (SPI_CR1_BR_1 | SPI_CR1_DFF));
   PREG_SET(dev->SPIx->CR2, SPI_CR2_SSOE_Pos);
 
-
-  uint8_t pump = 0;
   /* configure DMA, Channel2 - RX */
   /* set priority high*/
   /* set memory to increment */
@@ -147,11 +148,9 @@ __STATIC_INLINE void SPI_Adjust(BMxX80_TypeDef* dev) {
 // ----------------------------------------------------------------------------
 
 ErrorStatus BMx680_Init(BMxX80_TypeDef* dev) {
-
+  /* Lock the device */
   if (dev->Lock == DISABLE) dev->Lock = ENABLE; else return (ERROR);
 
-  
-  
   /* Initialize NSS Pin */
   if (dev->SPINssPin > 7) {
     MODIFY_REG(dev->SPINssPort->CRL, (0xf << ((dev->SPINssPin - 8) * 4)), ((GPIO_GPO_PP | GPIO_IOS_2) << ((dev->SPINssPin -8) * 4)));
@@ -203,6 +202,7 @@ ErrorStatus BMx680_Measurment(BMxX80_TypeDef *dev) {
 // ----------------------------------------------------------------------------
 
 static ErrorStatus BMx680_Read(BMxX80_TypeDef *dev, uint8_t reg, uint8_t len) {
+
   if (dev->I2Cx != NULL) {
     if (I2C_Read(dev, reg, len)) return (ERROR);
     return (SUCCESS);
@@ -220,6 +220,7 @@ static ErrorStatus BMx680_Read(BMxX80_TypeDef *dev, uint8_t reg, uint8_t len) {
 // ----------------------------------------------------------------------------
 
 static ErrorStatus BMx680_Write(BMxX80_TypeDef *dev, uint8_t len) {
+  
   if (dev->I2Cx != NULL) {
     if (I2C_Write(dev, len)) return (ERROR);
     return (SUCCESS);
@@ -238,7 +239,9 @@ static ErrorStatus BMx680_Write(BMxX80_TypeDef *dev, uint8_t len) {
 // ----------------------------------------------------------------------------
 
 static ErrorStatus I2C_Write(BMxX80_TypeDef* dev, uint16_t len) {
+  
   if (I2C_Master_Send(dev->I2Cx, dev->I2C_Address, dev->RawBufPtr, len)) return (ERROR);
+  
   return (SUCCESS);
 }
 
@@ -249,8 +252,11 @@ static ErrorStatus I2C_Write(BMxX80_TypeDef* dev, uint16_t len) {
 // ----------------------------------------------------------------------------
 
 static ErrorStatus I2C_Read(BMxX80_TypeDef* dev, uint8_t reg, uint16_t len) {
+  
   if (I2C_Master_Send(dev->I2Cx, dev->I2C_Address, &reg, 1)) return (ERROR);
+  
   I2C_Master_Receive(dev->I2Cx, dev->I2C_Address, dev->RawBufPtr, len);
+  
   return (SUCCESS);
 }
 
@@ -270,8 +276,7 @@ static ErrorStatus SPI_Write(BMxX80_TypeDef *dev, uint16_t len) {
 
 static ErrorStatus SPI_Read(BMxX80_TypeDef *dev, uint8_t reg, uint16_t len) {
   uint32_t tmout;
-  uint8_t pump = 0;
-
+  uint8_t pump = 0;   /* The pump variable to complete DMA configuration */
   
   SPI_Adjust(dev);
   if (SPI_Enable(dev->SPIx)) return (ERROR);
@@ -299,12 +304,11 @@ static ErrorStatus SPI_Read(BMxX80_TypeDef *dev, uint8_t reg, uint16_t len) {
     }
   }
   
-  /* Read data from the bus */
+  /* AN alternative way to read/receive data from the bus */
   // SPI_Read_8b(dev->SPIx, dev->RawBufPtr, len);
 
 
-    
-  /* --- Read data from the bus via DMA --- */
+  /* --- Read/receive data from the bus via DMA --- */
 
   /* Enable from memory to peripheral DMA transfer */
   PREG_SET(dev->SPIx->CR2, SPI_CR2_TXDMAEN_Pos);
@@ -362,7 +366,7 @@ static ErrorStatus SPI_Read(BMxX80_TypeDef *dev, uint8_t reg, uint16_t len) {
   /* Disable transfer from memory to peripheral */
   PREG_CLR(dev->DMAxTx->CCR, DMA_CCR_EN_Pos);
 
-  /* Clear correspondent DMA flags */
+  /* Clear correspondent DMA interrupt flags */
   dev->DMAx->IFCR |= 0x00000ff0;
 
   /* stop the bus */

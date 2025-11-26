@@ -44,25 +44,31 @@ static BMxX80_TypeDef bosch_0 = {
   .ResBufPtr    = boschResults_0,
   .Lock         = DISABLE,
   .I2Cx         = I2C1,
-  .I2C_Address  = 0x76,
-  .SPIx         = NULL,
+  .I2C_Address  = BMX280_I2C_ADDR,
+  // .SPIx         = NULL,
+  // .SPINssPort   = NULL,
+  // .SPINssPin    = NULL,
+  .DMAx         = DMA1,
+  .DMAxTx       = DMA1_Channel6,
+  .DMAxRx       = DMA1_Channel7,
 };
 
 static uint8_t boschRawData_1[42];
 static int32_t boschResults_1[4];
 
 static BMxX80_TypeDef bosch_1 = {
-  .DevID      = 0,
-  .RawBufPtr  = boschRawData_1,
-  .ResBufPtr  = boschResults_1,
-  .Lock       = DISABLE,
-  .I2Cx       = NULL,
-  .SPIx       = SPI1,
-  .SPINssPort = GPIOA,
-  .SPINssPin  = 2,
-  .DMAx       = DMA1,
-  .DMAxTx     = DMA1_Channel3,
-  .DMAxRx     = DMA1_Channel2,
+  .DevID        = 0,
+  .RawBufPtr    = boschRawData_1,
+  .ResBufPtr    = boschResults_1,
+  .Lock         = DISABLE,
+  // .I2Cx         = NULL,
+  // .I2C_Address  = NULL,
+  .SPIx         = SPI1,
+  .SPINssPort   = GPIOA,
+  .SPINssPin    = 2,
+  .DMAx         = DMA1,
+  .DMAxTx       = DMA1_Channel3,
+  .DMAxRx       = DMA1_Channel2,
 };
 
 /* Dallas DS related data */
