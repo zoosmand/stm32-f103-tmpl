@@ -80,8 +80,6 @@ __STATIC_INLINE ErrorStatus SPI_Unconfigure(Max72xx_TypeDef*);
 // ----------------------------------------------------------------------------
 
 ErrorStatus MAX72xx_Init(Max72xx_TypeDef* dev) {
-  // if ((dev->SPIx == NULL) || (dev->DMAx == NULL) || (dev->DMAxRx == NULL) || (dev->DMAxTx == NULL)) return (1);
-
 
   if (dev->Lock == DISABLE) dev->Lock = ENABLE; else return (ERROR);
 
@@ -105,16 +103,16 @@ ErrorStatus MAX72xx_Init(Max72xx_TypeDef* dev) {
   
   for (uint8_t i = 0; i < sizeof(maxInit)/2; i++) {
     segs = dev->SegCnt;
-    NSS_1_L;
+    PIN_L(dev->SPINssPort, dev->SPINssPin);
     while (segs-- > 0) {
-      if (SPI_Write_16b(dev->SPIx, &maxInit[i], 1)) return (1);
+      if (SPI_Write_16b(dev->SPIx, &maxInit[i], 1)) return (SPI_Unconfigure(dev));
     }
-    NSS_1_H;
+    PIN_H(dev->SPINssPort, dev->SPINssPin);
   }
 
   SPI_Disable(dev->SPIx);
   dev->Lock = DISABLE;
-  return (0);
+  return (SUCCESS);
 }
 
 
@@ -200,6 +198,7 @@ __STATIC_INLINE ErrorStatus SPI_Unconfigure(Max72xx_TypeDef* dev) {
 
 
 // ----------------------------------------------------------------------------
+
 static ErrorStatus mAX72xx_PrintBuf(Max72xx_TypeDef* dev, uint16_t len) {
 
   if (dev->Lock == DISABLE) dev->Lock = ENABLE; else return (ERROR);
@@ -208,13 +207,13 @@ static ErrorStatus mAX72xx_PrintBuf(Max72xx_TypeDef* dev, uint16_t len) {
   if (SPI_Enable(dev->SPIx)) return (1);
 
   for (uint8_t i = 0; i < 8; i++) {
-    NSS_1_L;
+    PIN_L(dev->SPINssPort, dev->SPINssPin);
     
     for (uint8_t k = 0; k < dev->SegCnt; k++) {
       if (SPI_Write_16b(dev->SPIx, &(dev->BufPtr)[k + (len * i)], 1)) return (ERROR);
     }
     
-    NSS_1_H;
+    PIN_H(dev->SPINssPort, dev->SPINssPin);
   }
 
   if (SPI_Disable(dev->SPIx)) return (ERROR);
@@ -228,6 +227,7 @@ static ErrorStatus mAX72xx_PrintBuf(Max72xx_TypeDef* dev, uint16_t len) {
 
 
 // ----------------------------------------------------------------------------
+
 ErrorStatus MAX72xx_Print(Max72xx_TypeDef* dev, const char* buf) {
 
   uint16_t len = 0;
@@ -262,6 +262,7 @@ ErrorStatus MAX72xx_Print(Max72xx_TypeDef* dev, const char* buf) {
 
 
 // ----------------------------------------------------------------------------
+
 static void mAX72xx_CompressBuf(Max72xx_TypeDef* dev, uint16_t len, uint8_t step) {
 
   if (step > 3) return;

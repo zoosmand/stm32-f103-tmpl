@@ -47,8 +47,6 @@
 
 #define NSS_0_H         PIN_H(SPI_Port, NSS_0_Pin_Pos)
 #define NSS_0_L         PIN_L(SPI_Port, NSS_0_Pin_Pos)
-#define NSS_1_H         PIN_H(SPI_Port, NSS_1_Pin_Pos)
-#define NSS_1_L         PIN_L(SPI_Port, NSS_1_Pin_Pos)
 
 
 
