@@ -120,7 +120,7 @@ __STATIC_INLINE void SPI_Adjust(BMxX80_TypeDef* dev) {
   /* set memory to increment */
   MODIFY_REG(dev->DMAxRx->CCR, (DMA_CCR_PL_Msk | DMA_CCR_MINC_Msk), (DMA_CCR_PL_1 | DMA_CCR_MINC));
   
-  /* set buffer size to 0 */
+  /* Set buffer size address */
   dev->DMAxRx->CNDTR = 0UL;
   /* set peripheral address */
   dev->DMAxRx->CPAR = (uint32_t)&dev->SPIx->DR;
@@ -133,7 +133,7 @@ __STATIC_INLINE void SPI_Adjust(BMxX80_TypeDef* dev) {
   /* set direction from memory to peripheral */
   MODIFY_REG(dev->DMAxTx->CCR, (DMA_CCR_PL_Msk | DMA_CCR_MINC_Msk | DMA_CCR_DIR_Msk), (DMA_CCR_PL_1 | DMA_CCR_MINC | DMA_CCR_DIR));
   
-  /* set buffer size to 0 */
+  /* Set buffer size address */
   dev->DMAxTx->CNDTR = 0UL;
   /* set peripheral address */
   dev->DMAxTx->CPAR = (uint32_t)&dev->SPIx->DR;

@@ -113,10 +113,7 @@ void BoschMeasurment_CronHandler(void) {
         printf("Cannot collect Bosch device (BMx280) data\n");
         bosch_0.Lock = ENABLE;
       } else {
-        
         sprintf(tmpBuf, "%i", boschResults_0[0]);
-        
-
       }
     }
 

@@ -68,6 +68,16 @@ int main(void) {
     
     if (FLAG_CHECK(&_ASREG_, MAXDSPL_RF) || FLAG_CHECK(&_ASREG_, TMDSPL_RF) ) { DisplayHealthCheck_CronHandler(); }
 
+
+    Max72xx_TypeDef* maxDsplDev = Get_MaxDiplayDevice();
+    if (maxDsplDev->Lock == DISABLE) {
+      if (MAX72xx_Print(maxDsplDev, "1234")) {
+        printf("Cannot output data to MAX display from SEC\n");
+        maxDsplDev->Lock = ENABLE;
+      }
+    }
+
+
   }
 
   /* ----------------------------------*/
@@ -111,7 +121,7 @@ void Cron_Handler(void) {
   }
   
   if (FLAG_CHECK(&_ASREG_, I2C1_RF)) {
-    if (!BMx280_Init(Get_BoschDevice(0))) FLAG_SET(&_ASREG_, BMX280_RF);
+    // if (!BMx280_Init(Get_BoschDevice(0))) FLAG_SET(&_ASREG_, BMX280_RF);
     if (!SSD13xx_Init(I2C1))  FLAG_SET(&_ASREG_, SSDDisplay_RF);
     if (!WHxxxx_Init(I2C1))   FLAG_SET(&_ASREG_, WHDisplay_RF);
   }

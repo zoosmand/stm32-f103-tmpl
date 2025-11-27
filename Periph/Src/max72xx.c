@@ -20,6 +20,24 @@
 #include "max72xx.h"
 
 /* Private variables ---------------------------------------------------------*/
+static const uint16_t maxInit[15] = {
+  0x0c00, // 0x0c - Shutdown,     0x00 - Shutdown
+  0x0f00, // 0x0f - DisplayTest,  0x00 - Off, 0x01 - On
+  0x0900, // 0x09 - Decode Mode,  0x00 - No decode for digits 7�0, 0xff - Code B decode for digits 7�0
+  0x0a04, // 0x0a - Intensity,    0x00 - lowest, 0x0f - highest
+  0x0b07, // 0x0b - Scan-Limit,   0x07 - Display digits 0 1 2 3 4 5 6 7
+  0x0100, // 0x01 - Line 1
+  0x0200,
+  0x0300,
+  0x0400,
+  0x0500,
+  0x0600,
+  0x0700,
+  0x0800, // 0x08 - Line 8
+  0x0c01, // 0x0c - Run,          0x01 - Normal operation 
+  0x0000  // 0x00 - NOP
+};
+
 
 /* Private function prototypes -----------------------------------------------*/
 
@@ -47,6 +65,12 @@ static void mAX72xx_CompressBuf(Max72xx_TypeDef*, uint16_t, uint8_t);
  */
 __STATIC_INLINE void SPI_Adjust(Max72xx_TypeDef*);
 
+/**
+  * @brief   Unconfigure SPI bus.
+  * @param   dev: pointer to the device struct
+  * @retval  none
+  */
+__STATIC_INLINE ErrorStatus SPI_Unconfigure(Max72xx_TypeDef*);
 
 
 
@@ -56,32 +80,26 @@ __STATIC_INLINE void SPI_Adjust(Max72xx_TypeDef*);
 // ----------------------------------------------------------------------------
 
 ErrorStatus MAX72xx_Init(Max72xx_TypeDef* dev) {
-  if ((dev->SPIx == NULL) || (dev->DMAx == NULL) || (dev->DMAxRx == NULL) || (dev->DMAxTx == NULL)) return (1); 
+  // if ((dev->SPIx == NULL) || (dev->DMAx == NULL) || (dev->DMAxRx == NULL) || (dev->DMAxTx == NULL)) return (1);
+
 
   if (dev->Lock == DISABLE) dev->Lock = ENABLE; else return (ERROR);
 
+  /* Initialize NSS Pin */
+  if (dev->SPINssPin > 7) {
+    MODIFY_REG(dev->SPINssPort->CRL, (0xf << ((dev->SPINssPin - 8) * 4)), ((GPIO_GPO_PP | GPIO_IOS_2) << ((dev->SPINssPin -8) * 4)));
+  } else {
+    MODIFY_REG(dev->SPINssPort->CRL, (0xf << (dev->SPINssPin * 4)), ((GPIO_GPO_PP | GPIO_IOS_2) << (dev->SPINssPin * 4)));
+  }
+  PIN_H(dev->SPINssPort, dev->SPINssPin);
+  
+  _delay_us(10);
+
+
   SPI_Adjust(dev);
-  if (SPI_Enable(dev->SPIx)) return (1);
+  if (SPI_Enable(dev->SPIx)) return (SPI_Unconfigure(dev));
   
-  _delay_ms(5);
-  
-  uint16_t maxInit[15] = {
-    0x0c00, // 0x0c - Shutdown,     0x00 - Shutdown
-    0x0f00, // 0x0f - DisplayTest,  0x00 - Off, 0x01 - On
-    0x0900, // 0x09 - Decode Mode,  0x00 - No decode for digits 7�0, 0xff - Code B decode for digits 7�0
-    0x0a04, // 0x0a - Intensity,    0x00 - lowest, 0x0f - highest
-    0x0b07, // 0x0b - Scan-Limit,   0x07 - Display digits 0 1 2 3 4 5 6 7
-    0x0100, // 0x01 - Line 1
-    0x0200,
-    0x0300,
-    0x0400,
-    0x0500,
-    0x0600,
-    0x0700,
-    0x0800, // 0x08 - Line 8
-    0x0c01, // 0x0c - Run,          0x01 - Normal operation 
-    0x0000  // 0x00 - NOP
-  };
+  _delay_ms(5); 
   
   uint8_t segs = 0;
   
@@ -103,17 +121,80 @@ ErrorStatus MAX72xx_Init(Max72xx_TypeDef* dev) {
 
 
 // ----------------------------------------------------------------------------
+
 __STATIC_INLINE void SPI_Adjust(Max72xx_TypeDef* dev) {
   /* adjust frequency divider, 0b010 = 8, (PCLK)72/8 = 9MHz */
   /* set 16-bit data buffer length */ 
   MODIFY_REG(dev->SPIx->CR1, (SPI_CR1_BR_Msk | SPI_CR1_DFF_Msk), (SPI_CR1_BR_1 | SPI_CR1_DFF));
   PREG_CLR(dev->SPIx->CR2, SPI_CR2_SSOE_Pos);
-  dev->DMAxTx->CCR = 0UL;
-  dev->DMAxRx->CCR = 0UL;
-  /* Clear correspondents DMA flags */
-  dev->DMAx->IFCR |= 0x00000ff0;
+  // dev->DMAxTx->CCR = 0UL;
+  // dev->DMAxRx->CCR = 0UL;
+  // /* Clear correspondents DMA flags */
+  // dev->DMAx->IFCR |= 0x00000ff0;
+
+  /* configure DMA, Channel2 - RX */
+  /* set priority high*/
+  /* set memory to increment */
+  // MODIFY_REG(dev->DMAxRx->CCR, (DMA_CCR_PL_Msk | DMA_CCR_MINC_Msk), (DMA_CCR_PL_1 | DMA_CCR_MINC));
+  
+  // /* set buffer size to 0 */
+  // dev->DMAxRx->CNDTR = 0UL;
+  // /* set peripheral address */
+  // dev->DMAxRx->CPAR = (uint32_t)&dev->SPIx->DR;
+  // /* set memory address */
+  // dev->DMAxRx->CMAR = (uint32_t)dev->BufPtr;
+  
+  /* configure DMA, Channel3 - TX */
+  /* set priority high*/
+  /* set memory to increment */
+  /* set direction from memory to peripheral */
+  MODIFY_REG(dev->DMAxTx->CCR, (DMA_CCR_PL_Msk | DMA_CCR_MINC_Msk | DMA_CCR_DIR_Msk), (DMA_CCR_PL_1 | DMA_CCR_MINC | DMA_CCR_DIR));
+  
+  /* set buffer size to 0 */
+  dev->DMAxTx->CNDTR = 0UL;
+  /* set peripheral address */
+  dev->DMAxTx->CPAR = (uint32_t)&dev->SPIx->DR;
+  /* set memory address */
+  dev->DMAxTx->CMAR = (uint32_t)dev->BufPtr;
+
+
 }
 
+
+
+
+// ----------------------------------------------------------------------------
+
+__STATIC_INLINE ErrorStatus SPI_Unconfigure(Max72xx_TypeDef* dev) {
+
+  /* Clear correspondents DMA flags */
+  dev->DMAx->IFCR |= (
+      DMA_IFCR_CGIF3_Msk
+    | DMA_IFCR_CHTIF3_Msk
+    | DMA_IFCR_CTCIF3_Msk
+  );
+  
+  /* Disable from memory to peripheral DMA transfer */
+  PREG_CLR(dev->SPIx->CR2, SPI_CR2_TXDMAEN_Pos);
+  /* Disable from peripheral to memory DMA transfer */
+  // PREG_CLR(dev->SPIx->CR2, SPI_CR2_RXDMAEN_Pos);
+  /* Disable transfer from peripheral to memory */
+  // PREG_CLR(dev->DMAxRx->CCR, DMA_CCR_EN_Pos);
+  /* Disable transfer from memory to peripheral */
+  PREG_CLR(dev->DMAxTx->CCR, DMA_CCR_EN_Pos);
+
+  PIN_H(dev->SPINssPort, dev->SPINssPin);
+  SPI_Disable(dev->SPIx);
+
+  /* Clear memory/peripheral pointers */
+  dev->DMAxTx->CCR = 0UL;
+  // dev->DMAxRx->CCR = 0UL;
+  /* Clear DMA registers */
+  MODIFY_REG(dev->DMAxTx->CCR, (DMA_CCR_PL_Msk | DMA_CCR_MINC_Msk | DMA_CCR_DIR_Msk), 0UL);
+  // MODIFY_REG(dev->DMAxRx->CCR, (DMA_CCR_PL_Msk | DMA_CCR_MINC_Msk), 0UL);
+
+  return (ERROR);
+}
 
 
 
