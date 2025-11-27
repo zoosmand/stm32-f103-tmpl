@@ -57,28 +57,60 @@
 /**
  * @brief  Initializes the given SPI bus.
  * @param  SPIx: pointer to the given SPI peripherals
- * @retval (int) status of operation
+ * @retval status of operation
  */
-int SPI_Init(SPI_TypeDef*);
+ErrorStatus SPI_Init(SPI_TypeDef*);
 
 /**
  * @brief  Enables the given SPI peripherals.
  * @param  SPIx: pointer to the given SPI peripherals
- * @retval (int) status of operation
+ * @retval status of operation
  */
-int SPI_Enable(SPI_TypeDef*);
+ErrorStatus SPI_Enable(SPI_TypeDef*);
 
 /**
  * @brief  Disables the given SPI peripherals.
  * @param  SPIx: pointer to the given SPI peripherals
- * @retval (int) status of operation
+ * @retval status of operation
  */
-int SPI_Disable(SPI_TypeDef*);
+ErrorStatus SPI_Disable(SPI_TypeDef*);
 
-int SPI_Read_8b(SPI_TypeDef*, uint8_t*, uint16_t);
-int SPI_Write_8b(SPI_TypeDef*, uint8_t*, uint16_t);
-int SPI_Read_16b(SPI_TypeDef*, uint16_t*, uint16_t);
-int SPI_Write_16b(SPI_TypeDef*, uint16_t*, uint16_t);
+/**
+  * @brief  Reads data from SPI bus with 8-bit data buffer size.
+  * @param  SPIx: pointer to the dedicatred SPI bus structure
+  * @param  buf: pointer to the buffer to store the read data
+  * @param  cnt: count of bytes to read from the bus
+  * @retval status of aperation
+  */
+ErrorStatus SPI_Read_8b(SPI_TypeDef*, uint8_t*, uint16_t);
+
+/**
+  * @brief  Writes data to the SPI bus with 8-bit data buffer size.
+  * @param  SPIx: pointer to the dedicatred SPI bus structure
+  * @param  buf: pointer to the buffer of transmitting data
+  * @param  cnt: count of bytes to write to the bus
+  * @retval status of aperation
+  */
+ErrorStatus SPI_Write_8b(SPI_TypeDef*, uint8_t*, uint16_t);
+
+
+/**
+  * @brief  Reads data from SPI bus with 16-bit data buffer size.
+  * @param  SPIx: pointer to the dedicatred SPI bus structure
+  * @param  buf: pointer to the buffer to store the read data
+  * @param  cnt: count of halfwords to read from the bus
+  * @retval none
+  */
+ErrorStatus SPI_Read_16b(SPI_TypeDef*, uint16_t*, uint16_t);
+
+/**
+  * @brief  Writes data to the SPI bus with 16-bit data buffer size.
+  * @param  SPIx: pointer to the dedicatred SPI bus structure
+  * @param  buf: pointer to the buffer of transmitting data
+  * @param  cnt: count of halfwords to write to the bus
+  * @retval status of aperation
+  */
+ErrorStatus SPI_Write_16b(SPI_TypeDef*, uint16_t*, uint16_t);
 
 
 #ifdef __cplusplus

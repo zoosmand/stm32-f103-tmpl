@@ -79,14 +79,20 @@ void DisplayHealthCheck_CronHandler(void) {
 
     FLAG_CLR(displayHealthCheckScheduler.counterReg, displayHealthCheckScheduler.entranceFlag);
     
-    if (maxDisplayHealthCheck_Task(&maxDisplay_0)) {
-      /* TODO reinitialize, overwise clear rediness flag */
-      printf("Cannot run MAX72xx display device\n");
+    if (maxDisplay_0.Lock == DISABLE) {
+      if (maxDisplayHealthCheck_Task(&maxDisplay_0)) {
+        /* TODO reinitialize, overwise clear rediness flag */
+        printf("Cannot run MAX72xx display device\n");
+        maxDisplay_0.Lock = ENABLE;
+      }
     }
 
-    if (tmDisplayHealthCheck_Task(&tmDisplay_0)) {
-      /* TODO reinitialize, overwise clear rediness flag */
-      printf("Cannot run TM163x display device\n");
+    if (tmDisplay_0.Lock == DISABLE) {
+      if (tmDisplayHealthCheck_Task(&tmDisplay_0)) {
+        /* TODO reinitialize, overwise clear rediness flag */
+        printf("Cannot run TM163x display device\n");
+        tmDisplay_0.Lock = ENABLE;
+      }
     }
   }
 }

@@ -27,9 +27,9 @@
  * @brief   Prints the buffer from the given MAX72xx dev.
  * @param   dev: pointer to the MAX72xx device struct
  * @param   len: number of bytes to print at the buffer
- * @retval  none
+ * @retval  status of operation
  */
-static int mAX72xx_PrintBuf(Max72xx_TypeDef*, uint16_t);
+static ErrorStatus mAX72xx_PrintBuf(Max72xx_TypeDef*, uint16_t);
 
 /**
  * @brief   Compresses the buffer from the given MAX72xx dev.
@@ -54,7 +54,8 @@ __STATIC_INLINE void SPI_Adjust(Max72xx_TypeDef*);
 
 
 // ----------------------------------------------------------------------------
-int MAX72xx_Init(Max72xx_TypeDef* dev) {
+
+ErrorStatus MAX72xx_Init(Max72xx_TypeDef* dev) {
   if ((dev->SPIx == NULL) || (dev->DMAx == NULL) || (dev->DMAxRx == NULL) || (dev->DMAxTx == NULL)) return (1); 
 
   if (dev->Lock == DISABLE) dev->Lock = ENABLE; else return (ERROR);
@@ -118,7 +119,7 @@ __STATIC_INLINE void SPI_Adjust(Max72xx_TypeDef* dev) {
 
 
 // ----------------------------------------------------------------------------
-static int mAX72xx_PrintBuf(Max72xx_TypeDef* dev, uint16_t len) {
+static ErrorStatus mAX72xx_PrintBuf(Max72xx_TypeDef* dev, uint16_t len) {
 
   if (dev->Lock == DISABLE) dev->Lock = ENABLE; else return (ERROR);
 
@@ -129,16 +130,16 @@ static int mAX72xx_PrintBuf(Max72xx_TypeDef* dev, uint16_t len) {
     NSS_1_L;
     
     for (uint8_t k = 0; k < dev->SegCnt; k++) {
-      if (SPI_Write_16b(dev->SPIx, &(dev->BufPtr)[k + (len * i)], 1)) return (1);
+      if (SPI_Write_16b(dev->SPIx, &(dev->BufPtr)[k + (len * i)], 1)) return (ERROR);
     }
     
     NSS_1_H;
   }
 
-  if (SPI_Disable(dev->SPIx)) return (1);
+  if (SPI_Disable(dev->SPIx)) return (ERROR);
 
   dev->Lock = DISABLE;
-  return (0);
+  return (SUCCESS);
 }
 
 
@@ -146,7 +147,7 @@ static int mAX72xx_PrintBuf(Max72xx_TypeDef* dev, uint16_t len) {
 
 
 // ----------------------------------------------------------------------------
-void MAX72xx_Print(Max72xx_TypeDef* dev, const char* buf) {
+ErrorStatus MAX72xx_Print(Max72xx_TypeDef* dev, const char* buf) {
 
   uint16_t len = 0;
   const char *buf_ = buf;
@@ -160,7 +161,7 @@ void MAX72xx_Print(Max72xx_TypeDef* dev, const char* buf) {
     uint8_t pos = buf[k];
     if ((pos > 126) || (pos < 32)) {
       if (pos == 176) pos = 95;
-      else return;
+      else return (ERROR);
     } else pos -= 32;
     
     for (uint8_t i = 0; i < 8; i++) {
@@ -170,7 +171,9 @@ void MAX72xx_Print(Max72xx_TypeDef* dev, const char* buf) {
 
   /* TODO fix buffer overflow bug */
   // mAX72xx_CompressBuf(dev, len, 2);
-  if (mAX72xx_PrintBuf(dev, len)) return;
+  if (mAX72xx_PrintBuf(dev, len)) return (ERROR);
+
+  return (SUCCESS);
 }
 
 

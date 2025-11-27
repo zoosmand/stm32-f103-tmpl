@@ -203,20 +203,20 @@ ErrorStatus BMx680_Init(BMxX80_TypeDef* dev) {
   _delay_us(10);
   
   /* Get device ID */
-  BMx680_Read(dev, BMx680_dev_id, 1);
+  if (BMx680_Read(dev, BMx680_dev_id, 1)) return (ERROR);
   
   if (dev->RawBufPtr[0] != BME680_ID) return (ERROR);
   
   /* Get par_t1 calibration value */
-  BMx680_Read(dev, BMx680_par_t1, 3);
+  if (BMx680_Read(dev, BMx680_par_t1, 3)) return (ERROR);
   par_t1 = *(int16_t*)dev->RawBufPtr;
 
   /* Get par_t2 calibration value */
-  BMx680_Read(dev, BMx680_par_t2, 2);
+  if (BMx680_Read(dev, BMx680_par_t2, 2)) return (ERROR);
   par_t2 = *(int16_t*)dev->RawBufPtr;
 
   /* Get par_t3 calibration value */
-  BMx680_Read(dev, BMx680_par_t2, 1);
+  if (BMx680_Read(dev, BMx680_par_t2, 1)) return (ERROR);
   par_t3 = *(int8_t*)dev->RawBufPtr;
 
 

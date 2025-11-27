@@ -23,7 +23,8 @@
 
 
 // ----------------------------------------------------------------------------
-int SPI_Init(SPI_TypeDef* SPIx) {
+
+ErrorStatus SPI_Init(SPI_TypeDef* SPIx) {
 
   /* Enable GPIO SCK, MISO, MOSI alternative on high speed */
 
@@ -48,10 +49,10 @@ int SPI_Init(SPI_TypeDef* SPIx) {
   if (SPIx == SPI1) {
     // NVIC_SetPriority(SPI1_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 15, 0));
     // NVIC_EnableIRQ(SPI1_IRQn);
-    return (0);
+    return (SUCCESS);
   }
 
-  return (1);
+  return (ERROR);
 }
 
 
@@ -59,19 +60,19 @@ int SPI_Init(SPI_TypeDef* SPIx) {
 
 // ----------------------------------------------------------------------------
 
-int SPI_Enable(SPI_TypeDef* SPIx) {
+ErrorStatus SPI_Enable(SPI_TypeDef* SPIx) {
 
   uint32_t tmout = SPI_BUS_TMOUT;
 
   while(PREG_CHECK(SPIx->SR, SPI_SR_BSY_Pos)) {
     if (!(--tmout)) {
       SPI_Disable(SPIx);
-      return (1);
+      return (ERROR);
     }
   }
 
   PREG_SET(SPIx->CR1, SPI_CR1_SPE_Pos);
-  return (0);
+  return (SUCCESS);
 }
 
 
@@ -79,143 +80,100 @@ int SPI_Enable(SPI_TypeDef* SPIx) {
 
 // ----------------------------------------------------------------------------
 
-int SPI_Disable(SPI_TypeDef* SPIx) {
+ErrorStatus SPI_Disable(SPI_TypeDef* SPIx) {
   uint32_t tmout = SPI_BUS_TMOUT;
   
   while(PREG_CHECK(SPIx->SR, SPI_SR_BSY_Pos)) {
     if (!(--tmout)) {
-      return (1);
+      return (ERROR);
     }
   }
-
+  
   PREG_CLR(SPIx->CR1, SPI_CR1_SPE_Pos);
-  return (0);
+  return (SUCCESS);
 }
 
 
 
 
+// ----------------------------------------------------------------------------
 
-/**
-  * @brief  Reads data from SPI bus with 8-bit data buffer length
-  * @param  buf: pointer to buffer to read, the first item of buffer could contain
-  *              a command data. Beginning iteration reads a dummy byte.
-  *         cnt: count of bytes to read.
-  * @retval none
-  */
-int SPI_Read_8b(SPI_TypeDef* SPIx, uint8_t *buf, uint16_t cnt) {
+ErrorStatus SPI_Read_8b(SPI_TypeDef* SPIx, uint8_t *buf, uint16_t cnt) {
   uint32_t tmout = 0;
-
+  
   while (cnt--) {
     *(__IO uint8_t*)&SPIx->DR = 0;
-
-
+    
     tmout = SPI_BUS_TMOUT;
     while(!(PREG_CHECK(SPIx->SR, SPI_SR_TXE_Pos))) {
-      if (!(--tmout)) {
-        return (1);
-      }
+      if (!(--tmout)) return (ERROR);
     }
-
+    
     tmout = SPI_BUS_TMOUT;
     while(!(PREG_CHECK(SPIx->SR, SPI_SR_RXNE_Pos))) {
-      if (!(--tmout)) {
-        return (1);
-      }
+      if (!(--tmout)) return (ERROR);
     }
-
     *buf++ = (uint8_t)SPIx->DR;
   }
-
-  return (0);
+  
+  return (SUCCESS);
 }
 
 
 
+// ----------------------------------------------------------------------------
 
-
-
-/**
-  * @brief  Writes data into SPI bus with 8-bit data buffer length
-  * @param  buf: pointer to buffer to write.
-  *         cnt: count of bytes to write.
-  * @retval none
-  */
-int SPI_Write_8b(SPI_TypeDef* SPIx, uint8_t *buf, uint16_t cnt) {
+ErrorStatus SPI_Write_8b(SPI_TypeDef* SPIx, uint8_t *buf, uint16_t cnt) {
   uint32_t tmout = 0;
-
+  
   while (cnt--) {
     *(__IO uint8_t*)&SPIx->DR = *buf++;
-
+    
     tmout = SPI_BUS_TMOUT;
     while(!(PREG_CHECK(SPIx->SR, SPI_SR_TXE_Pos))) {
-      if (!(--tmout)) {
-        return (1);
-      }
+      if (!(--tmout)) return (ERROR);
     }
-
+    
     tmout = SPI_BUS_TMOUT;
     while(!(PREG_CHECK(SPIx->SR, SPI_SR_RXNE_Pos))) {
-      if (!(--tmout)) {
-        return (1);
-      }
+      if (!(--tmout)) return (ERROR);
     }
-
     (SPIx->DR);
   }
-
-  return (0);
+  
+  return (SUCCESS);
 }
 
 
 
+// ----------------------------------------------------------------------------
 
-/**
-  * @brief  Reads data from SPI bus with 16-bit data buffer length
-  * @param  buf: pointer to buffer to read, the first item of buffer could contain
-  *              a command data. Beginning iteration reads a dummy byte.
-  *         cnt: count of bytes to read.
-  * @retval none
-  */
-int SPI_Read_16b(SPI_TypeDef* SPIx, uint16_t *buf, uint16_t cnt) {
+ErrorStatus SPI_Read_16b(SPI_TypeDef* SPIx, uint16_t *buf, uint16_t cnt) {
   uint32_t tmout = 0;
-
+  
   while (cnt--) {
     *(__IO uint16_t*)&SPIx->DR = 0;
-
-
+    
     tmout = SPI_BUS_TMOUT;
     while(!(PREG_CHECK(SPIx->SR, SPI_SR_TXE_Pos))) {
-      if (!(--tmout)) {
-        return (1);
-      }
+      if (!(--tmout)) return (ERROR);
     }
-
+    
     tmout = SPI_BUS_TMOUT;
     while(!(PREG_CHECK(SPIx->SR, SPI_SR_RXNE_Pos))) {
-      if (!(--tmout)) {
-        return (1);
-      }
+      if (!(--tmout)) return (ERROR);
     }
-
     *buf++ = (uint16_t)SPIx->DR;
   }
-
-  return (0);
+  
+  return (SUCCESS);
 }
 
 
 
+// ----------------------------------------------------------------------------
 
-
-
-/**
-  * @brief  Writes data into SPI bus with 8-bit data buffer length
-  * @param  buf: pointer to buffer to write.
-  *         cnt: count of bytes to write.
-  * @retval none
-  */
-int SPI_Write_16b(SPI_TypeDef* SPIx, uint16_t *buf, uint16_t cnt) {
+ErrorStatus SPI_Write_16b(SPI_TypeDef* SPIx, uint16_t *buf, uint16_t cnt) {
   uint32_t tmout = 0;
 
   while (cnt--) {
@@ -223,20 +181,15 @@ int SPI_Write_16b(SPI_TypeDef* SPIx, uint16_t *buf, uint16_t cnt) {
 
     tmout = SPI_BUS_TMOUT;
     while(!(PREG_CHECK(SPIx->SR, SPI_SR_TXE_Pos))) {
-      if (!(--tmout)) {
-        return (1);
-      }
+      if (!(--tmout)) return (ERROR);
     }
 
     tmout = SPI_BUS_TMOUT;
     while(!(PREG_CHECK(SPIx->SR, SPI_SR_RXNE_Pos))) {
-      if (!(--tmout)) {
-        return (1);
-      }
+      if (!(--tmout)) return (ERROR);
     }
-
     SPIx->DR;
   }
 
-  return (0);
+  return (SUCCESS);
 }

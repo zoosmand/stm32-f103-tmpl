@@ -100,44 +100,58 @@ static task_scheduler_t dsScheduler = {
 void BoschMeasurment_CronHandler(void) {
 
   Scheduler_Handler(&boschScheduler);
+  
+  uint8_t tmpBuf[4];
 
   if (FLAG_CHECK(boschScheduler.counterReg, boschScheduler.entranceFlag)) {
 
     FLAG_CLR(boschScheduler.counterReg, boschScheduler.entranceFlag);
     
-    if (BMx280_Measurment(&bosch_0)) {
-      /* TODO reinitialize device overwise clear rediness flag */
-      printf("Cannot collect Bosch device (BMx280) data\n");
-      bosch_0.Lock = ENABLE;
-      return;
+    if (bosch_0.Lock == DISABLE) {
+      if (BMx280_Measurment(&bosch_0)) {
+        /* TODO reinitialize device overwise clear rediness flag */
+        printf("Cannot collect Bosch device (BMx280) data\n");
+        bosch_0.Lock = ENABLE;
+      } else {
+        
+        sprintf(tmpBuf, "%i", boschResults_0[0]);
+        
+
+      }
     }
 
-    if (BMx680_Measurment(&bosch_1)) {
-      /* TODO reinitialize device overwise clear rediness flag */
-      printf("Cannot collect Bosch device (MBx680) data\n");
-      bosch_1.Lock = ENABLE;
-      return;
+    if (bosch_1.Lock == DISABLE) {
+      if (BMx680_Measurment(&bosch_1)) {
+        /* TODO reinitialize device overwise clear rediness flag */
+        printf("Cannot collect Bosch device (MBx680) data\n");
+        bosch_1.Lock = ENABLE;
+      }
     }
 
     /* TODO handle Bosch data usage */
     TM163x_TypeDef* tmDsplDev = Get_TmDiplayDevice();
 
-    if (tmDsplDev->Lock) {
-      printf("Cannot output data\n");
-      return;
+    if (tmDsplDev->Lock == DISABLE) {
+      
+        tmDsplDev->Dig0 = tmpBuf[0];
+        tmDsplDev->Dig1 = tmpBuf[1];
+        tmDsplDev->Dig2 = tmpBuf[2];
+        tmDsplDev->Dig3 = tmpBuf[3];
+
+        if (TM163x_Print(tmDsplDev)) {
+        printf("Cannot output data to TM display\n");
+        tmDsplDev->Lock = ENABLE;
+      }
     }
 
-    uint8_t tmpBuf[4];
-
-    sprintf(tmpBuf, "%i", boschResults_0[0]);
-
-    tmDsplDev->Dig0 = tmpBuf[0];
-    tmDsplDev->Dig1 = tmpBuf[1];
-    tmDsplDev->Dig2 = tmpBuf[2];
-    tmDsplDev->Dig3 = tmpBuf[3];
-      
-    TM163x_Print(tmDsplDev);
-
+    Max72xx_TypeDef* maxDsplDev = Get_MaxDiplayDevice();
+    
+    if (maxDsplDev->Lock == DISABLE) {
+      if (MAX72xx_Print(maxDsplDev, tmpBuf)) {
+        printf("Cannot output data to MAX display\n");
+        maxDsplDev->Lock = ENABLE;
+      }
+    }
   }
 }
 
