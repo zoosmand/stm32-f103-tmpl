@@ -91,6 +91,13 @@ static ErrorStatus SPI_Read(BMxX80_TypeDef*, uint8_t, uint16_t);
   */
 __STATIC_INLINE void SPI_Adjust(BMxX80_TypeDef*);
 
+/**
+  * @brief   Unconfigure SPI bus.
+  * @param   dev: pointer to the device struct
+  * @retval  none
+  */
+__STATIC_INLINE ErrorStatus SPI_Unconfigure(BMxX80_TypeDef*);
+
 ////////////////////////////////////////////////////////////////////////////////
 
 
@@ -98,16 +105,16 @@ __STATIC_INLINE void SPI_Adjust(BMxX80_TypeDef*);
 
 
 // ----------------------------------------------------------------------------
+
 __STATIC_INLINE void SPI_Adjust(BMxX80_TypeDef* dev) {
-
-  /* The pump variable to complete DMA adjustments */
+  
   uint8_t pump = 0;
-
+  
   /* adjust frequency divider, 0b010 = 8, (PCLK)72/8 = 9MHz */
   /* set 8-bit data buffer length */ 
   MODIFY_REG(dev->SPIx->CR1, (SPI_CR1_BR_Msk | SPI_CR1_DFF_Msk), (SPI_CR1_BR_1 | SPI_CR1_DFF));
   PREG_SET(dev->SPIx->CR2, SPI_CR2_SSOE_Pos);
-
+  
   /* configure DMA, Channel2 - RX */
   /* set priority high*/
   /* set memory to increment */
@@ -118,26 +125,53 @@ __STATIC_INLINE void SPI_Adjust(BMxX80_TypeDef* dev) {
   /* set peripheral address */
   dev->DMAxRx->CPAR = (uint32_t)&dev->SPIx->DR;
   /* set memory address */
-  dev->DMAxRx->CMAR = (uint32_t)&pump;
+  dev->DMAxRx->CMAR = (uint32_t)dev->RawBufPtr;
   
   /* configure DMA, Channel3 - TX */
   /* set priority high*/
   /* set memory to increment */
   /* set direction from memory to peripheral */
   MODIFY_REG(dev->DMAxTx->CCR, (DMA_CCR_PL_Msk | DMA_CCR_MINC_Msk | DMA_CCR_DIR_Msk), (DMA_CCR_PL_1 | DMA_CCR_MINC | DMA_CCR_DIR));
-
+  
   /* set buffer size to 0 */
   dev->DMAxTx->CNDTR = 0UL;
   /* set peripheral address */
   dev->DMAxTx->CPAR = (uint32_t)&dev->SPIx->DR;
   /* set memory address */
-  dev->DMAxTx->CMAR = (uint32_t)&pump;
-
+  dev->DMAxTx->CMAR = (uint32_t)dev->RawBufPtr;
+  
   // dev->DMAxTx->CCR = 0UL;
   // dev->DMAxRx->CCR = 0UL;
   // /* Clear correspondents DMA flags */
   // dev->DMAx->IFCR |= 0x00000ff0;
+  
+}
 
+
+
+
+// ----------------------------------------------------------------------------
+
+__STATIC_INLINE ErrorStatus SPI_Unconfigure(BMxX80_TypeDef* dev) {
+
+  /* Clear memory/peripheral pointers */
+  dev->DMAxTx->CCR = 0UL;
+  dev->DMAxRx->CCR = 0UL;
+  /* Clear correspondents DMA flags */
+  dev->DMAx->IFCR |= 0x00000ff0;
+  
+  /* Disable from memory to peripheral DMA transfer */
+  PREG_CLR(dev->SPIx->CR2, SPI_CR2_TXDMAEN_Pos);
+  /* Disable from peripheral to memory DMA transfer */
+  PREG_CLR(dev->SPIx->CR2, SPI_CR2_RXDMAEN_Pos);
+  /* Disable transfer from peripheral to memory */
+  PREG_CLR(dev->DMAxRx->CCR, DMA_CCR_EN_Pos);
+  /* Disable transfer from memory to peripheral */
+  PREG_CLR(dev->DMAxTx->CCR, DMA_CCR_EN_Pos);
+  
+  SPI_Disable(dev->SPIx);
+
+  return (ERROR);
 }
 
 
@@ -290,18 +324,12 @@ static ErrorStatus SPI_Read(BMxX80_TypeDef *dev, uint8_t reg, uint16_t len) {
   
   tmout = SPI_BUS_TMOUT;
   while(!(PREG_CHECK(dev->SPIx->SR, SPI_SR_TXE_Pos))) {
-    if (!(--tmout)) {
-      SPI_Disable(dev->SPIx);
-      return (ERROR);
-    }
+    if (!(--tmout)) return (SPI_Unconfigure(dev));
   }
   
   tmout = SPI_BUS_TMOUT;
   while(!(PREG_CHECK(dev->SPIx->SR, SPI_SR_RXNE_Pos))) {
-    if (!(--tmout)) {
-      SPI_Disable(dev->SPIx);
-      return (ERROR);
-    }
+    if (!(--tmout)) return (SPI_Unconfigure(dev));
   }
   
   /* AN alternative way to read/receive data from the bus */
@@ -314,36 +342,30 @@ static ErrorStatus SPI_Read(BMxX80_TypeDef *dev, uint8_t reg, uint16_t len) {
   PREG_SET(dev->SPIx->CR2, SPI_CR2_TXDMAEN_Pos);
   /* Enable from peripheral to memory DMA transfer */
   PREG_SET(dev->SPIx->CR2, SPI_CR2_RXDMAEN_Pos);
-  /* Disable incremental and wait until it clears */
+
+  /* Disable incremental and wait until it clears, due to here only nulls to be sent to the bus */
   PREG_CLR(dev->DMAxTx->CCR, DMA_CCR_MINC_Pos);
-  
   tmout = SPI_BUS_TMOUT;
   while((PREG_CHECK(dev->DMAxTx->CCR, DMA_CCR_MINC_Pos))) {
-    if (!(--tmout)) {
-      SPI_Disable(dev->SPIx);
-      return (1);
-    }
+    if (!(--tmout)) return (SPI_Unconfigure(dev));
   }
 
-  /* Set buffer address */
-  dev->DMAxRx->CMAR = (uint32_t)dev->RawBufPtr;
+  /* Set buffer address to the null pump */
   dev->DMAxTx->CMAR = (uint32_t)&pump;
+
   /* Set counter */
   dev->DMAxRx->CNDTR = len;
   dev->DMAxTx->CNDTR = len;
-  __NOP();
+  
   /* Enable transfer from memory to peripheral */
   PREG_SET(dev->DMAxTx->CCR, DMA_CCR_EN_Pos);
   /* Enable transfer from peripheral to memory */
   PREG_SET(dev->DMAxRx->CCR, DMA_CCR_EN_Pos);
 
-  /* Wait for transfer is compete */
+  /* Wait for transfer TX (memory to peripheral) to be competed */
   tmout = SPI_BUS_TMOUT;
   while(!(PREG_CHECK(dev->DMAx->ISR, DMA_ISR_TCIF3_Pos))) {
-    if (!(--tmout)) {
-      SPI_Disable(dev->SPIx);
-      return (1);
-    }
+    if (!(--tmout)) return (SPI_Unconfigure(dev));
   }
 
   /* Clear complete transger flag */
@@ -351,27 +373,12 @@ static ErrorStatus SPI_Read(BMxX80_TypeDef *dev, uint8_t reg, uint16_t len) {
 
   tmout = SPI_BUS_TMOUT;
   while((PREG_CHECK(dev->SPIx->SR, SPI_SR_BSY_Pos))) {
-    if (!(--tmout)) {
-      SPI_Disable(dev->SPIx);
-      return (1);
-    }
+    if (!(--tmout)) return (SPI_Unconfigure(dev));
   }
-
-  /* Disable from memory to peripheral DMA transfer */
-  PREG_CLR(dev->SPIx->CR2, SPI_CR2_TXDMAEN_Pos);
-  /* Disable from peripheral to memory DMA transfer */
-  PREG_CLR(dev->SPIx->CR2, SPI_CR2_RXDMAEN_Pos);
-  /* Disable transfer from peripheral to memory */
-  PREG_CLR(dev->DMAxRx->CCR, DMA_CCR_EN_Pos);
-  /* Disable transfer from memory to peripheral */
-  PREG_CLR(dev->DMAxTx->CCR, DMA_CCR_EN_Pos);
-
-  /* Clear correspondent DMA interrupt flags */
-  dev->DMAx->IFCR |= 0x00000ff0;
 
   /* stop the bus */
   PIN_H(dev->SPINssPort, dev->SPINssPin);
-  if (SPI_Disable(dev->SPIx)) return (ERROR);
+  SPI_Unconfigure(dev);
 
   return (SUCCESS);
 }
