@@ -35,7 +35,7 @@
 /* Exported macro ------------------------------------------------------------*/
 
 /* Exported functions prototypes ---------------------------------------------*/
-int WHxxxx_Init(I2C_TypeDef*);
+ErrorStatus WHxxxx_Init(I2C_TypeDef*);
 
 
 /* Private defines -----------------------------------------------------------*/

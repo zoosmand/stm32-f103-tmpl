@@ -38,8 +38,8 @@ static uint16_t diplPrintPos = 0;
 
 
 /* Private function prototypes -----------------------------------------------*/
-static int WHxxxx_WriteChar(I2C_TypeDef*, uint8_t);
-static int WHxxxx_WriteCommand(I2C_TypeDef*, uint8_t, uint32_t);
+static ErrorStatus WHxxxx_WriteChar(I2C_TypeDef*, uint8_t);
+static ErrorStatus WHxxxx_WriteCommand(I2C_TypeDef*, uint8_t, uint32_t);
 
 
 
@@ -50,7 +50,7 @@ static int WHxxxx_WriteCommand(I2C_TypeDef*, uint8_t, uint32_t);
  * @param  I2Cx: pointer to the I2C peripherals
  * @retval (int) status of operation
  */
-int WHxxxx_Init(I2C_TypeDef* I2Cx) {
+ErrorStatus WHxxxx_Init(I2C_TypeDef* I2Cx) {
   
   /* Initial delay according WHxxxx documentation */
   _delay_ms(40);
@@ -67,18 +67,19 @@ int WHxxxx_Init(I2C_TypeDef* I2Cx) {
     WHxxxx_POS_1LS,       WHxxxx_SD
   }; 
   
-  if (I2C_Start(I2Cx)) return (1);
-  if (I2C_SendAddress(I2Cx, WHxxxx_I2C_ADDR, TX)) return (1);
-  for(uint8_t i = 0; i < sizeof(params); i++) {
-    if (I2C_WriteByte(I2Cx, _WR1NCMD((uint8_t)params[i]))) return (1);
-    if (I2C_WriteByte(I2Cx, _WR2NCMD((uint8_t)params[i]))) return (1);
-    if (I2C_WriteByte(I2Cx, _WR1NCMD(((uint8_t)params[i] << 4)))) return (1);
-    if (I2C_WriteByte(I2Cx, _WR2NCMD(((uint8_t)params[i] << 4)))) return (1);
-    _delay_us(params[i++]);
-  }
-  I2C_Stop(I2Cx);
+  uint8_t bytes[4];
+  for(uint8_t i = 0; i < (sizeof(params) / 2); (i += 2)) {
 
-  return (0);
+    bytes[0] = _WR1NCMD((uint8_t)params[i]);
+    bytes[1] = _WR2NCMD((uint8_t)params[i]);
+    bytes[2] = _WR1NCMD(((uint8_t)params[i] << 4));
+    bytes[3] = _WR2NCMD(((uint8_t)params[i] << 4));
+
+    if (I2C_Master_Send(I2Cx, WHxxxx_I2C_ADDR, bytes, 4)) return (ERROR);
+    _delay_us(params[i + 1]);
+  }
+
+  return (SUCCESS);
 }
 
 
@@ -86,15 +87,21 @@ int WHxxxx_Init(I2C_TypeDef* I2Cx) {
  * @brief  Writes/Sends a charachter symbol to WHxxxx display
  * @param  I2Cx: pointer to the I2C peripherals
  * @param  ch: ACSII charachter
- * @retval (int) status of operation
+ * @retval status of operation
  */
-int WHxxxx_WriteChar(I2C_TypeDef* I2Cx, uint8_t ch) {
-  if (I2C_WriteByte(I2Cx, _WR1NCHAR(ch))) return (1);
-  if (I2C_WriteByte(I2Cx, _WR2NCHAR(ch))) return (1);
-  if (I2C_WriteByte(I2Cx, _WR1NCHAR(ch << 4))) return (1);
-  if (I2C_WriteByte(I2Cx, _WR2NCHAR(ch << 4))) return (1);
+static ErrorStatus WHxxxx_WriteChar(I2C_TypeDef* I2Cx, uint8_t ch) {
+
+  uint8_t bytes[4];
+
+  bytes[0] = _WR1NCHAR(ch);
+  bytes[1] = _WR2NCHAR(ch);
+  bytes[2] = _WR1NCHAR(ch << 4);
+  bytes[3] = _WR2NCHAR(ch << 4);
+
+  if (I2C_Master_Send(I2Cx, WHxxxx_I2C_ADDR, bytes, 4)) return (ERROR);
+
   _delay_us(WHxxxx_SD);
-  return (0);
+  return (SUCCESS);
 }
 
 
@@ -103,15 +110,21 @@ int WHxxxx_WriteChar(I2C_TypeDef* I2Cx, uint8_t ch) {
  * @param  I2Cx: pointer to the I2C peripherals
  * @param  cmd: 1602a command
  * @param  delay: command delay according documentation
- * @retval (int) status of operation
+ * @retval status of operation
  */
-int WHxxxx_WriteCommand(I2C_TypeDef* I2Cx, uint8_t cmd, uint32_t delay) {  
-  if (I2C_WriteByte(I2Cx, _WR1NCMD(cmd))) return (1);
-  if (I2C_WriteByte(I2Cx, _WR2NCMD(cmd))) return (1);
-  if (I2C_WriteByte(I2Cx, _WR1NCMD(cmd << 4))) return (1);
-  if (I2C_WriteByte(I2Cx, _WR2NCMD(cmd << 4))) return (1);
+static ErrorStatus WHxxxx_WriteCommand(I2C_TypeDef* I2Cx, uint8_t cmd, uint32_t delay) {  
+
+  uint8_t bytes[4];
+
+  bytes[0] = _WR1NCMD(cmd);
+  bytes[1] = _WR2NCMD(cmd);
+  bytes[2] = _WR1NCMD(cmd << 4);
+  bytes[3] = _WR2NCMD(cmd << 4);
+
+  if (I2C_Master_Send(I2Cx, WHxxxx_I2C_ADDR, bytes, 4)) return (ERROR);
+
   _delay_us(delay);
-  return (0);
+  return (SUCCESS);
 }
 
 
@@ -120,29 +133,23 @@ int WHxxxx_WriteCommand(I2C_TypeDef* I2Cx, uint8_t cmd, uint32_t delay) {
  * @brief  Writes/Sends cgarachter to the given display
  * @param  ch: charachter to write
  * @param  dspl: display index #TODO define desctop selection
- * @retval (int) status of operation
+ * @retval status of operation
  */
 int __attribute__((weak)) putc_dspl_wh1602(char ch) {
   if ((FLAG_CHECK(&_DSPLREG_, _0DCF_)) && (FLAG_CHECK(&_DSPLREG_, _0ACF_))) {
     FLAG_CLR(&_DSPLREG_, _0DCF_);
     FLAG_CLR(&_DSPLREG_, _0ACF_);
 
-    if (I2C_Start(I2C1)) return (1);
-    if (I2C_SendAddress(I2C1, WHxxxx_I2C_ADDR, TX)) return (1);
     if (WHxxxx_WriteCommand(I2C1, WHxxxx_CLR_DSLP, WHxxxx_LD)) return (1);
     if (WHxxxx_WriteCommand(I2C1, WHxxxx_POS_1LS, WHxxxx_SD)) return (1);
-    I2C_Stop(I2C1);
     diplPrintPos = 0;
   }
   if ((ch != 0x0a) && (ch != 0x0d)) {
-    if (I2C_Start(I2C1)) return (1);
-    if (I2C_SendAddress(I2C1, WHxxxx_I2C_ADDR, TX)) return (1);
     if (diplPrintPos > 15) {
       if (WHxxxx_WriteCommand(I2C1, WHxxxx_POS_2LS, WHxxxx_SD)) return (1);
       diplPrintPos = 0;
     }
     if (WHxxxx_WriteChar(I2C1, ch)) return (1);
-    I2C_Stop(I2C1);
     diplPrintPos++;
   }
   
@@ -157,29 +164,23 @@ int __attribute__((weak)) putc_dspl_wh1602(char ch) {
  * @brief  Writes/Sends cgarachter to the given display
  * @param  ch: charachter to write
  * @param  dspl: display index #TODO define desctop selection
- * @retval (int) status of operation
+ * @retval status of operation
  */
 int __attribute__((weak)) putc_dspl_wh2004(char ch) {
   if ((FLAG_CHECK(&_DSPLREG_, _0DCF_)) && (FLAG_CHECK(&_DSPLREG_, _0ACF_))) {
     FLAG_CLR(&_DSPLREG_, _0DCF_);
     FLAG_CLR(&_DSPLREG_, _0ACF_);
 
-    if (I2C_Start(I2C1)) return (1);
-    if (I2C_SendAddress(I2C1, WHxxxx_I2C_ADDR, TX)) return (1);
     if (WHxxxx_WriteCommand(I2C1, WHxxxx_CLR_DSLP, WHxxxx_LD)) return (1);
     if (WHxxxx_WriteCommand(I2C1, WHxxxx_POS_1LS, WHxxxx_SD)) return (1);
-    I2C_Stop(I2C1);
     diplPrintPos = 0;
   }
   if ((ch != 0x0a) && (ch != 0x0d)) {
-    if (I2C_Start(I2C1)) return (1);
-    if (I2C_SendAddress(I2C1, WHxxxx_I2C_ADDR, TX)) return (1);
     if (diplPrintPos > 19) {
       if (WHxxxx_WriteCommand(I2C1, WHxxxx_POS_2LS, WHxxxx_SD)) return (1);
       diplPrintPos = 0;
     }
     if (WHxxxx_WriteChar(I2C1, ch)) return (1);
-    I2C_Stop(I2C1);
     diplPrintPos++;
   }
   
