@@ -74,6 +74,7 @@ extern uint32_t secCnt;
 
 
 /* Exported constants --------------------------------------------------------*/
+// #define MAX_DSPL
 
 
 /** Global Events Register Flags */

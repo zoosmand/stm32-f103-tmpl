@@ -91,35 +91,43 @@ ErrorStatus MAX72xx_Init(Max72xx_TypeDef* dev) {
 
   if (dev->Lock == DISABLE) dev->Lock = ENABLE; else return (ERROR);
 
-  /* Initialize NSS Pin */
-  if (dev->SPINssPin > 7) {
-    MODIFY_REG(dev->SPINssPort->CRL, (0xf << ((dev->SPINssPin - 8) * 4)), ((GPIO_GPO_PP | GPIO_IOS_2) << ((dev->SPINssPin -8) * 4)));
-  } else {
-    MODIFY_REG(dev->SPINssPort->CRL, (0xf << (dev->SPINssPin * 4)), ((GPIO_GPO_PP | GPIO_IOS_2) << (dev->SPINssPin * 4)));
-  }
-  PIN_H(dev->SPINssPort, dev->SPINssPin);
-  
-  _delay_us(10);
+  #ifdef MAX_DSPL
 
-  SPI_Adjust(dev);
-  if (SPI_Enable(dev->SPIx)) return (SPI_Unconfigure(dev));
-  
-  _delay_ms(5); 
-  
-  for (uint8_t i = 0; i < sizeof(maxInit)/2; i++) {
-    PIN_L(dev->SPINssPort, dev->SPINssPin);
-
-    /* An alternative way to write data the the SPI bus */
-    // if (SPI_Write_16b(dev->SPIx, &maxInit[i], dev->SegCnt)) return (SPI_Unconfigure(dev));
-
-    SPI_Write(dev, &maxInit[i]);
-
+    /* Initialize NSS Pin */
+    if (dev->SPINssPin > 7) {
+      MODIFY_REG(dev->SPINssPort->CRL, (0xf << ((dev->SPINssPin - 8) * 4)), ((GPIO_GPO_PP | GPIO_IOS_2) << ((dev->SPINssPin -8) * 4)));
+    } else {
+      MODIFY_REG(dev->SPINssPort->CRL, (0xf << (dev->SPINssPin * 4)), ((GPIO_GPO_PP | GPIO_IOS_2) << (dev->SPINssPin * 4)));
+    }
     PIN_H(dev->SPINssPort, dev->SPINssPin);
-  }
+    
+    _delay_us(10);
 
-  SPI_Disable(dev->SPIx);
-  dev->Lock = DISABLE;
+    SPI_Adjust(dev);
+    if (SPI_Enable(dev->SPIx)) return (SPI_Unconfigure(dev));
+    
+    _delay_ms(5); 
+    
+    for (uint8_t i = 0; i < sizeof(maxInit)/2; i++) {
+      PIN_L(dev->SPINssPort, dev->SPINssPin);
+
+      /* An alternative way to write data the the SPI bus */
+      // if (SPI_Write_16b(dev->SPIx, &maxInit[i], dev->SegCnt)) return (SPI_Unconfigure(dev));
+
+      SPI_Write(dev, &maxInit[i]);
+
+      PIN_H(dev->SPINssPort, dev->SPINssPin);
+    }
+
+    SPI_Disable(dev->SPIx);
+    dev->Lock = DISABLE;
+
   return (SUCCESS);
+  
+  #else
+    dev->Lock = ENABLE;
+    return (ERROR);
+  #endif
 }
 
 
@@ -286,7 +294,6 @@ ErrorStatus MAX72xx_Print(Max72xx_TypeDef* dev, const char* buf) {
     
     for (uint8_t i = 0; i < 8; i++) {
       dev->BufPtr[(k + (len * i))] = ((i + 1) << 8) | (uint8_t)font_dot_5x7_max[pos][i];
-      // dev->BufPtr[(k + (len * i))] = ((i + 1) | (font_dot_5x7_max[pos][i] << 8));
     }
   }
 

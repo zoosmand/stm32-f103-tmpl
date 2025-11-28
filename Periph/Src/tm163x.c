@@ -25,7 +25,7 @@
 /* Private function prototypes -----------------------------------------------*/
 
 /* Locaal variables ---------------------------------------------------------*/
-const uint8_t symbols[] = {
+static const uint8_t symbols[] = {
   0x3f, // 0 - 0x3f
   0x06, // 1 - 0x06
   0x5b, // 2 - 0x5b
