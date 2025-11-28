@@ -59,18 +59,26 @@ static ErrorStatus mAX72xx_PrintBuf(Max72xx_TypeDef*, uint16_t);
 static void mAX72xx_CompressBuf(Max72xx_TypeDef*, uint16_t, uint8_t);
 
 /**
- * @brief Adjusts SPI bus according to MAX72xx parameters.
+ * @brief   Adjusts the SPI bus according to MAX72xx parameters.
  * @param   dev: pointer to the MAX72xx device struct
  * @retval  none
  */
 __STATIC_INLINE void SPI_Adjust(Max72xx_TypeDef*);
 
 /**
-  * @brief   Unconfigure SPI bus.
+  * @brief   Unconfigures the SPI bus.
   * @param   dev: pointer to the device struct
   * @retval  none
   */
 __STATIC_INLINE ErrorStatus SPI_Unconfigure(Max72xx_TypeDef*);
+
+/**
+  * @brief   Writes/sends data to the SPI bus.
+  * @param   dev: pointer to the device struct
+  * @param   buf: pointer to the redefined buffer (struct buffre is also available)
+  * @retval  none
+  */
+__STATIC_INLINE ErrorStatus SPI_Write(Max72xx_TypeDef*, uint16_t*);
 
 
 
@@ -93,20 +101,19 @@ ErrorStatus MAX72xx_Init(Max72xx_TypeDef* dev) {
   
   _delay_us(10);
 
-
   SPI_Adjust(dev);
   if (SPI_Enable(dev->SPIx)) return (SPI_Unconfigure(dev));
   
   _delay_ms(5); 
   
-  uint8_t segs = 0;
-  
   for (uint8_t i = 0; i < sizeof(maxInit)/2; i++) {
-    segs = dev->SegCnt;
     PIN_L(dev->SPINssPort, dev->SPINssPin);
-    while (segs-- > 0) {
-      if (SPI_Write_16b(dev->SPIx, &maxInit[i], 1)) return (SPI_Unconfigure(dev));
-    }
+
+    /* An alternative way to write data the the SPI bus */
+    // if (SPI_Write_16b(dev->SPIx, &maxInit[i], dev->SegCnt)) return (SPI_Unconfigure(dev));
+
+    SPI_Write(dev, &maxInit[i]);
+
     PIN_H(dev->SPINssPort, dev->SPINssPin);
   }
 
@@ -125,37 +132,38 @@ __STATIC_INLINE void SPI_Adjust(Max72xx_TypeDef* dev) {
   /* set 16-bit data buffer length */ 
   MODIFY_REG(dev->SPIx->CR1, (SPI_CR1_BR_Msk | SPI_CR1_DFF_Msk), (SPI_CR1_BR_1 | SPI_CR1_DFF));
   PREG_CLR(dev->SPIx->CR2, SPI_CR2_SSOE_Pos);
-  // dev->DMAxTx->CCR = 0UL;
-  // dev->DMAxRx->CCR = 0UL;
-  // /* Clear correspondents DMA flags */
-  // dev->DMAx->IFCR |= 0x00000ff0;
 
-  /* configure DMA, Channel2 - RX */
-  /* set priority high*/
-  /* set memory to increment */
-  // MODIFY_REG(dev->DMAxRx->CCR, (DMA_CCR_PL_Msk | DMA_CCR_MINC_Msk), (DMA_CCR_PL_1 | DMA_CCR_MINC));
+  /* Enable from memory to peripheral DMA transfer */
+  PREG_SET(dev->SPIx->CR2, SPI_CR2_TXDMAEN_Pos);
+
+  /* --- Configure DMA TX Channel3 --- */
+  /* Cet priority high*/
+  /* Cet memory to increment */
+  /* Set direction from memory to peripheral */
+  /* Set peripheral bandwidth 16-bit */
+  /* Set memory bandwidth 16-bit */
+  MODIFY_REG(dev->DMAxTx->CCR, (
+        DMA_CCR_PL_Msk
+      | DMA_CCR_MINC_Msk
+      | DMA_CCR_DIR_Msk
+      | DMA_CCR_PSIZE_Msk
+      | DMA_CCR_MSIZE_Msk
+    ), (
+        DMA_CCR_PL_1
+      | DMA_CCR_MINC
+      | DMA_CCR_DIR
+      | DMA_CCR_PSIZE_0
+      | DMA_CCR_MSIZE_0
+    )
+  );
   
-  // /* set buffer size to 0 */
-  // dev->DMAxRx->CNDTR = 0UL;
-  // /* set peripheral address */
-  // dev->DMAxRx->CPAR = (uint32_t)&dev->SPIx->DR;
-  // /* set memory address */
-  // dev->DMAxRx->CMAR = (uint32_t)dev->BufPtr;
-  
-  /* configure DMA, Channel3 - TX */
-  /* set priority high*/
-  /* set memory to increment */
-  /* set direction from memory to peripheral */
-  MODIFY_REG(dev->DMAxTx->CCR, (DMA_CCR_PL_Msk | DMA_CCR_MINC_Msk | DMA_CCR_DIR_Msk), (DMA_CCR_PL_1 | DMA_CCR_MINC | DMA_CCR_DIR));
-  
-  /* set buffer size to 0 */
-  dev->DMAxTx->CNDTR = 0UL;
-  /* set peripheral address */
+  uint32_t tmout = SPI_BUS_TMOUT;
+  while(!(PREG_CHECK(dev->DMAxTx->CCR, DMA_CCR_MINC_Pos))) {
+    if (!(--tmout)) return;
+  }
+
+  /* Set peripheral address */
   dev->DMAxTx->CPAR = (uint32_t)&dev->SPIx->DR;
-  /* set memory address */
-  dev->DMAxTx->CMAR = (uint32_t)dev->BufPtr;
-
-
 }
 
 
@@ -164,36 +172,63 @@ __STATIC_INLINE void SPI_Adjust(Max72xx_TypeDef* dev) {
 // ----------------------------------------------------------------------------
 
 __STATIC_INLINE ErrorStatus SPI_Unconfigure(Max72xx_TypeDef* dev) {
-
+  
   /* Clear correspondents DMA flags */
   dev->DMAx->IFCR |= (
-      DMA_IFCR_CGIF3_Msk
+    DMA_IFCR_CGIF3_Msk
     | DMA_IFCR_CHTIF3_Msk
     | DMA_IFCR_CTCIF3_Msk
   );
   
-  /* Disable from memory to peripheral DMA transfer */
+  /* Disable SPI DMA transfer */
   PREG_CLR(dev->SPIx->CR2, SPI_CR2_TXDMAEN_Pos);
-  /* Disable from peripheral to memory DMA transfer */
-  // PREG_CLR(dev->SPIx->CR2, SPI_CR2_RXDMAEN_Pos);
-  /* Disable transfer from peripheral to memory */
-  // PREG_CLR(dev->DMAxRx->CCR, DMA_CCR_EN_Pos);
-  /* Disable transfer from memory to peripheral */
+  /* Disable DMA transfer */
   PREG_CLR(dev->DMAxTx->CCR, DMA_CCR_EN_Pos);
-
+  
+  /* Stop SPI bus */
   PIN_H(dev->SPINssPort, dev->SPINssPin);
   SPI_Disable(dev->SPIx);
-
-  /* Clear memory/peripheral pointers */
-  dev->DMAxTx->CCR = 0UL;
-  // dev->DMAxRx->CCR = 0UL;
+  
   /* Clear DMA registers */
-  MODIFY_REG(dev->DMAxTx->CCR, (DMA_CCR_PL_Msk | DMA_CCR_MINC_Msk | DMA_CCR_DIR_Msk), 0UL);
-  // MODIFY_REG(dev->DMAxRx->CCR, (DMA_CCR_PL_Msk | DMA_CCR_MINC_Msk), 0UL);
-
+  MODIFY_REG(dev->DMAxTx->CCR, (
+    DMA_CCR_PL_Msk
+    | DMA_CCR_MINC_Msk
+    | DMA_CCR_DIR_Msk
+    | DMA_CCR_PSIZE_Msk
+    | DMA_CCR_MSIZE_Msk
+  ), 0UL);
+  
   return (ERROR);
 }
 
+
+
+
+
+// ----------------------------------------------------------------------------
+
+__STATIC_INLINE ErrorStatus SPI_Write(Max72xx_TypeDef* dev, uint16_t* buf) {
+    /* Set counter */
+    dev->DMAxTx->CNDTR = dev->SegCnt;
+    /* Set buffer address */
+    dev->DMAxTx->CMAR = (uint32_t)buf;
+    /* Enable DMA transfer */
+    PREG_SET(dev->DMAxTx->CCR, DMA_CCR_EN_Pos);
+
+    /* Wait for transfer is compete */
+    uint32_t tmout = SPI_BUS_TMOUT;
+    while(!(PREG_CHECK(dev->DMAx->ISR, DMA_ISR_TCIF3_Pos))) {
+      if (!(--tmout)) return (SPI_Unconfigure(dev));
+    }
+
+    /* Clear complete transger flag */
+    SET_BIT(dev->DMAx->IFCR, DMA_IFCR_CTCIF3);
+    /* Disable DMA transfer */
+    PREG_CLR(dev->DMAxTx->CCR, DMA_CCR_EN_Pos);
+
+    _delay_us(5);
+
+}
 
 
 
@@ -206,17 +241,21 @@ static ErrorStatus mAX72xx_PrintBuf(Max72xx_TypeDef* dev, uint16_t len) {
   SPI_Adjust(dev);
   if (SPI_Enable(dev->SPIx)) return (1);
 
+
+
   for (uint8_t i = 0; i < 8; i++) {
     PIN_L(dev->SPINssPort, dev->SPINssPin);
     
-    for (uint8_t k = 0; k < dev->SegCnt; k++) {
-      if (SPI_Write_16b(dev->SPIx, &(dev->BufPtr)[k + (len * i)], 1)) return (ERROR);
-    }
-    
+    /* An alternative way to write data the the SPI bus */
+    // if (SPI_Write_16b(dev->SPIx, &(dev->BufPtr)[len * i], dev->SegCnt)) return (ERROR);
+
+    SPI_Write(dev, &dev->BufPtr[len * i]);
+
     PIN_H(dev->SPINssPort, dev->SPINssPin);
   }
 
-  if (SPI_Disable(dev->SPIx)) return (ERROR);
+  /* Unconfigure and stop the SPI bus */
+  SPI_Unconfigure(dev);
 
   dev->Lock = DISABLE;
   return (SUCCESS);
@@ -247,6 +286,7 @@ ErrorStatus MAX72xx_Print(Max72xx_TypeDef* dev, const char* buf) {
     
     for (uint8_t i = 0; i < 8; i++) {
       dev->BufPtr[(k + (len * i))] = ((i + 1) << 8) | (uint8_t)font_dot_5x7_max[pos][i];
+      // dev->BufPtr[(k + (len * i))] = ((i + 1) | (font_dot_5x7_max[pos][i] << 8));
     }
   }
 
