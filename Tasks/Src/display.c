@@ -26,38 +26,47 @@ __attribute__((section(".cron"))) static uint32_t displayHealthCheckTaskCnt    =
 __attribute__((section(".cron"))) static uint32_t displayHealthCheckTaskReg    = 0;
 
 static task_scheduler_t displayHealthCheckScheduler = {
-  .counter        = &displayHealthCheckTaskCnt,
-  .counterSrc     = &secCnt,
-  .period         = 8,
-  .counterReg     = &displayHealthCheckTaskReg,
-  .entranceFlag   = 31,
+  .counter      = &displayHealthCheckTaskCnt,
+  .counterSrc   = &secCnt,
+  .period       = 8,
+  .counterReg   = &displayHealthCheckTaskReg,
+  .entranceFlag = 31,
 };
 
 static uint16_t maxDisplay_0_data[(MAX72XX_MAX_SEG_CNT * 8)];
 static Max72xx_TypeDef maxDisplay_0 = {
-  .SegCnt     = MAX72XX_SEG_CNT,
-  .MaxSegCnt  = MAX72XX_MAX_SEG_CNT,
-  .BufPtr     = maxDisplay_0_data,
-  .SPINssPort = GPIOA,
-  .SPINssPin  = NSS_1_Pin_Pos,
-  .SPIx       = SPI1,
-  .DMAx       = DMA1,
-  .DMAxTx     = DMA1_Channel3,
-  .DMAxRx     = DMA1_Channel2,
-  .Lock       = DISABLE,
+  .SegCnt       = MAX72XX_SEG_CNT,
+  .MaxSegCnt    = MAX72XX_MAX_SEG_CNT,
+  .BufPtr       = maxDisplay_0_data,
+  .SPINssPort   = GPIOA,
+  .SPINssPin    = NSS_1_Pin_Pos,
+  .SPIx         = SPI1,
+  .DMAx         = DMA1,
+  .DMAxTx       = DMA1_Channel3,
+  .Lock         = DISABLE,
 };
 
 
 static TM163x_TypeDef tmDisplay_0 = {
-  .PortSck    = TM_SCK_Port,
-  .PortDio    = TM_DIO_Port,
-  .PinSck     = TM_SCK_Pin_Pos,
-  .PinDio     = TM_DIO_Pin_Pos,
-  .Dig1       = 0,
-  .Dig1       = 0,
-  .Dig2       = 0,
-  .Dig3       = 0,
-  .Lock       = DISABLE,
+  .PortSck      = TM_SCK_Port,
+  .PortDio      = TM_DIO_Port,
+  .PinSck       = TM_SCK_Pin_Pos,
+  .PinDio       = TM_DIO_Pin_Pos,
+  .Dig1         = 0,
+  .Dig1         = 0,
+  .Dig2         = 0,
+  .Dig3         = 0,
+  .Lock         = DISABLE,
+};
+
+
+static WHxxxx_TypeDef whDisplay_0 = {
+  .Lock         = DISABLE,
+  .I2Cx         = I2C1,
+  .I2C_Address  = WHxxxx_I2C_ADDR,
+  .DMAx         = DMA1,
+  .DMAxTx       = DMA1_Channel6,
+  .DMAxRx       = DMA1_Channel7,
 };
 
 
@@ -65,6 +74,7 @@ static TM163x_TypeDef tmDisplay_0 = {
 
 static ErrorStatus maxDisplayHealthCheck_Task(Max72xx_TypeDef*);
 static ErrorStatus tmDisplayHealthCheck_Task(TM163x_TypeDef*);
+static ErrorStatus whDisplayHealthCheck_Task(WHxxxx_TypeDef*);
 
 
 
@@ -96,11 +106,20 @@ void DisplayHealthCheck_CronHandler(void) {
         tmDisplay_0.Lock = ENABLE;
       }
     }
+
+    if (whDisplay_0.Lock == DISABLE) {
+      if (whDisplayHealthCheck_Task(&whDisplay_0)) {
+        /* TODO reinitialize, overwise clear rediness flag */
+        printf("Cannot run WHxxxx display device\n");
+        whDisplay_0.Lock = ENABLE;
+      }
+    }
   }
 }
 
 
 
+/* ------------ MAX -------------- */
 // ----------------------------------------------------------------------------
 
 static ErrorStatus maxDisplayHealthCheck_Task(Max72xx_TypeDef* dev) {
@@ -111,7 +130,6 @@ static ErrorStatus maxDisplayHealthCheck_Task(Max72xx_TypeDef* dev) {
 }
 
 
-
 // ----------------------------------------------------------------------------
 
 Max72xx_TypeDef* Get_MaxDiplayDevice(void) {
@@ -120,6 +138,7 @@ Max72xx_TypeDef* Get_MaxDiplayDevice(void) {
 
 
 
+/* ------------ TM -------------- */
 // ----------------------------------------------------------------------------
 
 static ErrorStatus tmDisplayHealthCheck_Task(TM163x_TypeDef* dev) {
@@ -130,7 +149,6 @@ static ErrorStatus tmDisplayHealthCheck_Task(TM163x_TypeDef* dev) {
 }
 
 
-
 // ----------------------------------------------------------------------------
 
 TM163x_TypeDef* Get_TmDiplayDevice(void) {
@@ -138,3 +156,21 @@ TM163x_TypeDef* Get_TmDiplayDevice(void) {
 }
 
 
+
+
+/* ------------ WH -------------- */
+// ----------------------------------------------------------------------------
+
+WHxxxx_TypeDef* Get_WhDiplayDevice(void) {
+  return &whDisplay_0;
+}
+
+
+// ----------------------------------------------------------------------------
+
+static ErrorStatus whDisplayHealthCheck_Task(WHxxxx_TypeDef* dev) {
+  
+  if (dev->Lock) return (ERROR);
+
+  return (SUCCESS);
+}

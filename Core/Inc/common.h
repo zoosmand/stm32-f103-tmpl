@@ -234,7 +234,7 @@ typedef struct {
 // ----------------------------------------------------------------------------
 
 /**
- * @brief   MAX7219 device type definition struct.
+ * @brief   MAX72xx device type definition struct.
  */
 typedef struct {
   uint8_t               SegCnt;
@@ -246,12 +246,14 @@ typedef struct {
   uint16_t              SPINssPin;
   DMA_TypeDef*          DMAx;
   DMA_Channel_TypeDef*  DMAxTx;
-  DMA_Channel_TypeDef*  DMAxRx;
 } Max72xx_TypeDef;
 
 
 // ----------------------------------------------------------------------------
 
+/**
+ * @brief   TM163x device type definition struct.
+ */
 typedef struct {
   FunctionalState       Lock;
   GPIO_TypeDef*         PortSck;
@@ -267,6 +269,21 @@ typedef struct {
   uint8_t               Dig6;
   uint8_t               Dig7;
 } TM163x_TypeDef;
+
+
+// ----------------------------------------------------------------------------
+
+/**
+ * @brief   WHxxxx device type definition struct.
+ */
+typedef struct {
+  FunctionalState       Lock;
+  I2C_TypeDef*          I2Cx;
+  uint8_t               I2C_Address;
+  DMA_TypeDef*          DMAx;
+  DMA_Channel_TypeDef*  DMAxTx;
+  DMA_Channel_TypeDef*  DMAxRx;
+} WHxxxx_TypeDef;
 
 
 // ----------------------------------------------------------------------------

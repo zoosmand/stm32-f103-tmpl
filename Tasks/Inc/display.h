@@ -46,6 +46,12 @@ Max72xx_TypeDef* Get_MaxDiplayDevice(void);
  */
 TM163x_TypeDef* Get_TmDiplayDevice(void);
 
+/**
+ * @brief Return WH display device struct pointer.
+ * @return device struct pointer
+ */
+WHxxxx_TypeDef* Get_WhDiplayDevice(void);
+
 
 #ifdef __cplusplus
 }
