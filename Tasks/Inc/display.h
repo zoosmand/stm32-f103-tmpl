@@ -48,9 +48,10 @@ TM163x_TypeDef* Get_TmDiplayDevice(void);
 
 /**
  * @brief Return WH display device struct pointer.
+ * @param model: four digits display model code
  * @return device struct pointer
  */
-WHxxxx_TypeDef* Get_WhDiplayDevice(void);
+WHxxxx_TypeDef* Get_WhDiplayDevice(uint16_t);
 
 
 #ifdef __cplusplus

@@ -35,7 +35,13 @@
 /* Exported macro ------------------------------------------------------------*/
 
 /* Exported functions prototypes ---------------------------------------------*/
-ErrorStatus WHxxxx_Init(I2C_TypeDef*);
+
+/**
+ * @brief  Initializes WHxxxx display
+ * @param  dev: pointer to the particular device structure
+ * @retval status of operation
+ */
+ErrorStatus WHxxxx_Init(WHxxxx_TypeDef*);
 
 
 /* Private defines -----------------------------------------------------------*/
@@ -69,8 +75,13 @@ ErrorStatus WHxxxx_Init(I2C_TypeDef*);
 #define _0ACF_                1
 
 /* Extern functions prototypes ----------------------------------------------*/
-int __attribute__((weak)) putc_dspl_wh1602(char);
-int __attribute__((weak)) putc_dspl_wh2004(char);
+
+/**
+ * @brief  Writes/Sends cgarachter to the given WH1602 display
+ * @param  ch: charachter to display
+ * @retval status of operation
+ */
+int __attribute__((weak)) putc_dspl_wh(char);
 
 #ifdef __cplusplus
 }

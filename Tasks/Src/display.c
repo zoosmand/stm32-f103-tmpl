@@ -60,7 +60,17 @@ static TM163x_TypeDef tmDisplay_0 = {
 };
 
 
-static WHxxxx_TypeDef whDisplay_0 = {
+static WHxxxx_TypeDef whDisplay_1602 = {
+  .Lock         = DISABLE,
+  .I2Cx         = I2C1,
+  .I2C_Address  = WHxxxx_I2C_ADDR,
+  .DMAx         = DMA1,
+  .DMAxTx       = DMA1_Channel6,
+  .DMAxRx       = DMA1_Channel7,
+};
+
+
+static WHxxxx_TypeDef whDisplay_2004 = {
   .Lock         = DISABLE,
   .I2Cx         = I2C1,
   .I2C_Address  = WHxxxx_I2C_ADDR,
@@ -107,11 +117,19 @@ void DisplayHealthCheck_CronHandler(void) {
       }
     }
 
-    if (whDisplay_0.Lock == DISABLE) {
-      if (whDisplayHealthCheck_Task(&whDisplay_0)) {
+    if (whDisplay_1602.Lock == DISABLE) {
+      if (whDisplayHealthCheck_Task(&whDisplay_1602)) {
         /* TODO reinitialize, overwise clear rediness flag */
         printf("Cannot run WHxxxx display device\n");
-        whDisplay_0.Lock = ENABLE;
+        whDisplay_1602.Lock = ENABLE;
+      }
+    }
+
+    if (whDisplay_2004.Lock == DISABLE) {
+      if (whDisplayHealthCheck_Task(&whDisplay_2004)) {
+        /* TODO reinitialize, overwise clear rediness flag */
+        printf("Cannot run WHxxxx display device\n");
+        whDisplay_2004.Lock = ENABLE;
       }
     }
   }
@@ -161,8 +179,10 @@ TM163x_TypeDef* Get_TmDiplayDevice(void) {
 /* ------------ WH -------------- */
 // ----------------------------------------------------------------------------
 
-WHxxxx_TypeDef* Get_WhDiplayDevice(void) {
-  return &whDisplay_0;
+WHxxxx_TypeDef* Get_WhDiplayDevice(uint16_t model) {
+  if (model == 1602) return &whDisplay_1602;
+  if (model == 2004) return &whDisplay_2004;
+  return NULL;
 }
 
 
