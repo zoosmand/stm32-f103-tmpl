@@ -28,6 +28,23 @@ __STATIC_INLINE ErrorStatus OneWire_Enumerate(OneWireDevice_t*);
 // -------------------------------------------------------------  
 
 ErrorStatus OneWireBus_Init(OneWireBus_TypeDef* busDev) {
+  /* Init GPIO */
+  if (busDev->Port > 7) {
+    MODIFY_REG(
+      busDev->Port->CRH, 
+      (0x0f << ((busDev->Pin - 8) * 4)), 
+      ((GPIO_GPO_OD | GPIO_IOS_10) << ((busDev->Pin - 8) * 4))
+    );
+  } else {
+    MODIFY_REG(
+      busDev->Port->CRL, 
+      (0x0f << ((busDev->Pin - 8) * 4)), 
+      ((GPIO_GPO_OD | GPIO_IOS_10) << (busDev->Pin * 4))
+    );
+  }
+  
+  PIN_H(busDev->Port, busDev->Pin);
+
   return OneWire_Search(busDev);
 }
 
@@ -38,14 +55,17 @@ ErrorStatus OneWireBus_Init(OneWireBus_TypeDef* busDev) {
 ErrorStatus OneWire_Reset(OneWireBus_TypeDef* busDev) {
 
   OneWire_High;
+  // PIN_L(busDev->Port, busDev->Pin);
   _delay_us(580);
   OneWire_Low;
+  // PIN_H(busDev->Port, busDev->Pin);
   _delay_us(15);
   
   int i = 0;
   ErrorStatus status = ERROR;
 
   while (i++ < 240) {
+    // if (!(PIN_LEVEL(busDev->Port, busDev->Pin))) {
     if (!OneWire_Level) {
       status = SUCCESS;
       break;
