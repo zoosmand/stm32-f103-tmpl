@@ -70,11 +70,25 @@ ErrorStatus GPIO_LED_Init(void) {
 
 
 // ----------------------------------------------------------------------------
+
 ErrorStatus GPIO_TM163x_Init(void) {
 
   /* Check if pins are not locked */
   if (PREG_CHECK(TM_SCK_Port->LCKR, TM_DIO_Pin_Pos)) return (ERROR);
   if (PREG_CHECK(TM_DIO_Port->LCKR, TM_DIO_Pin_Pos)) return (ERROR);
+
+  return (SUCCESS);
+}
+
+
+
+
+// ----------------------------------------------------------------------------
+
+ErrorStatus GPIO_OneWire_Init(void) {
+
+  /* Check if pins are not locked */
+  if (PREG_CHECK(OneWire_PORT->LCKR, OneWire_PIN_Pos)) return (ERROR);
 
   return (SUCCESS);
 }

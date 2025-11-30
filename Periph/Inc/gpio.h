@@ -29,6 +29,7 @@
 
 
 /* Private defines -----------------------------------------------------------*/
+/* GPIO definitions for LED indications */
 #define LED_GREEN_Pin         GPIO_PIN_13
 #define LED_GREEN_Pin_Pos     GPIO_PIN_13_Pos
 #define LED_GREEN_Pin_Mask    GPIO_PIN_13_Mask
@@ -45,7 +46,7 @@
 #define LED_RED_Port          GPIOA
 
 
-
+/* GPIO definitions for TM display */
 #define TM_DIO_Pin            GPIO_PIN_12
 #define TM_DIO_Pin_Pos        GPIO_PIN_12_Pos
 #define TM_DIO_Pin_Mask       GPIO_PIN_12_Mask
@@ -57,6 +58,10 @@
 #define TM_SCK_Port           GPIOA
 
 
+/* GPIO definitions for OneWire bus */
+#define OneWire_PORT          GPIOB
+#define OneWire_PIN           GPIO_PIN_9_Pos
+#define OneWire_PIN_Pos       GPIO_PIN_9_Pos
 
 
 /* Exported functions prototypes ---------------------------------------------*/
@@ -74,6 +79,13 @@ ErrorStatus GPIO_LED_Init(void);
  * @return  status of operation
  */
 ErrorStatus GPIO_TM163x_Init(void);
+
+/**
+ * @brief   Initialized GPIO pins for OnwWire bus.
+ * @param   none
+ * @return  status of operation
+ */
+ErrorStatus GPIO_OneWire_Init(void);
 
 
 #ifdef __cplusplus

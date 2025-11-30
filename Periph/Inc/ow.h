@@ -64,8 +64,6 @@ OneWireDevice_t* Get_OwDevices(void);
 #define MatchROM        0x55
 #define SkipROM         0xcc
 
-#define OneWire_PORT    GPIOB
-#define OneWire_PIN     GPIO_PIN_9_Pos
 
 #define OneWire_Low     PIN_H(OneWire_PORT, OneWire_PIN)
 #define OneWire_High    PIN_L(OneWire_PORT, OneWire_PIN)

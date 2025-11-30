@@ -83,22 +83,25 @@ extern uint32_t secCnt;
 
 
 /** Rediness Services Register Flags */
-#define OneWireBus_RF     0
-#define SSDDisplay_RF     1
-#define WHDSPL_RF         2
+#define GPIO_LED_RF       0
+#define GPIO_TM_RF        1
+#define GPIO_OW_RF        2
 #define SPI1_RF           3
-#define EEPROM_RF         4
-#define MAXDSPL_RF        5
-#define BMX280_RF         6
-#define I2C1_RF           7
-#define BMX680_RF         8
-#define GPIOLED_RF        9
-#define GPIOTM_RF         10
-#define TMDSPL_RF         11
+#define I2C1_RF           4
+#define OW_BUS_RF         5
+#define SSD_DSPL_RF       6
+#define WH_DSPL_RF        7
+#define MAX_DSPL_RF       8
+#define TM_DSPL_RF        9
+#define EEPROM_RF         10
+#define BMX280_RF         11
+#define BMX680_RF         12
 
 
 /* Exported defines -----------------------------------------------------------*/
-#define putc_dspl(ch) DSPL_OUT(ch);
+/* print standars output definitions */
+#define PRINTF_DSPL_RF    WH_DSPL_RF
+#define putc_dspl(ch)     DSPL_OUT(ch);
 
 /* Exported macro ------------------------------------------------------------*/
 

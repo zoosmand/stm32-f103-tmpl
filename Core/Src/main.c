@@ -60,16 +60,16 @@ int main(void) {
     printf("sec:%li\n", secCnt);
     
 
-    if (FLAG_CHECK(&_ASREG_, OneWireBus_RF)) { DsMeasurment_CronHandler(); }
+    if (FLAG_CHECK(&_ASREG_, OW_BUS_RF)) { DsMeasurment_CronHandler(); }
     
     if (FLAG_CHECK(&_ASREG_, BMX280_RF)) { BoschMeasurment_CronHandler(); }
 
     if (FLAG_CHECK(&_ASREG_, EEPROM_RF)) { EepromHealthCheck_CronHandler(); }
     
     if (
-         FLAG_CHECK(&_ASREG_, MAXDSPL_RF) 
-      || FLAG_CHECK(&_ASREG_, TMDSPL_RF)
-      || FLAG_CHECK(&_ASREG_, WHDSPL_RF)
+         FLAG_CHECK(&_ASREG_, MAX_DSPL_RF) 
+      || FLAG_CHECK(&_ASREG_, TM_DSPL_RF)
+      || FLAG_CHECK(&_ASREG_, WH_DSPL_RF)
     ) { DisplayHealthCheck_CronHandler(); }
 
   }
@@ -79,7 +79,7 @@ int main(void) {
   /* ----------------------------------*/
   if (CRON_SYSTICK_EVENT) {
 
-    if (FLAG_CHECK(&_ASREG_, GPIOLED_RF)) { Led_CronHandler(); }
+    if (FLAG_CHECK(&_ASREG_, GPIO_LED_RF)) { Led_CronHandler(); }
 
   }
 
@@ -99,29 +99,29 @@ void Cron_Handler(void) {
   SET_BIT(CoreDebug->DEMCR, CoreDebug_DEMCR_TRCENA_Msk);
 
 
-  if (!GPIO_LED_Init())     FLAG_SET(&_ASREG_, GPIOLED_RF);
-  if (!GPIO_TM163x_Init())  FLAG_SET(&_ASREG_, GPIOTM_RF);
-  if (!OneWireBus_Init())   FLAG_SET(&_ASREG_, OneWireBus_RF);
+  if (!GPIO_LED_Init())     FLAG_SET(&_ASREG_, GPIO_LED_RF);
+  if (!GPIO_TM163x_Init())  FLAG_SET(&_ASREG_, GPIO_TM_RF);
+  if (!OneWireBus_Init())   FLAG_SET(&_ASREG_, OW_BUS_RF);
   if (!SPI_Init(SPI1))      FLAG_SET(&_ASREG_, SPI1_RF);
   if (!I2C_Init(I2C1))      FLAG_SET(&_ASREG_, I2C1_RF);
   
   /* One Wire contition   */
-  if (FLAG_CHECK(&_ASREG_, OneWireBus_RF)) OneWire_Search();
+  if (FLAG_CHECK(&_ASREG_, OW_BUS_RF)) OneWire_Search();
 
   if (FLAG_CHECK(&_ASREG_, SPI1_RF)) {
     if (!W25qxx_Init(Get_EepromDevice()))         FLAG_SET(&_ASREG_, EEPROM_RF);
-    if (!MAX72xx_Init(Get_MaxDiplayDevice()))     FLAG_SET(&_ASREG_, MAXDSPL_RF);
+    if (!MAX72xx_Init(Get_MaxDiplayDevice()))     FLAG_SET(&_ASREG_, MAX_DSPL_RF);
     if (!BMx680_Init(Get_BoschDevice(1)))         FLAG_SET(&_ASREG_, BMX680_RF);
   }
   
   if (FLAG_CHECK(&_ASREG_, I2C1_RF)) {
     if (!BMx280_Init(Get_BoschDevice(0)))             FLAG_SET(&_ASREG_, BMX280_RF);
-    if (!SSD13xx_Init(I2C1))                          FLAG_SET(&_ASREG_, SSDDisplay_RF);
-    if (!WHxxxx_Init(Get_WhDiplayDevice(WH_MODEL)))   FLAG_SET(&_ASREG_, WHDSPL_RF);
+    if (!SSD13xx_Init(I2C1))                          FLAG_SET(&_ASREG_, SSD_DSPL_RF);
+    if (!WHxxxx_Init(Get_WhDiplayDevice(WH_MODEL)))   FLAG_SET(&_ASREG_, WH_DSPL_RF);
   }
 
-  if (FLAG_CHECK(&_ASREG_, GPIOTM_RF)) {
-    if (!TM163x_Init(Get_TmDiplayDevice()))       FLAG_SET(&_ASREG_, TMDSPL_RF);
+  if (FLAG_CHECK(&_ASREG_, GPIO_TM_RF)) {
+    if (!TM163x_Init(Get_TmDiplayDevice()))       FLAG_SET(&_ASREG_, TM_DSPL_RF);
   }
 
   /* Display calibration */
