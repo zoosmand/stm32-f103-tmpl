@@ -15,9 +15,12 @@
 static uint8_t lastfork;
 
 /* Private function prototypes -----------------------------------------------*/
-__STATIC_INLINE ErrorStatus OneWire_ErrorHandler(void);
+__STATIC_INLINE ErrorStatus OneWire_ErrorHandler(OneWireBus_TypeDef*);
 
-__STATIC_INLINE void OneWire_WriteBit(uint8_t);
+__STATIC_INLINE void OneWire_WriteBit(OneWireBus_TypeDef*, uint8_t);
+
+__STATIC_INLINE ErrorStatus OneWire_Enumerate(OneWireDevice_t*);
+
 
 
 
@@ -32,7 +35,7 @@ ErrorStatus OneWireBus_Init(OneWireBus_TypeDef* busDev) {
 
 // -------------------------------------------------------------  
 
-ErrorStatus OneWire_Reset(void) {
+ErrorStatus OneWire_Reset(OneWireBus_TypeDef* busDev) {
 
   OneWire_High;
   _delay_us(580);
@@ -63,7 +66,7 @@ ErrorStatus OneWire_Reset(void) {
 
 // -------------------------------------------------------------  
 
-__STATIC_INLINE void OneWire_WriteBit(uint8_t bit) {
+__STATIC_INLINE void OneWire_WriteBit(OneWireBus_TypeDef* busDev, uint8_t bit) {
   OneWire_High;
   if (bit) {
     _delay_us(6);
@@ -79,9 +82,9 @@ __STATIC_INLINE void OneWire_WriteBit(uint8_t bit) {
 
 // ------------------------------------------------------------- 
 
-void OneWire_WriteByte(uint8_t byte) {
+void OneWire_WriteByte(OneWireBus_TypeDef* busDev, uint8_t byte) {
   for (int i = 0; i < 8; i++) {
-    OneWire_WriteBit(byte & 0x01);
+    OneWire_WriteBit(busDev, byte & 0x01);
     byte >>= 1;
   }
 }
@@ -89,7 +92,7 @@ void OneWire_WriteByte(uint8_t byte) {
 
 // -------------------------------------------------------------  
 
-uint8_t OneWire_ReadBit(void) {
+uint8_t OneWire_ReadBit(OneWireBus_TypeDef* busDev) {
   OneWire_High;
   _delay_us(6);
   OneWire_Low;
@@ -103,10 +106,10 @@ uint8_t OneWire_ReadBit(void) {
 
 // -------------------------------------------------------------  
 
-void OneWire_ReadByte(uint8_t* data) {
+void OneWire_ReadByte(OneWireBus_TypeDef* busDev, uint8_t* data) {
   for (int i = 0; i < 8; i++) {
     *data >>= 1;
-    *data |= (OneWire_ReadBit()) ? 0x80 : 0;
+    *data |= (OneWire_ReadBit(busDev)) ? 0x80 : 0;
   }
 }
 
@@ -125,7 +128,7 @@ uint8_t OneWire_CRC8(uint8_t crc, uint8_t byte) {
 
 // -------------------------------------------------------------  
 
-__STATIC_INLINE ErrorStatus OneWire_ErrorHandler(void) {
+__STATIC_INLINE ErrorStatus OneWire_ErrorHandler(OneWireBus_TypeDef*) {
   return (ERROR);
 }
 
@@ -146,10 +149,11 @@ __STATIC_INLINE ErrorStatus OneWire_ErrorHandler(void) {
 
 
 
-__STATIC_INLINE int OneWire_Enumerate(uint8_t* addr) {
+__STATIC_INLINE ErrorStatus OneWire_Enumerate(OneWireDevice_t* dev) {
   if (!lastfork) return (1);
   
-	if (OneWire_Reset()) return (1);
+	if (OneWire_Reset((OneWireBus_TypeDef*)dev->ParentBusPtr)) return (ERROR);
+  uint8_t* addr = dev->Addr;
   
   uint8_t bp = 7;
 	uint8_t prev = *addr;
@@ -158,11 +162,11 @@ __STATIC_INLINE int OneWire_Enumerate(uint8_t* addr) {
 	uint8_t bit0 = 0;
 	uint8_t bit1 = 0;
   
-	OneWire_WriteByte(SearchROM);
+	OneWire_WriteByte((OneWireBus_TypeDef*)dev->ParentBusPtr, SearchROM);
   
 	for(uint8_t i = 1; i < 65; i++) {
-    bit0 = OneWire_ReadBit();
-    bit1 = OneWire_ReadBit();
+    bit0 = OneWire_ReadBit((OneWireBus_TypeDef*)dev->ParentBusPtr);
+    bit1 = OneWire_ReadBit((OneWireBus_TypeDef*)dev->ParentBusPtr);
     
 		if (!bit0) {
       if (!bit1) {
@@ -182,11 +186,11 @@ __STATIC_INLINE int OneWire_Enumerate(uint8_t* addr) {
       if (!bit1) {
         curr |= 0x80;
 			} else {
-        return (1);
+        return (ERROR);
 			}
 		}
     
-		OneWire_WriteBit(curr & 0x80);
+		OneWire_WriteBit((OneWireBus_TypeDef*)dev->ParentBusPtr, (curr & 0x80));
     
 		if (!bp) {
       *addr = curr;
@@ -201,7 +205,7 @@ __STATIC_INLINE int OneWire_Enumerate(uint8_t* addr) {
     bp--;
 	}
 	lastfork = fork;
-  return (0);  
+  return (SUCCESS);  
 }
 
 
@@ -209,11 +213,11 @@ __STATIC_INLINE int OneWire_Enumerate(uint8_t* addr) {
 
 ErrorStatus OneWire_Search(OneWireBus_TypeDef* busDev) {
 
-  if (OneWire_Reset()) return (ERROR);
+  if (OneWire_Reset(busDev)) return (ERROR);
 
   lastfork = 65;
   for (uint8_t i = 0; i < busDev->Count; i++) {
-    if (OneWire_Enumerate(busDev->Devs[i].Addr)) {
+    if (OneWire_Enumerate(&busDev->Devs[i])) {
       break;
     } else {
       busDev->Devs[i].Family = busDev->Devs[i].Addr[0];
@@ -231,9 +235,9 @@ ErrorStatus OneWire_Search(OneWireBus_TypeDef* busDev) {
 
 uint8_t OneWire_ReadPowerSupply(OneWireDevice_t* dev) {
   OneWire_MatchROM(dev);
-  OneWire_WriteByte(ReadPowerSupply);
+  OneWire_WriteByte((OneWireBus_TypeDef*)dev->ParentBusPtr, ReadPowerSupply);
   
-  return !OneWire_ReadBit();
+  return !OneWire_ReadBit((OneWireBus_TypeDef*)dev->ParentBusPtr);
 }
 
 
@@ -243,11 +247,11 @@ uint8_t OneWire_ReadPowerSupply(OneWireDevice_t* dev) {
  * @retval  (uint8_t) status of operation
  */
 ErrorStatus OneWire_MatchROM(OneWireDevice_t* dev) {
-  if (OneWire_Reset()) return (ERROR);
+  if (OneWire_Reset((OneWireBus_TypeDef*)dev->ParentBusPtr)) return (ERROR);
   
-  OneWire_WriteByte(MatchROM);
+  OneWire_WriteByte((OneWireBus_TypeDef*)dev->ParentBusPtr, MatchROM);
   for (uint8_t i = 0; i < 8; i++) {
-    OneWire_WriteByte(dev->Addr[i]);
+    OneWire_WriteByte((OneWireBus_TypeDef*)dev->ParentBusPtr, dev->Addr[i]);
   }
 
   return (SUCCESS);

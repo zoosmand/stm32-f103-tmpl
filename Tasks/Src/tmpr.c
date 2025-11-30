@@ -185,24 +185,7 @@ void DsMeasurment_CronHandler(void) {
 
     FLAG_CLR(dsScheduler.counterReg, dsScheduler.entranceFlag);
 
-    /* TODO reinitialize device overwise clear rediness flag */
-    
-    // OneWireDevice_t* devs = Get_OwDevices();
-
-    // for (uint8_t i = 0; i < 2; i++) {
-    //   if (DS18B20_GetTemperatureMeasurment(&devs[i])) {
-    //     /* --- on error, set up -128.00 C --- */
-    //     devs[i].Spad[0] = 0x00;
-    //     devs[i].Spad[1] = 0x08;
-    //   }
-    // }
-
-    // uint32_t* t1 = (int32_t*)&devs[0].Spad;
-    // uint32_t* t2 = (int32_t*)&devs[1].Spad;
-    // printf("%d.%02d %d.%02d\n", 
-    //   (int8_t)((*t1 & 0x0000fff0) >> 4), (uint8_t)(((*t1 & 0x0000000f) * 100) >> 4),
-    //   (int8_t)((*t2 & 0x0000fff0) >> 4), (uint8_t)(((*t2 & 0x0000000f) * 100) >> 4)
-    // );
+    /* TODO realize heath check */
     
     OneWireDevice_t* owDev = Get_OneWireDevice(0);
     if (DS18B20_GetTemperatureMeasurment(owDev)) {
@@ -233,5 +216,6 @@ OneWireBus_TypeDef* Get_OneWireBusDevice(void) {
 
 OneWireDevice_t* Get_OneWireDevice(uint8_t denNum) {
 
+  ow_set.Devs[denNum].ParentBusPtr = (uint32_t*)&ow_set;
   return &ow_set.Devs[denNum];
 }

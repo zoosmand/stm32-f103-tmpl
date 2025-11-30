@@ -28,13 +28,13 @@ extern __attribute__((section(".cron"))) uint32_t _OWREG_;
  */
 ErrorStatus OneWireBus_Init(OneWireBus_TypeDef*);
 
-ErrorStatus OneWire_Reset(void);
+ErrorStatus OneWire_Reset(OneWireBus_TypeDef*);
 
-void OneWire_WriteByte(uint8_t);
+void OneWire_WriteByte(OneWireBus_TypeDef*, uint8_t);
 
-uint8_t OneWire_ReadBit(void);
+uint8_t OneWire_ReadBit(OneWireBus_TypeDef*);
 
-void OneWire_ReadByte(uint8_t*);
+void OneWire_ReadByte(OneWireBus_TypeDef*, uint8_t*);
 
 uint8_t OneWire_CRC8(uint8_t, uint8_t);
 

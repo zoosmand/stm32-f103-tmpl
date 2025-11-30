@@ -296,6 +296,7 @@ typedef struct {
   uint8_t               Type;
   uint8_t               Addr[8];
   uint8_t               Spad[9];
+  uint32_t*             ParentBusPtr;
 } OneWireDevice_t;
 
 /**
