@@ -35,22 +35,28 @@
 /* Exported functions prototypes ---------------------------------------------*/
 
 /**
- * @brief Bosch BMx CRON handler procedure.
- * @return none
+ * @brief   Provides Bosch BMx CRON handler procedure.
+ * @return  none
  */
 void BoschMeasurment_CronHandler(void);
 
 /**
- * @brief Bosch DS CRON handler procedure.
- * @return none
+ * @brief   Provides Bosch DS CRON handler procedure.
+ * @return  none
  */
 void DsMeasurment_CronHandler(void);
 
 /**
- * @brief Return BMx Bosch device struct pointer.
- * @return device struct pointer
+ * @brief   Returns BMx Bosch device struct pointer.
+ * @return  device struct pointer
  */
 BMxX80_TypeDef* Get_BoschDevice(uint8_t);
+
+/**
+ * @brief   Returns OneWire bus struct pointer.
+ * @return  the set of OneWire devices struct pointer
+ */
+OneWireBus_TypeDef* Get_OneWireBusDevice(void);
 
 
 #ifdef __cplusplus

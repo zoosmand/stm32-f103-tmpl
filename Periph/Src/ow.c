@@ -24,7 +24,7 @@ __STATIC_INLINE void OneWire_WriteBit(uint8_t);
 
 
 // -------------------------------------------------------------  
-ErrorStatus OneWireBus_Init(void) {
+ErrorStatus OneWireBus_Init(OneWireBus_TypeDef* dev) {
   return OneWire_Search();
 }
 

@@ -83,6 +83,15 @@ static task_scheduler_t dsScheduler = {
   .entranceFlag   = 31,
 };
 
+static OneWireDevice_t ow_pack[16];
+
+static OneWireBus_TypeDef ow_set = {
+  .Count    = 16,
+  .Pin      = OneWire_PIN_Pos,
+  .Port     = OneWire_PORT,
+  .Devs     = ow_pack,
+};
+
 
 
 /* Private function prototypes ----------------------------------------------*/
@@ -198,4 +207,13 @@ void DsMeasurment_CronHandler(void) {
     /* TODO handle DS data usage */
     __NOP();
   }
+}
+
+
+
+// ----------------------------------------------------------------------------
+
+OneWireBus_TypeDef* Get_OneWireBusDevice(void) {
+
+  return &ow_set;
 }

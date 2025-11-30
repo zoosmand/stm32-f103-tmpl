@@ -108,17 +108,17 @@ void Cron_Handler(void) {
 
   /* Initialize devices based on their own bus */
   if (FLAG_CHECK(&_ASREG_, GPIO_OW_RF)) {
-    if (!OneWireBus_Init())       FLAG_SET(&_ASREG_, OW_BUS_RF);
+    if (!OneWireBus_Init(Get_OneWireBusDevice()))     FLAG_SET(&_ASREG_, OW_BUS_RF);
   }
   if (FLAG_CHECK(&_ASREG_, GPIO_TM_RF)) {
-    if (!TM163x_Init(Get_TmDiplayDevice()))       FLAG_SET(&_ASREG_, TM_DSPL_RF);
+    if (!TM163x_Init(Get_TmDiplayDevice()))           FLAG_SET(&_ASREG_, TM_DSPL_RF);
   }
 
   /* Initialize SPI1 bus devices */
   if (FLAG_CHECK(&_ASREG_, SPI1_RF)) {
-    if (!W25qxx_Init(Get_EepromDevice()))         FLAG_SET(&_ASREG_, EEPROM_RF);
-    if (!MAX72xx_Init(Get_MaxDiplayDevice()))     FLAG_SET(&_ASREG_, MAX_DSPL_RF);
-    if (!BMx680_Init(Get_BoschDevice(1)))         FLAG_SET(&_ASREG_, BMX680_RF);
+    if (!W25qxx_Init(Get_EepromDevice()))             FLAG_SET(&_ASREG_, EEPROM_RF);
+    if (!MAX72xx_Init(Get_MaxDiplayDevice()))         FLAG_SET(&_ASREG_, MAX_DSPL_RF);
+    if (!BMx680_Init(Get_BoschDevice(1)))             FLAG_SET(&_ASREG_, BMX680_RF);
   }
   
   /* Initialize I2C1 bus devices */
