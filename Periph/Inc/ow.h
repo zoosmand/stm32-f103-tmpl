@@ -26,9 +26,9 @@ extern __attribute__((section(".cron"))) uint32_t _OWREG_;
  * @brief   Inializes OneWire Bus pulling reset.
  * @return  status of operation
  */
-int OneWireBus_Init(void);
+ErrorStatus OneWireBus_Init(void);
 
-int OneWire_Reset(void);
+ErrorStatus OneWire_Reset(void);
 
 void OneWire_WriteByte(uint8_t);
 
@@ -38,7 +38,7 @@ void OneWire_ReadByte(uint8_t*);
 
 uint8_t OneWire_CRC8(uint8_t, uint8_t);
 
-int OneWire_Search(void);
+ErrorStatus OneWire_Search(void);
 
 /**
  * @brief   Defines parasitic powered devices on OnWire bus.

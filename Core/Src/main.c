@@ -98,30 +98,34 @@ void Cron_Handler(void) {
   __NVIC_SetPriorityGrouping(NVIC_PRIORITYGROUP_4);
   SET_BIT(CoreDebug->DEMCR, CoreDebug_DEMCR_TRCENA_Msk);
 
-
-  if (!GPIO_LED_Init())     FLAG_SET(&_ASREG_, GPIO_LED_RF);
-  if (!GPIO_TM163x_Init())  FLAG_SET(&_ASREG_, GPIO_TM_RF);
-  if (!OneWireBus_Init())   FLAG_SET(&_ASREG_, OW_BUS_RF);
-  if (!SPI_Init(SPI1))      FLAG_SET(&_ASREG_, SPI1_RF);
-  if (!I2C_Init(I2C1))      FLAG_SET(&_ASREG_, I2C1_RF);
+  /* Initialize GPIOs and buses */
+  if (!GPIO_LED_Init())         FLAG_SET(&_ASREG_, GPIO_LED_RF);
+  if (!GPIO_TM163x_Init())      FLAG_SET(&_ASREG_, GPIO_TM_RF);
+  if (!GPIO_OneWire_Init())     FLAG_SET(&_ASREG_, GPIO_OW_RF);
+  if (!SPI_Init(SPI1))          FLAG_SET(&_ASREG_, SPI1_RF);
+  if (!I2C_Init(I2C1))          FLAG_SET(&_ASREG_, I2C1_RF);
   
-  /* One Wire contition   */
-  if (FLAG_CHECK(&_ASREG_, OW_BUS_RF)) OneWire_Search();
 
+  /* Initialize devices based on their own bus */
+  if (FLAG_CHECK(&_ASREG_, GPIO_OW_RF)) {
+    if (!OneWireBus_Init())       FLAG_SET(&_ASREG_, OW_BUS_RF);
+  }
+  if (FLAG_CHECK(&_ASREG_, GPIO_TM_RF)) {
+    if (!TM163x_Init(Get_TmDiplayDevice()))       FLAG_SET(&_ASREG_, TM_DSPL_RF);
+  }
+
+  /* Initialize SPI1 bus devices */
   if (FLAG_CHECK(&_ASREG_, SPI1_RF)) {
     if (!W25qxx_Init(Get_EepromDevice()))         FLAG_SET(&_ASREG_, EEPROM_RF);
     if (!MAX72xx_Init(Get_MaxDiplayDevice()))     FLAG_SET(&_ASREG_, MAX_DSPL_RF);
     if (!BMx680_Init(Get_BoschDevice(1)))         FLAG_SET(&_ASREG_, BMX680_RF);
   }
   
+  /* Initialize I2C1 bus devices */
   if (FLAG_CHECK(&_ASREG_, I2C1_RF)) {
     if (!BMx280_Init(Get_BoschDevice(0)))             FLAG_SET(&_ASREG_, BMX280_RF);
     if (!SSD13xx_Init(I2C1))                          FLAG_SET(&_ASREG_, SSD_DSPL_RF);
     if (!WHxxxx_Init(Get_WhDiplayDevice(WH_MODEL)))   FLAG_SET(&_ASREG_, WH_DSPL_RF);
-  }
-
-  if (FLAG_CHECK(&_ASREG_, GPIO_TM_RF)) {
-    if (!TM163x_Init(Get_TmDiplayDevice()))       FLAG_SET(&_ASREG_, TM_DSPL_RF);
   }
 
   /* Display calibration */

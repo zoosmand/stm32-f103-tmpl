@@ -122,10 +122,10 @@ typedef struct {
 } task_scheduler_t;
 
 
-typedef struct {
-  uint8_t   addr[8];
-  uint8_t   spad[9];
-} OneWireDevice_t;
+// typedef struct {
+//   uint8_t   addr[8];
+//   uint8_t   spad[9];
+// } OneWireDevice_t;
 
 
 /* Private includes ----------------------------------------------------------*/

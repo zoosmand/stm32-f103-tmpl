@@ -24,14 +24,14 @@ __STATIC_INLINE void OneWire_WriteBit(uint8_t);
 
 
 // -------------------------------------------------------------  
-int OneWireBus_Init(void) {
-  return OneWire_Reset();
+ErrorStatus OneWireBus_Init(void) {
+  return OneWire_Search();
 }
 
 
 
 // -------------------------------------------------------------  
-int OneWire_Reset(void) {
+ErrorStatus OneWire_Reset(void) {
 
   OneWire_High;
   _delay_us(580);
@@ -39,10 +39,11 @@ int OneWire_Reset(void) {
   _delay_us(15);
   
   int i = 0;
-  int status = 1;
+  ErrorStatus status = ERROR;
+
   while (i++ < 240) {
     if (!OneWire_Level) {
-      status = 0;
+      status = SUCCESS;
       break;
     }
     _delay_us(1);
@@ -50,7 +51,7 @@ int OneWire_Reset(void) {
 
   /* to prevent non pulled-up pin to response */
   if (i == 1) {
-    status = 1;
+    status = ERROR;
   } else {
     _delay_us(580 - i);
   }
@@ -199,16 +200,16 @@ __STATIC_INLINE int OneWire_Enumerate(uint8_t* addr) {
 
 
 // -------------------------------------------------------------
-int OneWire_Search(void) {
+ErrorStatus OneWire_Search(void) {
 
-  if (OneWire_Reset()) return (1);
+  if (OneWire_Reset()) return (ERROR);
 
   lastfork = 65;
   for (uint8_t i = 0; i < 2; i++) {
-    if (OneWire_Enumerate(oneWireDevices[i].addr)) break;
+    if (OneWire_Enumerate(oneWireDevices[i].Addr)) break;
   }
 
-  return (0);
+  return (SUCCESS);
 }
 
 

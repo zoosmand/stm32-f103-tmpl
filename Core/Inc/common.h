@@ -288,6 +288,27 @@ typedef struct {
 
 // ----------------------------------------------------------------------------
 
+/**
+ * @brief   OnwWire device type definition struct.
+ */
+typedef struct {
+  uint8_t               Addr[8];
+  uint8_t               Spad[9];
+} OneWireDevice_t;
+
+/**
+ * @brief   OnwWire bus type definition struct.
+ */
+typedef struct {
+  GPIO_TypeDef*         Port;
+  uint16_t              Pin;
+  OneWireDevice_t*      Devs;
+} OneWireBus_t;
+
+
+
+// ----------------------------------------------------------------------------
+
 /* Linked List prototype structures  */
 // typedef struct {
 //   uint32_t  ItemPtr;
