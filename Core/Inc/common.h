@@ -292,6 +292,7 @@ typedef struct {
  * @brief   OnwWire device type definition struct.
  */
 typedef struct {
+  FunctionalState       Lock;
   uint8_t               Family;
   uint8_t               Type;
   uint8_t               Addr[8];
@@ -303,6 +304,7 @@ typedef struct {
  * @brief   OnwWire bus type definition struct.
  */
 typedef struct {
+  FunctionalState       Lock;
   GPIO_TypeDef*         Port;
   uint16_t              Pin;
   OneWireDevice_t*      Devs;

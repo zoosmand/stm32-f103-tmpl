@@ -90,6 +90,7 @@ static OneWireBus_TypeDef ow_set = {
   .Pin      = OneWire_PIN_Pos,
   .Port     = OneWire_PORT,
   .Devs     = ow_pack,
+  .Lock     = DISABLE,
 };
 
 
@@ -158,6 +159,21 @@ void BoschMeasurment_CronHandler(void) {
         maxDsplDev->Lock = ENABLE;
       }
     }
+
+    WHxxxx_TypeDef* whDsplDev = Get_WhDiplayDevice(1602);
+    
+    if (whDsplDev->Lock == DISABLE) {
+      uint8_t tmpBuf2[5];
+      tmpBuf2[0] = tmpBuf[0];
+      tmpBuf2[1] = tmpBuf[1];
+      tmpBuf2[2] = '.';
+      tmpBuf2[3] = tmpBuf[2];
+      tmpBuf2[4] = tmpBuf[3];
+      if (WHxxxx_Print(whDsplDev, tmpBuf2, 5)) {
+        printf("Cannot output data to HW display\n");
+        whDsplDev->Lock = ENABLE;
+      }
+    }
   }
 }
 
@@ -188,17 +204,20 @@ void DsMeasurment_CronHandler(void) {
     /* TODO realize heath check */
     
     OneWireDevice_t* owDev = Get_OneWireDevice(0);
-    if (DS18B20_GetTemperatureMeasurment(owDev)) {
-      /* --- on error, set up -128.00 C --- */
-      owDev->Spad[0] = 0x00;
-    }
-    uint32_t* t1 = (int32_t*)&owDev->Spad;
-    printf("%d.%02d\n", 
-      (int8_t)((*t1 & 0x0000fff0) >> 4), (uint8_t)(((*t1 & 0x0000000f) * 100) >> 4)
-    );
 
-    /* TODO handle DS data usage */
-    __NOP();
+    if (owDev->Lock == DISABLE) {
+      if (DS18B20_GetTemperatureMeasurment(owDev)) {
+        /* --- on error, set up -128.00 C --- */
+        owDev->Spad[0] = 0x00;
+      }
+      uint32_t* t1 = (int32_t*)&owDev->Spad;
+      printf("%d.%02d\n", 
+        (int8_t)((*t1 & 0x0000fff0) >> 4), (uint8_t)(((*t1 & 0x0000000f) * 100) >> 4)
+      );
+
+      /* TODO handle DS data usage */
+      __NOP();
+    }
   }
 }
 
@@ -217,5 +236,7 @@ OneWireBus_TypeDef* Get_OneWireBusDevice(void) {
 OneWireDevice_t* Get_OneWireDevice(uint8_t denNum) {
 
   ow_set.Devs[denNum].ParentBusPtr = (uint32_t*)&ow_set;
+  ow_set.Devs[denNum].Lock = DISABLE;
+
   return &ow_set.Devs[denNum];
 }

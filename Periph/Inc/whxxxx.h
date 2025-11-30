@@ -37,11 +37,19 @@
 /* Exported functions prototypes ---------------------------------------------*/
 
 /**
- * @brief  Initializes WHxxxx display
+ * @brief  Initializes WHxxxx display.
  * @param  dev: pointer to the particular device structure
  * @retval status of operation
  */
 ErrorStatus WHxxxx_Init(WHxxxx_TypeDef*);
+
+/**
+ * @brief  Prints data to the WHxxxx display.
+ * @param  dev: pointer to the particular device structure
+ * @param  buf: pointer to buffer to print data from
+ * @param  len: number of symbols to print
+ */
+ErrorStatus WHxxxx_Print(WHxxxx_TypeDef*, uint8_t*, uint8_t);
 
 
 /* Private defines -----------------------------------------------------------*/

@@ -95,9 +95,7 @@ static ErrorStatus dS18B20_ReadScratchpad(OneWireDevice_t* dev) {
 
 // -------------------------------------------------------------  
 static ErrorStatus dS18B20_ConvertTemperature(OneWireDevice_t* dev) {
-
   if (dev->Addr) {
-
     if (OneWire_MatchROM(dev)) return 1;
     uint8_t pps = OneWire_ReadPowerSupply(dev);
 
@@ -120,6 +118,7 @@ static ErrorStatus dS18B20_ConvertTemperature(OneWireDevice_t* dev) {
     dS18B20_Command(dev, ConvertT);
     dS18B20_WaitStatus(parentBus, 3);
   }
+  
   return (SUCCESS);
 }
 
@@ -172,6 +171,8 @@ static void dS18B20_ErrorHandler(void) {
 // -------------------------------------------------------------  
 ErrorStatus DS18B20_GetTemperatureMeasurment(OneWireDevice_t *dev) {
 
+  dev->Lock = ENABLE;
+
   if (dS18B20_ConvertTemperature(dev)) return (ERROR);
 
   parentBus = (OneWireBus_TypeDef*)dev->ParentBusPtr;
@@ -181,5 +182,6 @@ ErrorStatus DS18B20_GetTemperatureMeasurment(OneWireDevice_t *dev) {
   if (dS18B20_ReadScratchpad(dev)) return (ERROR);
   dS18B20_WaitStatus(parentBus, 3);
 
+  dev->Lock = DISABLE;
   return (SUCCESS);
 }

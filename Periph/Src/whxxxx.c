@@ -132,15 +132,29 @@ static ErrorStatus WHxxxx_WriteCommand(WHxxxx_TypeDef* dev, uint8_t cmd, uint32_
 
 // ----------------------------------------------------------------------------
 
+ErrorStatus WHxxxx_Print(WHxxxx_TypeDef* dev, uint8_t* buf, uint8_t len) {
+  if (dev->Lock == DISABLE) {
+    if (WHxxxx_WriteCommand(dev, WHxxxx_CLR_DSLP, WHxxxx_LD)) return (ERROR);
+    for (uint8_t i = 0; i < len; i++) {
+      if (WHxxxx_WriteChar(dev, buf[i])) return (ERROR);
+    }
+  }
+  return (SUCCESS);
+}
+
+
+// ----------------------------------------------------------------------------
+
 int __attribute__((weak)) putc_dspl_wh(char ch) {
   WHxxxx_TypeDef* dev = Get_WhDiplayDevice(WH_MODEL);
+  dev->Lock = ENABLE;
 
   if ((FLAG_CHECK(&_DSPLREG_, _0DCF_)) && (FLAG_CHECK(&_DSPLREG_, _0ACF_))) {
     FLAG_CLR(&_DSPLREG_, _0DCF_);
     FLAG_CLR(&_DSPLREG_, _0ACF_);
 
-    if (WHxxxx_WriteCommand(dev, WHxxxx_CLR_DSLP, WHxxxx_LD)) return (1);
-    if (WHxxxx_WriteCommand(dev, WHxxxx_POS_1LS, WHxxxx_SD)) return (1);
+    if (WHxxxx_WriteCommand(dev, WHxxxx_CLR_DSLP, WHxxxx_LD)) return (ERROR);
+    if (WHxxxx_WriteCommand(dev, WHxxxx_POS_1LS, WHxxxx_SD)) return (ERROR);
     diplPrintPos = 0;
   }
   if ((ch != 0x0a) && (ch != 0x0d)) {
@@ -148,12 +162,14 @@ int __attribute__((weak)) putc_dspl_wh(char ch) {
       if (WHxxxx_WriteCommand(dev, WHxxxx_POS_2LS, WHxxxx_SD)) return (1);
       diplPrintPos = 0;
     }
-    if (WHxxxx_WriteChar(dev, ch)) return (1);
+    if (WHxxxx_WriteChar(dev, ch)) return (ERROR);
     diplPrintPos++;
   }
   
   if (ch == 0x0a) FLAG_SET(&_DSPLREG_, _0DCF_);
   if (ch == 0x0d) FLAG_SET(&_DSPLREG_, _0ACF_);
+
+  dev->Lock = DISABLE;
   return (SUCCESS);
 }
 
