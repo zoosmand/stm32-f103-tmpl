@@ -58,6 +58,13 @@ BMxX80_TypeDef* Get_BoschDevice(uint8_t);
  */
 OneWireBus_TypeDef* Get_OneWireBusDevice(void);
 
+/**
+ * @brief   Returns OneWire device struct pointer.
+ * @param   devNum: the number of the device in the set of the bus device
+ * @return  the OneWire devices struct pointer
+ */
+OneWireDevice_t* Get_OneWireDevice(uint8_t);
+
 
 #ifdef __cplusplus
 }

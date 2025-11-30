@@ -10,13 +10,12 @@
 /* Private macro -------------------------------------------------------------*/
 
 /* Global variables ----------------------------------------------------------*/
-static uint8_t lastfork;
-static OneWireDevice_t oneWireDevices[16];
 
 /* Private variables ---------------------------------------------------------*/
+static uint8_t lastfork;
 
 /* Private function prototypes -----------------------------------------------*/
-__STATIC_INLINE int OneWire_ErrorHandler(void);
+__STATIC_INLINE ErrorStatus OneWire_ErrorHandler(void);
 
 __STATIC_INLINE void OneWire_WriteBit(uint8_t);
 
@@ -24,13 +23,15 @@ __STATIC_INLINE void OneWire_WriteBit(uint8_t);
 
 
 // -------------------------------------------------------------  
-ErrorStatus OneWireBus_Init(OneWireBus_TypeDef* dev) {
-  return OneWire_Search();
+
+ErrorStatus OneWireBus_Init(OneWireBus_TypeDef* busDev) {
+  return OneWire_Search(busDev);
 }
 
 
 
 // -------------------------------------------------------------  
+
 ErrorStatus OneWire_Reset(void) {
 
   OneWire_High;
@@ -61,6 +62,7 @@ ErrorStatus OneWire_Reset(void) {
 
 
 // -------------------------------------------------------------  
+
 __STATIC_INLINE void OneWire_WriteBit(uint8_t bit) {
   OneWire_High;
   if (bit) {
@@ -75,9 +77,9 @@ __STATIC_INLINE void OneWire_WriteBit(uint8_t bit) {
 }
 
 
-// -------------------------------------------------------------  
+// ------------------------------------------------------------- 
+
 void OneWire_WriteByte(uint8_t byte) {
-  // uint8_t _byte_ = *data;
   for (int i = 0; i < 8; i++) {
     OneWire_WriteBit(byte & 0x01);
     byte >>= 1;
@@ -86,6 +88,7 @@ void OneWire_WriteByte(uint8_t byte) {
 
 
 // -------------------------------------------------------------  
+
 uint8_t OneWire_ReadBit(void) {
   OneWire_High;
   _delay_us(6);
@@ -99,6 +102,7 @@ uint8_t OneWire_ReadBit(void) {
 
 
 // -------------------------------------------------------------  
+
 void OneWire_ReadByte(uint8_t* data) {
   for (int i = 0; i < 8; i++) {
     *data >>= 1;
@@ -108,6 +112,7 @@ void OneWire_ReadByte(uint8_t* data) {
 
 
 // -------------------------------------------------------------  
+
 uint8_t OneWire_CRC8(uint8_t crc, uint8_t byte) {
   // 0x8c - it is a bit reverse of OneWire polinom of 0x31
   for (uint8_t i = 0; i < 8; i++) {
@@ -119,8 +124,9 @@ uint8_t OneWire_CRC8(uint8_t crc, uint8_t byte) {
 
 
 // -------------------------------------------------------------  
-int OneWire_ErrorHandler(void) {
-  return (-1);
+
+__STATIC_INLINE ErrorStatus OneWire_ErrorHandler(void) {
+  return (ERROR);
 }
 
 
@@ -200,13 +206,21 @@ __STATIC_INLINE int OneWire_Enumerate(uint8_t* addr) {
 
 
 // -------------------------------------------------------------
-ErrorStatus OneWire_Search(void) {
+
+ErrorStatus OneWire_Search(OneWireBus_TypeDef* busDev) {
 
   if (OneWire_Reset()) return (ERROR);
 
   lastfork = 65;
-  for (uint8_t i = 0; i < 2; i++) {
-    if (OneWire_Enumerate(oneWireDevices[i].Addr)) break;
+  for (uint8_t i = 0; i < busDev->Count; i++) {
+    if (OneWire_Enumerate(busDev->Devs[i].Addr)) {
+      break;
+    } else {
+      busDev->Devs[i].Family = busDev->Devs[i].Addr[0];
+      if (busDev->Devs[i].Family == DS18B20_Family_Code) {
+        busDev->Devs[i].Type = 't';
+      }
+    }
   }
 
   return (SUCCESS);
@@ -214,8 +228,9 @@ ErrorStatus OneWire_Search(void) {
 
 
 // -------------------------------------------------------------
-uint8_t OneWire_ReadPowerSupply(uint8_t* addr) {
-  OneWire_MatchROM(addr);
+
+uint8_t OneWire_ReadPowerSupply(OneWireDevice_t* dev) {
+  OneWire_MatchROM(dev);
   OneWire_WriteByte(ReadPowerSupply);
   
   return !OneWire_ReadBit();
@@ -227,22 +242,15 @@ uint8_t OneWire_ReadPowerSupply(uint8_t* addr) {
  * @param   addr pointer to OneWire device address
  * @retval  (uint8_t) status of operation
  */
-int OneWire_MatchROM(uint8_t* addr) {
-  if (OneWire_Reset()) return (1);
+ErrorStatus OneWire_MatchROM(OneWireDevice_t* dev) {
+  if (OneWire_Reset()) return (ERROR);
   
   OneWire_WriteByte(MatchROM);
   for (uint8_t i = 0; i < 8; i++) {
-    OneWire_WriteByte(addr[i]);
+    OneWire_WriteByte(dev->Addr[i]);
   }
 
-  return (0);
+  return (SUCCESS);
 }
-
-
-// -------------------------------------------------------------
-OneWireDevice_t* Get_OwDevices(void) {
-  return oneWireDevices;
-}
-
 
 

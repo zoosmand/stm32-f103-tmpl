@@ -38,21 +38,21 @@ void OneWire_ReadByte(uint8_t*);
 
 uint8_t OneWire_CRC8(uint8_t, uint8_t);
 
-ErrorStatus OneWire_Search(void);
+ErrorStatus OneWire_Search(OneWireBus_TypeDef*);
 
 /**
  * @brief   Defines parasitic powered devices on OnWire bus.
  * @param   addr pointer to OneWire device address
  * @retval  (uint8_t) status of power supply
  */
-uint8_t OneWire_ReadPowerSupply(uint8_t*);
+uint8_t OneWire_ReadPowerSupply(OneWireDevice_t*);
 
 /**
  * @brief   Determines the existent of the device with given address, on the bus.
  * @param   addr pointer to OneWire device address
  * @retval  (uint8_t) status of operation
  */
-int OneWire_MatchROM(uint8_t*);
+ErrorStatus OneWire_MatchROM(OneWireDevice_t*);
 
 
 OneWireDevice_t* Get_OwDevices(void);
