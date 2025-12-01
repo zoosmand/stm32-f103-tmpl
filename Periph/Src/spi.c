@@ -29,17 +29,21 @@ ErrorStatus SPI_Init(SPI_TypeDef* SPIx) {
   /* Enable GPIO SCK, MISO, MOSI alternative on high speed */
 
   if (SPIx == SPI1) {
-    MODIFY_REG(SPI_Port->CRL,
-      (NSS_0_Pin_Mask | SCK_Pin_Mask | MISO_Pin_Mask | MOSI_Pin_Mask), (
-        ((GPIO_AF_PP | GPIO_IOS_50) << (SCK_Pin_Pos * 4U))
-      | ((GPIO_AF_PP | GPIO_IOS_50) << (MISO_Pin_Pos * 4U))
-      | ((GPIO_AF_PP | GPIO_IOS_50) << (MOSI_Pin_Pos * 4U))
-      | ((GPIO_GPO_PP | GPIO_IOS_2) << (NSS_0_Pin_Pos * 4U))
+    MODIFY_REG(SPI1_Port->CRL,
+      ((0xf << (SPI1_SCK_Pin * 4U)) | (0xf << (SPI1_MISO_Pin * 4U)) | (0xf << (SPI1_MISO_Pin * 4U))), (
+        ((GPIO_AF_PP | GPIO_IOS_50) << (SPI1_SCK_Pin * 4U))
+      | ((GPIO_AF_PP | GPIO_IOS_50) << (SPI1_MISO_Pin * 4U))
+      | ((GPIO_AF_PP | GPIO_IOS_50) << (SPI1_MOSI_Pin * 4U))
+    ));
+
+    MODIFY_REG(SPI1_Port->CRL,
+      (0xf << (SPI1_NSS_0_Pin * 4U)), (
+        ((GPIO_GPO_PP | GPIO_IOS_2) << (SPI1_NSS_0_Pin * 4U))
     ));
   }
 
   /* set ready NSS pins for the multimaster mode */
-  NSS_0_H;
+  SPI1_NSS_0_H;
 
   /* Enbale SPI master mode */
   SET_BIT(SPIx->CR1, SPI_CR1_MSTR);

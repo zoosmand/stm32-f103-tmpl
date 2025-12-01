@@ -26,10 +26,10 @@ ErrorStatus I2C_Init(I2C_TypeDef* I2Cx) {
   /* Condigure PB6 - SCL, PB7 - SDA, 2MHz frequency, alternative*/
 
   if (I2Cx == I2C1) {
-    MODIFY_REG(I2C_Port->CRL,
-      (SCL_Pin_Mask | SDA_Pin_Mask), (
-        ((GPIO_AF_OD | GPIO_IOS_2) << (SCL_Pin_Pos * 4U))
-      | ((GPIO_AF_OD | GPIO_IOS_2) << (SDA_Pin_Pos * 4U))
+    MODIFY_REG(I2C1_Port->CRL,
+      ((0xf << (I2C1_SCL_Pin * 4U)) | (0xf << (I2C1_SDA_Pin * 4U))), (
+        ((GPIO_AF_OD | GPIO_IOS_2) << (I2C1_SCL_Pin * 4U))
+      | ((GPIO_AF_OD | GPIO_IOS_2) << (I2C1_SDA_Pin * 4U))
     ));
   }
 
@@ -152,7 +152,7 @@ ErrorStatus I2C_WriteByte(I2C_TypeDef* I2Cx, uint8_t txByte){
     }
   }
   
-  /* Verify after transferring if trasmit buffer is empty */
+  /* Verify after transferring if transmit buffer is empty */
   tmout = I2C_BUS_TMOUT;
   while(!(PREG_CHECK(I2Cx->SR1, I2C_SR1_TXE_Pos))) {
     if (!(--tmout)) {

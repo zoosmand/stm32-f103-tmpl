@@ -243,8 +243,8 @@ static int SPI_Transfer(W25qxx_TypeDef* dev, const uint8_t cmd, int32_t addr, co
 
   uint32_t tmout = 0;
   /* Activate slave and wait the level is low */
-  NSS_0_L;
-  while (PREG_CHECK(SPI_Port->IDR, NSS_0_Pin_Pos));
+  SPI1_NSS_0_L;
+  while (PREG_CHECK(SPI1_Port->IDR, SPI1_NSS_0_Pin));
 
   /* write a command, a dummy byte has to be read further */
   dev->SPIx->DR = cmd;
@@ -326,7 +326,7 @@ static int SPI_Transfer(W25qxx_TypeDef* dev, const uint8_t cmd, int32_t addr, co
   }
 
   /* Deactivate slave */
-  NSS_0_H;
+  SPI1_NSS_0_H;
 
   return (0);
 }

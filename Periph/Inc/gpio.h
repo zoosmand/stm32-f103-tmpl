@@ -60,8 +60,29 @@
 
 /* GPIO definitions for OneWire bus */
 #define OneWire_PORT          GPIOB
-#define OneWire_PIN           GPIO_PIN_9_Pos
-#define OneWire_PIN_Pos       GPIO_PIN_9_Pos
+#define OneWire_PIN           GPIO_PIN_9
+
+
+/* GPIO definition for I2C1 bus */
+#define I2C1_SCL_Pin          GPIO_PIN_6
+#define I2C1_SDA_Pin          GPIO_PIN_7
+#define I2C1_Port             GPIOB
+
+
+/* GPIO definition for SPI1 bus */
+#define SPI1_NSS_0_Port       GPIOA
+#define SPI1_NSS_0_Pin        GPIO_PIN_4
+#define SPI1_NSS_1_Port       GPIOA
+#define SPI1_NSS_1_Pin        GPIO_PIN_3
+#define SPI1_NSS_2_Port       GPIOA
+#define SPI1_NSS_2_Pin        GPIO_PIN_2
+
+#define SPI1_SCK_Pin          GPIO_PIN_5
+#define SPI1_MISO_Pin         GPIO_PIN_6
+#define SPI1_MOSI_Pin         GPIO_PIN_7
+#define SPI1_Port             GPIOA
+
+
 
 
 /* Exported functions prototypes ---------------------------------------------*/

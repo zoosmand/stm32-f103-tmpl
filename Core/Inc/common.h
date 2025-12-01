@@ -282,7 +282,6 @@ typedef struct {
   uint8_t               I2C_Address;
   DMA_TypeDef*          DMAx;
   DMA_Channel_TypeDef*  DMAxTx;
-  DMA_Channel_TypeDef*  DMAxRx;
 } WHxxxx_TypeDef;
 
 

@@ -88,7 +88,7 @@ ErrorStatus GPIO_TM163x_Init(void) {
 ErrorStatus GPIO_OneWire_Init(void) {
 
   /* Check if pins are not locked */
-  if (PREG_CHECK(OneWire_PORT->LCKR, OneWire_PIN_Pos)) return (ERROR);
+  if (PREG_CHECK(OneWire_PORT->LCKR, OneWire_PIN)) return (ERROR);
 
   return (SUCCESS);
 }

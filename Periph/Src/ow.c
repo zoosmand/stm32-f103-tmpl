@@ -29,7 +29,7 @@ __STATIC_INLINE ErrorStatus OneWire_Enumerate(OneWireDevice_t*);
 
 ErrorStatus OneWireBus_Init(OneWireBus_TypeDef* busDev) {
   /* Init GPIO */
-  if (busDev->Port > 7) {
+  if (busDev->Pin > 7) {
     MODIFY_REG(
       busDev->Port->CRH, 
       (0x0f << ((busDev->Pin - 8) * 4)), 

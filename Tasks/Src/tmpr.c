@@ -49,7 +49,6 @@ static BMxX80_TypeDef bosch_0 = {
   // .SPINssPort   = NULL,
   // .SPINssPin    = NULL,
   .DMAx         = DMA1,
-  .DMAxTx       = DMA1_Channel6,
   .DMAxRx       = DMA1_Channel7,
 };
 
@@ -64,8 +63,8 @@ static BMxX80_TypeDef bosch_1 = {
   // .I2Cx         = NULL,
   // .I2C_Address  = NULL,
   .SPIx         = SPI1,
-  .SPINssPort   = GPIOA,
-  .SPINssPin    = 2,
+  .SPINssPort   = SPI1_NSS_2_Port,
+  .SPINssPin    = SPI1_NSS_2_Pin,
   .DMAx         = DMA1,
   .DMAxTx       = DMA1_Channel3,
   .DMAxRx       = DMA1_Channel2,
@@ -87,7 +86,7 @@ static OneWireDevice_t ow_pack[16];
 
 static OneWireBus_TypeDef ow_set = {
   .Count    = 16,
-  .Pin      = OneWire_PIN_Pos,
+  .Pin      = OneWire_PIN,
   .Port     = OneWire_PORT,
   .Devs     = ow_pack,
   .Lock     = DISABLE,

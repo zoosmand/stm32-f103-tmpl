@@ -111,14 +111,14 @@ static BMx280_U32_t bmx280_compensate_P_int32(BMx280_S32_t);
 static BMx280_U32_t bmx280_compensate_H_int32(BMx280_S32_t);
 
 /**
-  * @brief   Adjusts SPI bus according to device requirements.
+  * @brief   Adjusts I2C bus according to device requirements.
   * @param   dev: pointer to the device struct
   * @retval  none
   */
 __STATIC_INLINE void I2C_Adjust(BMxX80_TypeDef*);
 
 /**
-  * @brief   Adjusts SPI bus according to device requirements.
+  * @brief   Adjusts I2C bus according to device requirements.
   * @param   dev: pointer to the device struct
   * @retval  none
   */
@@ -461,7 +461,7 @@ static ErrorStatus I2C_Read(BMxX80_TypeDef *dev, uint8_t reg, uint16_t len) {
 
   uint32_t tmout;
 
-  if (I2C_Master_Send(dev->I2Cx, dev->I2C_Address, &reg, 1)) return (ERROR);
+  if (I2C_Master_Send(dev->I2Cx, dev->I2C_Address, &reg, 1)) return (I2C_Unconfigure(dev));
   I2C_Adjust(dev);
 
   /* Set counter */

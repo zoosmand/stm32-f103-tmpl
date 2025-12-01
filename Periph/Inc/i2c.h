@@ -27,21 +27,13 @@
 
 /* Private defines -----------------------------------------------------------*/
 #define I2C_BUS_TMOUT   10000 /* cycles timeout on I2C bus operations */
+// #define SCL_Pin        GPIO_PIN_6// #define SCL_Pin_Pos    GPIO_PIN_6_Pos// #define SCL_Pin_Mask   GPIO_PIN_6_Mask// #define SDA_Pin        GPIO_PIN_7// #define SDA_Pin_Pos    GPIO_PIN_7_Pos// #define SDA_Pin_Mask   GPIO_PIN_7_Mask// #define I2C_Port       GPIOB
 
-#define SCL_Pin        GPIO_PIN_6
-#define SCL_Pin_Pos    GPIO_PIN_6_Pos
-#define SCL_Pin_Mask   GPIO_PIN_6_Mask
-#define SDA_Pin        GPIO_PIN_7
-#define SDA_Pin_Pos    GPIO_PIN_7_Pos
-#define SDA_Pin_Mask   GPIO_PIN_7_Mask
-#define I2C_Port       GPIOB
+#define I2C_SM_FREQ     100
+#define I2C_FM_FREQ     400
 
-
-#define I2C_SM_FREQ   100
-#define I2C_FM_FREQ   400
-
-#define I2C_TRISE_SM  1000000/I2C_SM_FREQ /* 10000ns */
-#define I2C_TRISE_FM  1000000/I2C_FM_FREQ /* 2500ns */
+#define I2C_TRISE_SM    1000000/I2C_SM_FREQ /* 10000ns */
+#define I2C_TRISE_FM    1000000/I2C_FM_FREQ /* 2500ns */
 
 /* Private defines -----------------------------------------------------------*/
 

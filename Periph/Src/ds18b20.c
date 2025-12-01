@@ -95,7 +95,7 @@ static ErrorStatus dS18B20_ReadScratchpad(OneWireDevice_t* dev) {
 
 // -------------------------------------------------------------  
 static ErrorStatus dS18B20_ConvertTemperature(OneWireDevice_t* dev) {
-  if (dev->Addr) {
+  if (dev->Lock == DISABLE) {
     if (OneWire_MatchROM(dev)) return 1;
     uint8_t pps = OneWire_ReadPowerSupply(dev);
 

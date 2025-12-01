@@ -38,8 +38,8 @@ static Max72xx_TypeDef maxDisplay_0 = {
   .SegCnt       = MAX72XX_SEG_CNT,
   .MaxSegCnt    = MAX72XX_MAX_SEG_CNT,
   .BufPtr       = maxDisplay_0_data,
-  .SPINssPort   = GPIOA,
-  .SPINssPin    = NSS_1_Pin_Pos,
+  .SPINssPort   = SPI1_NSS_1_Port,
+  .SPINssPin    = SPI1_NSS_1_Pin,
   .SPIx         = SPI1,
   .DMAx         = DMA1,
   .DMAxTx       = DMA1_Channel3,
@@ -66,7 +66,6 @@ static WHxxxx_TypeDef whDisplay_1602 = {
   .I2C_Address  = WHxxxx_I2C_ADDR,
   .DMAx         = DMA1,
   .DMAxTx       = DMA1_Channel6,
-  .DMAxRx       = DMA1_Channel7,
 };
 
 
@@ -76,7 +75,6 @@ static WHxxxx_TypeDef whDisplay_2004 = {
   .I2C_Address  = WHxxxx_I2C_ADDR,
   .DMAx         = DMA1,
   .DMAxTx       = DMA1_Channel6,
-  .DMAxRx       = DMA1_Channel7,
 };
 
 

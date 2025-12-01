@@ -108,7 +108,7 @@ __STATIC_INLINE ErrorStatus SPI_Unconfigure(BMxX80_TypeDef*);
 
 __STATIC_INLINE void SPI_Adjust(BMxX80_TypeDef* dev) {
   
-  uint8_t pump = 0;
+  // uint8_t pump = 0;
   
   /* adjust frequency divider, 0b010 = 8, (PCLK)72/8 = 9MHz */
   /* set 8-bit data buffer length */ 

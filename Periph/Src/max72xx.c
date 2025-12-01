@@ -20,6 +20,7 @@
 #include "max72xx.h"
 
 /* Private variables ---------------------------------------------------------*/
+#ifdef MAX_DSPL
 static const uint16_t maxInit[15] = {
   0x0c00, // 0x0c - Shutdown,     0x00 - Shutdown
   0x0f00, // 0x0f - DisplayTest,  0x00 - Off, 0x01 - On
@@ -37,6 +38,7 @@ static const uint16_t maxInit[15] = {
   0x0c01, // 0x0c - Run,          0x01 - Normal operation 
   0x0000  // 0x00 - NOP
 };
+#endif /* ifdef MAX_DSPL */
 
 
 /* Private function prototypes -----------------------------------------------*/
@@ -127,7 +129,7 @@ ErrorStatus MAX72xx_Init(Max72xx_TypeDef* dev) {
   #else
     dev->Lock = ENABLE;
     return (ERROR);
-  #endif
+  #endif /* ifdef MAX_DSPL */
 }
 
 
@@ -236,6 +238,7 @@ __STATIC_INLINE ErrorStatus SPI_Write(Max72xx_TypeDef* dev, uint16_t* buf) {
 
     _delay_us(5);
 
+    return (SUCCESS);
 }
 
 
