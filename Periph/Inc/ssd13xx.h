@@ -33,8 +33,6 @@
 
 //////////////////////////////////////////////////////////////////////////
 ErrorStatus SSD13xx_Init(SSD13xx_TypeDef*);
-int __attribute__((weak)) putc_dspl_5x7(char);
-int __attribute__((weak)) putc_dspl_10x14(char);
 int __attribute__((weak)) putc_dspl_ssd(char);
 
 

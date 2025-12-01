@@ -68,13 +68,6 @@ static uint8_t ssd13xxCurrentCurPosParams[8];
 static ErrorStatus sSD13xx_WriteCommand(SSD13xx_TypeDef*, uint8_t);
 
 /**
- * @brief  Writes/Sends a data to SSD13xx display.
- * @param  data: ssd13xx data byte
- * @retval status of operation
- */
-static ErrorStatus sSD13xx_WriteDataByte(SSD13xx_TypeDef*, uint8_t);
-
-/**
  * @brief  Writes/Sends a text buffer to SSD13xx display.
  * @param  buf: pointer to the character/text buffer
  * @param  len: buffer length
@@ -83,18 +76,123 @@ static ErrorStatus sSD13xx_WriteDataByte(SSD13xx_TypeDef*, uint8_t);
  */
 static ErrorStatus sSD13xx_WriteBuf(SSD13xx_TypeDef*, const uint8_t*, uint16_t, uint8_t*);
 
+/**
+  * @brief   Adjusts I2C bus according to device requirements.
+  * @param   dev: pointer to the device struct
+  * @retval  none
+  */
+__STATIC_INLINE void i2c_dma_configure(SSD13xx_TypeDef*);
+
+/**
+  * @brief   Adjusts I2C bus according to device requirements.
+  * @param   dev: pointer to the device struct
+  * @retval  none
+  */
+__STATIC_INLINE ErrorStatus i2c_dma_unconfigure(SSD13xx_TypeDef*);
+
+/**
+  * @brief  Transmits in master mode an amount of data.
+  * @param  dev Pointer to the target device structure
+  * @param  buf Pointer to data buffer
+  * @param  len Amount of data to be sent
+  * @return transmit status
+  */
+__STATIC_INLINE ErrorStatus i2c_master_send(SSD13xx_TypeDef*, uint8_t*, uint16_t);
 
 
 
 
 
 /******************************************************************************/
+// ----------------------------------------------------------------------------
+
+__STATIC_INLINE void i2c_dma_configure(SSD13xx_TypeDef* dev) {
+
+  /* Disable DMA transfer */
+  PREG_CLR(dev->DMAxTx->CCR, DMA_CCR_EN_Pos);
+  /* Clear ACK bnit */
+  PREG_CLR(dev->I2Cx->CR1, I2C_CR1_ACK_Pos);
+  /* configure DMA, Channel6 - TX */
+  /* set priority high*/
+  /* set memory to increment */
+  /* set dir bit, means reading from the bus */
+  MODIFY_REG(dev->DMAxTx->CCR, (DMA_CCR_PL_Msk | DMA_CCR_MINC_Msk | DMA_CCR_DIR_Msk), (DMA_CCR_PL_1 | DMA_CCR_MINC | DMA_CCR_DIR));
+  
+  /* set peripheral address */
+  dev->DMAxTx->CPAR = (uint32_t)&dev->I2Cx->DR;
+  
+}
+
 
 // ----------------------------------------------------------------------------
+
+__STATIC_INLINE ErrorStatus i2c_dma_unconfigure(SSD13xx_TypeDef* dev) {
+  
+  /* Clear correspondent DMA interrupt flags */
+  dev->DMAx->IFCR = (DMA_IFCR_CHTIF6_Msk | DMA_IFCR_CGIF6_Msk | DMA_IFCR_CTCIF6_Msk);
+  /* Clear DMA configuration */
+  dev->DMAxTx->CPAR   = 0UL;
+  dev->DMAxTx->CMAR   = 0UL;
+  dev->DMAxTx->CNDTR  = 0UL;
+  dev->DMAxTx->CCR    = 0UL;
+  
+  /* Disable DMA transfer on the bus */
+  PREG_CLR(dev->I2Cx->CR2, I2C_CR2_DMAEN);
+  
+  /* Disable I2C bus */
+  I2C_Stop(dev->I2Cx);
+  
+  return (ERROR);
+}
+
+
+// ----------------------------------------------------------------------------
+
+__STATIC_INLINE ErrorStatus i2c_master_send(SSD13xx_TypeDef* dev, uint8_t *buf, uint16_t len) {
+  
+  uint32_t tmout;
+
+  /* Adjust I2C bus with DMA transfer */
+  i2c_dma_configure(dev);
+  
+  /* Start bus transmission */
+  if (I2C_Start(dev->I2Cx)) { return (i2c_dma_unconfigure(dev)); }
+  if (I2C_SendAddress(dev->I2Cx, dev->I2C_Address, TX)) { return (i2c_dma_unconfigure(dev)); }
+
+  // _delay_ms(1);
+
+  /* Set counter */
+  dev->DMAxTx->CNDTR = len;
+  /* Set buffer pointer address */
+  dev->DMAxTx->CMAR = (uint32_t)buf;
+  /* Enable receiving DMA transfer */
+  PREG_SET(dev->I2Cx->CR2, I2C_CR2_DMAEN_Pos);
+  /* Enable DMS transfer*/
+  PREG_SET(dev->DMAxTx->CCR, DMA_CCR_EN_Pos);
+  
+  /* Wait for transfer is complete */
+  tmout = I2C_BUS_TMOUT;
+  while(!(PREG_CHECK(dev->DMAx->ISR, DMA_ISR_TCIF6_Pos))) {
+    if (!(--tmout)) return (i2c_dma_unconfigure(dev));
+  }
+
+  /* Verify after transferring if transmit buffer is empty */
+  tmout = I2C_BUS_TMOUT;
+  while(!(PREG_CHECK(dev->I2Cx->SR1, I2C_SR1_TXE_Pos))) {
+    if (!(--tmout)) { return (i2c_dma_unconfigure(dev)); }
+  }
+
+  /* Unconfigure DMA and stop the I2C bus */
+  i2c_dma_unconfigure(dev);
+  return (SUCCESS);
+}
+
+
+
+// ----------------------------------------------------------------------------
+
 ErrorStatus SSD13xx_Init(SSD13xx_TypeDef* dev) {
 
-  I2C_Instance = dev->I2Cx;
-  
   /* Initial delay according ssd1315 documentation */
   _delay_ms(15);
 
@@ -108,19 +206,10 @@ ErrorStatus SSD13xx_Init(SSD13xx_TypeDef* dev) {
     if (sSD13xx_WriteCommand(dev, ssd13xxClrDspl[i])) return (ERROR);
   }
 
-  if (I2C_Start(dev->I2Cx)) return (ERROR);
-  _delay_us(1);
-  /* --- Control ACK on sending address --- */
-  if (I2C_SendAddress(dev->I2Cx, dev->I2C_Address, TX)) return (ERROR);
-  /* --- Send control byte --- */
-  if (sSD13xx_WriteDataByte(dev, (uint8_t)((1 << SSD13xx_DC_BIT) & ~(1 << SSD13xx_Co_BIT)))) return (ERROR);
+  dev->BufPrt[0] = (uint8_t)((1 << SSD13xx_DC_BIT) & ~(1 << SSD13xx_Co_BIT));
 
-  for (uint8_t i = 0; i < 8; i++) {
-    for (uint8_t y = 0; y < 128; y++) {
-      if (sSD13xx_WriteDataByte(dev, 0x00)) return (ERROR);
-    }
-  }
-  I2C_Stop(dev->I2Cx);
+  // if (i2c_master_send(dev, dev->BufPrt, dev->BufSize)) return (ERROR);
+  if (I2C_Master_Send(dev->I2Cx, dev->I2C_Address, dev->BufPrt, dev->BufSize)) return (ERROR);
 
   /* --- Initialize the init cursor position --- */
   putc_dspl('\n');
@@ -132,21 +221,15 @@ ErrorStatus SSD13xx_Init(SSD13xx_TypeDef* dev) {
 
 
 // ----------------------------------------------------------------------------
+
 static ErrorStatus sSD13xx_WriteCommand(SSD13xx_TypeDef* dev, uint8_t cmd) {
 
-  if (I2C_Start(dev->I2Cx)) return (ERROR);
-  _delay_us(1);
+  uint8_t cmdBuf[2] = {
+    (uint8_t)(~(1 << SSD13xx_Co_BIT) & ~(1 << SSD13xx_DC_BIT)),
+    cmd
+  };
 
-  /* --- Control ACK on sending address --- */
-  if (I2C_SendAddress(dev->I2Cx, SSD1315_I2C_ADDR, TX)) return (ERROR);
-  
-  /* --- Send control byte --- */
-  if (I2C_WriteByte(dev->I2Cx, (uint8_t)(~(1 << SSD13xx_Co_BIT) & ~(1 << SSD13xx_DC_BIT)))) return (ERROR);
-  
-  /* --- Send data byte --- */
-  if (I2C_WriteByte(dev->I2Cx, cmd)) return (ERROR);
-
-  I2C_Stop(dev->I2Cx);
+  if (i2c_master_send(dev, cmdBuf, 2)) return (ERROR);
 
   return (SUCCESS);
 }
@@ -155,39 +238,29 @@ static ErrorStatus sSD13xx_WriteCommand(SSD13xx_TypeDef* dev, uint8_t cmd) {
 
 
 // ----------------------------------------------------------------------------
-static ErrorStatus sSD13xx_WriteDataByte(SSD13xx_TypeDef* dev, uint8_t data) {
-  /* --- Send data byte --- */
-  if (I2C_WriteByte(dev->I2Cx, data)) return (ERROR);
-  
-  return (SUCCESS);
-}
 
-
-
-
-// ----------------------------------------------------------------------------
 static ErrorStatus sSD13xx_WriteBuf(SSD13xx_TypeDef* dev, const uint8_t* buf, uint16_t len, uint8_t* pos) {
-
+  
   /* --- Set cursor position --- */
   for (uint8_t i = 0; i < 8; i++) {
-    if (sSD13xx_WriteCommand(dev, pos[i])) return (1);
+    if (sSD13xx_WriteCommand(dev, pos[i])) return (ERROR);
   }
   
   uint8_t step_left = 6;
   uint8_t step_up = 1;
-
+  
   switch (len) {
-  case 24:
+    case 24:
     step_left = 12;
     step_up = 2;
     break;
-  
-  default:
+    
+    default:
     // step_left = 6;
     // step_up = 1;
     break;
   }
-
+  
   if (((pos[4] + 6) & 0x7f) < pos[3]) {
     pos[3] = 0x00;
     pos[4] = step_left;
@@ -206,29 +279,23 @@ static ErrorStatus sSD13xx_WriteBuf(SSD13xx_TypeDef* dev, const uint8_t* buf, ui
   //   pos[3] = pos[4] + 1;
   //   pos[4] = pos[4] + 12;
   // }
-
-  /* --- Write the buffer --- */
-  if (I2C_Start(dev->I2Cx)) return (1);
-  _delay_us(1);
-
-  /* --- Control ACK on sending address --- */
-  if (I2C_SendAddress(dev->I2Cx, dev->I2C_Address, TX)) return (1);
-
-  /* --- Send control byte --- */
-  if (sSD13xx_WriteDataByte(dev, (uint8_t)((1 << SSD13xx_DC_BIT) & ~(1 << SSD13xx_Co_BIT)))) return (1);
-
-  /* --- Send buffer data --- */
+  
+  uint8_t cmdBuf[len + 1];
+  
+  cmdBuf[0] = (uint8_t)((1 << SSD13xx_DC_BIT) & ~(1 << SSD13xx_Co_BIT));
   for (uint8_t i = 0; i < len; i++) {
-    if (sSD13xx_WriteDataByte(dev, buf[i])) return (1);
+    cmdBuf[i + 1] = buf[i];
   }
-  I2C_Stop(dev->I2Cx);
-
-  return (0);
+  
+  if (i2c_master_send(dev, cmdBuf, (len + 1))) return (ERROR);
+  
+  return (SUCCESS);
 }
-
-
-
-
+    
+    
+    
+    
+// ----------------------------------------------------------------------------
 
 int __attribute__((weak)) putc_dspl_ssd(char ch) {
   
