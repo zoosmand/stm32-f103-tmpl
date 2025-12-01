@@ -15,6 +15,11 @@
 
 //////////////////////////////////////////////////////////////////////////
 
+#ifndef SSD_DSPL_MODEL
+#define SSD_DSPL_MODEL 1315
+#endif /* #ifndef SSD_DSPL_MODEL */
+
+
 #define SSD1306_I2C_ADDR    0x78 // SSD1306 I2C Address
 #define SSD1315_I2C_ADDR    0x3c // SSD1315 I2C Address
 #define SSD13xx_Co_BIT      7 // Co bit

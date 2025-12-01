@@ -25,6 +25,9 @@
 #include "main.h"
    
 /* Private typedef -----------------------------------------------------------*/
+#ifndef WH_DSPL_MODEL
+#define WH_DSPL_MODEL 1602
+#endif /* #ifndef WH_DSPL_MODEL */
 
 /* Private includes ----------------------------------------------------------*/
 

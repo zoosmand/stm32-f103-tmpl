@@ -4,17 +4,7 @@
     "*.h": "c",
     "*.s": "arm",
     "*.S": "arm",
-    "*.inc": "arm",
-    "any": "c",
-    "algorithm": "c",
-    "random": "c",
-    "fstream": "c",
-    "istream": "c",
-    "ostream": "c",
-    "stacktrace": "c",
-    "regex": "c",
-    "utility": "c",
-    "*.def": "c"
+    "*.inc": "arm"
   },
   "cortex-debug.variableUseNaturalFormat": false,
   "makefile.configureOnOpen": false

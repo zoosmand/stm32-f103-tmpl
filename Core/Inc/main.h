@@ -72,9 +72,7 @@ extern uint32_t sysCnt;
 extern uint32_t secCnt;
 
 
-
 /* Exported constants --------------------------------------------------------*/
-// #define MAX_DSPL
 
 
 /** Global Events Register Flags */
@@ -100,7 +98,10 @@ extern uint32_t secCnt;
 
 /* Exported defines -----------------------------------------------------------*/
 /* print standars output definitions */
+#ifndef PRINTF_DSPL_RF
 #define PRINTF_DSPL_RF    WH_DSPL_RF
+#endif /* #ifndef PRINTF_DSPL_RF */
+
 #define putc_dspl(ch)     DSPL_OUT(ch);
 
 /* Exported macro ------------------------------------------------------------*/
@@ -120,12 +121,6 @@ typedef struct {
   uint32_t  *counterReg;
   uint32_t  entranceFlag;
 } task_scheduler_t;
-
-
-// typedef struct {
-//   uint8_t   addr[8];
-//   uint8_t   spad[9];
-// } OneWireDevice_t;
 
 
 /* Private includes ----------------------------------------------------------*/

@@ -262,7 +262,7 @@ ErrorStatus WHxxxx_Print(WHxxxx_TypeDef* dev, uint8_t* buf, uint8_t len) {
 // ----------------------------------------------------------------------------
 
 int __attribute__((weak)) putc_dspl_wh(char ch) {
-  WHxxxx_TypeDef* dev = Get_WhDiplayDevice(WH_MODEL);
+  WHxxxx_TypeDef* dev = Get_WhDiplayDevice(WH_DSPL_MODEL);
   if (dev->Lock == DISABLE) dev->Lock = ENABLE; else return (ERROR);
 
   if ((FLAG_CHECK(&_DSPLREG_, _0DCF_)) && (FLAG_CHECK(&_DSPLREG_, _0ACF_))) {
