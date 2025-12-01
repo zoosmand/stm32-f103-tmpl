@@ -19,6 +19,10 @@
 #define SSD_DSPL_MODEL 1315
 #endif /* #ifndef SSD_DSPL_MODEL */
 
+#ifndef SSD_DSPL_FONT
+#define SSD_DSPL_FONT 1014
+#endif /* #ifndef SSD_DSPL_FONT */
+
 
 #define SSD1306_I2C_ADDR    0x78 // SSD1306 I2C Address
 #define SSD1315_I2C_ADDR    0x3c // SSD1315 I2C Address
@@ -28,9 +32,10 @@
 
 
 //////////////////////////////////////////////////////////////////////////
-int SSD13xx_Init(I2C_TypeDef*);
+ErrorStatus SSD13xx_Init(SSD13xx_TypeDef*);
 int __attribute__((weak)) putc_dspl_5x7(char);
 int __attribute__((weak)) putc_dspl_10x14(char);
+int __attribute__((weak)) putc_dspl_ssd(char);
 
 
 #ifdef __cplusplus

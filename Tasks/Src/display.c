@@ -78,11 +78,21 @@ static WHxxxx_TypeDef whDisplay_2004 = {
 };
 
 
+static SSD13xx_TypeDef ssdDisplay_1315 = {
+  .Lock         = DISABLE,
+  .I2Cx         = I2C1,
+  .I2C_Address  = SSD1315_I2C_ADDR,
+  .DMAx         = DMA1,
+  .DMAxTx       = DMA1_Channel6,
+};
+
+
 /* Private function prototypes ----------------------------------------------*/
 
 static ErrorStatus maxDisplayHealthCheck_Task(Max72xx_TypeDef*);
 static ErrorStatus tmDisplayHealthCheck_Task(TM163x_TypeDef*);
 static ErrorStatus whDisplayHealthCheck_Task(WHxxxx_TypeDef*);
+static ErrorStatus ssdDisplayHealthCheck_Task(SSD13xx_TypeDef*);
 
 
 
@@ -128,6 +138,14 @@ void DisplayHealthCheck_CronHandler(void) {
         /* TODO reinitialize, overwise clear rediness flag */
         printf("Cannot run WHxxxx display device\n");
         whDisplay_2004.Lock = ENABLE;
+      }
+    }
+
+    if (ssdDisplay_1315.Lock == DISABLE) {
+      if (ssdDisplayHealthCheck_Task(&ssdDisplay_1315)) {
+        /* TODO reinitialize, overwise clear rediness flag */
+        printf("Cannot run SSD13xx display device\n");
+        ssdDisplay_1315.Lock = ENABLE;
       }
     }
   }
@@ -187,6 +205,27 @@ WHxxxx_TypeDef* Get_WhDiplayDevice(uint16_t model) {
 // ----------------------------------------------------------------------------
 
 static ErrorStatus whDisplayHealthCheck_Task(WHxxxx_TypeDef* dev) {
+  
+  if (dev->Lock) return (ERROR);
+
+  return (SUCCESS);
+}
+
+
+
+/* ------------ SSD -------------- */
+// ----------------------------------------------------------------------------
+
+SSD13xx_TypeDef* Get_SsdDiplayDevice(uint16_t model) {
+  if (model == 1315) return &ssdDisplay_1315;
+  // if (model == 1306) return &ssdDisplay_1306;
+  return NULL;
+}
+
+
+// ----------------------------------------------------------------------------
+
+static ErrorStatus ssdDisplayHealthCheck_Task(SSD13xx_TypeDef* dev) {
   
   if (dev->Lock) return (ERROR);
 

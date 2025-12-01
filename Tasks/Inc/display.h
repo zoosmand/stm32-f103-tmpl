@@ -53,6 +53,13 @@ TM163x_TypeDef* Get_TmDiplayDevice(void);
  */
 WHxxxx_TypeDef* Get_WhDiplayDevice(uint16_t);
 
+/**
+ * @brief Return SSD display device struct pointer.
+ * @param model: four digits display model code
+ * @return device struct pointer
+ */
+SSD13xx_TypeDef* Get_SsdDiplayDevice(uint16_t);
+
 
 #ifdef __cplusplus
 }

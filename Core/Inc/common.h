@@ -288,6 +288,20 @@ typedef struct {
 // ----------------------------------------------------------------------------
 
 /**
+ * @brief   SSD13xx device type definition struct.
+ */
+typedef struct {
+  FunctionalState       Lock;
+  I2C_TypeDef*          I2Cx;
+  uint8_t               I2C_Address;
+  DMA_TypeDef*          DMAx;
+  DMA_Channel_TypeDef*  DMAxTx;
+} SSD13xx_TypeDef;
+
+
+// ----------------------------------------------------------------------------
+
+/**
  * @brief   OnwWire device type definition struct.
  */
 typedef struct {

@@ -123,9 +123,9 @@ void Cron_Handler(void) {
   
   /* Initialize I2C1 bus devices */
   if (FLAG_CHECK(&_ASREG_, I2C1_RF)) {
-    if (!BMx280_Init(Get_BoschDevice(0)))                 FLAG_SET(&_ASREG_, BMX280_RF);
-    if (!SSD13xx_Init(I2C1))                              FLAG_SET(&_ASREG_, SSD_DSPL_RF);
-    if (!WHxxxx_Init(Get_WhDiplayDevice(WH_DSPL_MODEL)))  FLAG_SET(&_ASREG_, WH_DSPL_RF);
+    if (!BMx280_Init(Get_BoschDevice(0)))                   FLAG_SET(&_ASREG_, BMX280_RF);
+    if (!SSD13xx_Init(Get_SsdDiplayDevice(SSD_DSPL_MODEL))) FLAG_SET(&_ASREG_, SSD_DSPL_RF);
+    if (!WHxxxx_Init(Get_WhDiplayDevice(WH_DSPL_MODEL)))    FLAG_SET(&_ASREG_, WH_DSPL_RF);
   }
 
   /* Display calibration */

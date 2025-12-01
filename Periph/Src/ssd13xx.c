@@ -12,7 +12,6 @@
 
 
 /* Private variables ---------------------------------------------------------*/
-static I2C_TypeDef* I2C_Instance;
 
 const static uint8_t ssd13xxInitParams[24] = {
   0xae,       // set display off
@@ -62,27 +61,27 @@ static uint8_t ssd13xxCurrentCurPosParams[8];
 /* Private function prototypes -----------------------------------------------*/
 
 /**
- * @brief  Writes/Sends a command to SSD13xx display
+ * @brief  Writes/Sends a command to SSD13xx display.
  * @param  cmd: ssd13xx command
- * @retval (int) status of operation
+ * @retval status of operation
  */
-static int sSD13xx_WriteCommand(uint8_t cmd);
+static ErrorStatus sSD13xx_WriteCommand(SSD13xx_TypeDef*, uint8_t);
 
 /**
- * @brief  Writes/Sends a data to SSD13xx display
+ * @brief  Writes/Sends a data to SSD13xx display.
  * @param  data: ssd13xx data byte
- * @retval (int) status of operation
+ * @retval status of operation
  */
-static int sSD13xx_WriteDataByte(uint8_t data);
+static ErrorStatus sSD13xx_WriteDataByte(SSD13xx_TypeDef*, uint8_t);
 
 /**
- * @brief  Writes/Sends a text buffer to SSD13xx display
+ * @brief  Writes/Sends a text buffer to SSD13xx display.
  * @param  buf: pointer to the character/text buffer
  * @param  len: buffer length
  * @param  pos: pointer to the cursor position
- * @retval (int) status of operation
+ * @retval status of operation
  */
-static int sSD13xx_WriteBuf(const uint8_t* buf, uint16_t len, uint8_t* pos);
+static ErrorStatus sSD13xx_WriteBuf(SSD13xx_TypeDef*, const uint8_t*, uint16_t, uint8_t*);
 
 
 
@@ -92,86 +91,86 @@ static int sSD13xx_WriteBuf(const uint8_t* buf, uint16_t len, uint8_t* pos);
 /******************************************************************************/
 
 // ----------------------------------------------------------------------------
-int SSD13xx_Init(I2C_TypeDef* i2c) {
+ErrorStatus SSD13xx_Init(SSD13xx_TypeDef* dev) {
 
-  I2C_Instance = i2c;
+  I2C_Instance = dev->I2Cx;
   
   /* Initial delay according ssd1315 documentation */
   _delay_ms(15);
 
   /* --- Initialization commands --- */
   for (uint8_t i = 0; i < sizeof(ssd13xxInitParams); i++) {
-    if (sSD13xx_WriteCommand(ssd13xxInitParams[i])) return (1);
+    if (sSD13xx_WriteCommand(dev, ssd13xxInitParams[i])) return (ERROR);
   }
 
     /* --- Clear display --- */
   for (uint8_t i = 0; i < sizeof(ssd13xxClrDspl); i++) {
-    if (sSD13xx_WriteCommand(ssd13xxClrDspl[i])) return (1);
+    if (sSD13xx_WriteCommand(dev, ssd13xxClrDspl[i])) return (ERROR);
   }
 
-  if (I2C_Start(I2C_Instance)) return (1);
+  if (I2C_Start(dev->I2Cx)) return (ERROR);
   _delay_us(1);
   /* --- Control ACK on sending address --- */
-  if (I2C_SendAddress(I2C_Instance, SSD1315_I2C_ADDR, TX)) return (1);
+  if (I2C_SendAddress(dev->I2Cx, dev->I2C_Address, TX)) return (ERROR);
   /* --- Send control byte --- */
-  if (sSD13xx_WriteDataByte((uint8_t)((1 << SSD13xx_DC_BIT) & ~(1 << SSD13xx_Co_BIT)))) return (1);
+  if (sSD13xx_WriteDataByte(dev, (uint8_t)((1 << SSD13xx_DC_BIT) & ~(1 << SSD13xx_Co_BIT)))) return (ERROR);
 
   for (uint8_t i = 0; i < 8; i++) {
     for (uint8_t y = 0; y < 128; y++) {
-      if (sSD13xx_WriteDataByte(0x00)) return (1);
+      if (sSD13xx_WriteDataByte(dev, 0x00)) return (ERROR);
     }
   }
-  I2C_Stop(I2C_Instance);
+  I2C_Stop(dev->I2Cx);
 
   /* --- Initialize the init cursor position --- */
   putc_dspl('\n');
  
-  return (0);
+  return (SUCCESS);
 }
 
 
 
 
 // ----------------------------------------------------------------------------
-static int sSD13xx_WriteCommand(uint8_t cmd) {
+static ErrorStatus sSD13xx_WriteCommand(SSD13xx_TypeDef* dev, uint8_t cmd) {
 
-  if (I2C_Start(I2C_Instance)) return (1);
+  if (I2C_Start(dev->I2Cx)) return (ERROR);
   _delay_us(1);
 
   /* --- Control ACK on sending address --- */
-  if (I2C_SendAddress(I2C_Instance, SSD1315_I2C_ADDR, TX)) return (1);
+  if (I2C_SendAddress(dev->I2Cx, SSD1315_I2C_ADDR, TX)) return (ERROR);
   
   /* --- Send control byte --- */
-  if (I2C_WriteByte(I2C_Instance, (uint8_t)(~(1 << SSD13xx_Co_BIT) & ~(1 << SSD13xx_DC_BIT)))) return (1);
+  if (I2C_WriteByte(dev->I2Cx, (uint8_t)(~(1 << SSD13xx_Co_BIT) & ~(1 << SSD13xx_DC_BIT)))) return (ERROR);
   
   /* --- Send data byte --- */
-  if (I2C_WriteByte(I2C_Instance, cmd)) return (1);
+  if (I2C_WriteByte(dev->I2Cx, cmd)) return (ERROR);
 
-  I2C_Stop(I2C_Instance);
+  I2C_Stop(dev->I2Cx);
 
-  return (0);
+  return (SUCCESS);
 }
 
 
 
 
 // ----------------------------------------------------------------------------
-static int sSD13xx_WriteDataByte(uint8_t data) {
+static ErrorStatus sSD13xx_WriteDataByte(SSD13xx_TypeDef* dev, uint8_t data) {
   /* --- Send data byte --- */
-  if (I2C_WriteByte(I2C_Instance, data)) return (1);
+  if (I2C_WriteByte(dev->I2Cx, data)) return (ERROR);
   
-  return (0);
+  return (SUCCESS);
 }
 
 
 
 
 // ----------------------------------------------------------------------------
-static int sSD13xx_WriteBuf(const uint8_t* buf, uint16_t len, uint8_t* pos) {
+static ErrorStatus sSD13xx_WriteBuf(SSD13xx_TypeDef* dev, const uint8_t* buf, uint16_t len, uint8_t* pos) {
 
   /* --- Set cursor position --- */
   for (uint8_t i = 0; i < 8; i++) {
-    if (sSD13xx_WriteCommand(pos[i])) return (1);
+    if (sSD13xx_WriteCommand(dev, pos[i])) return (1);
   }
   
   uint8_t step_left = 6;
@@ -209,56 +208,48 @@ static int sSD13xx_WriteBuf(const uint8_t* buf, uint16_t len, uint8_t* pos) {
   // }
 
   /* --- Write the buffer --- */
-  if (I2C_Start(I2C_Instance)) return (1);
+  if (I2C_Start(dev->I2Cx)) return (1);
   _delay_us(1);
 
   /* --- Control ACK on sending address --- */
-  if (I2C_SendAddress(I2C_Instance, SSD1315_I2C_ADDR, TX)) return (1);
+  if (I2C_SendAddress(dev->I2Cx, dev->I2C_Address, TX)) return (1);
 
   /* --- Send control byte --- */
-  if (sSD13xx_WriteDataByte((uint8_t)((1 << SSD13xx_DC_BIT) & ~(1 << SSD13xx_Co_BIT)))) return (1);
+  if (sSD13xx_WriteDataByte(dev, (uint8_t)((1 << SSD13xx_DC_BIT) & ~(1 << SSD13xx_Co_BIT)))) return (1);
 
   /* --- Send buffer data --- */
   for (uint8_t i = 0; i < len; i++) {
-    if (sSD13xx_WriteDataByte(buf[i])) return (1);
+    if (sSD13xx_WriteDataByte(dev, buf[i])) return (1);
   }
-  I2C_Stop(I2C_Instance);
+  I2C_Stop(dev->I2Cx);
 
   return (0);
 }
 
 
 
-/**
- * @brief  Writes/Sends character to the given display
- * @param  ch: character to write
- * @retval (int) status of operation
- */
-int __attribute__((weak)) putc_dspl_5x7(char ch) {
+
+
+int __attribute__((weak)) putc_dspl_ssd(char ch) {
+  
   if ((ch != 0x0a) && (ch != 0x0d)) {
-    sSD13xx_WriteBuf(font_dot_5x7[(((uint8_t)ch) - 32)], sizeof(font_dot_5x7_t), ssd13xxCurrentCurPosParams);
+    SSD13xx_TypeDef* dsplDev = Get_SsdDiplayDevice(SSD_DSPL_MODEL);
+
+    #if SSD_DSPL_FONT == 1014
+      sSD13xx_WriteBuf(dsplDev, font_dot_10x14[(((uint8_t)ch) - 32)], sizeof(font_dot_10x14_t), ssd13xxCurrentCurPosParams);
+    #elif SSD_DSPL_FONT == 57
+      sSD13xx_WriteBuf(dsplDev, font_dot_5x7[(((uint8_t)ch) - 32)], sizeof(font_dot_5x7_t), ssd13xxCurrentCurPosParams);
+    #endif
   } else {
-    for (uint8_t i = 0; i < sizeof(ssd13xxInitCurPosParams_5x7); i++) {
-      ssd13xxCurrentCurPosParams[i] = ssd13xxInitCurPosParams_5x7[i];
-    }
-  }
-  return (0);
-}
-
-
-
-/**
- * @brief  Writes/Sends character to the given display
- * @param  ch: character to write
- * @retval (int) status of operation
- */
-int __attribute__((weak)) putc_dspl_10x14(char ch) {
-  if ((ch != 0x0a) && (ch != 0x0d)) {
-    sSD13xx_WriteBuf(font_dot_10x14[(((uint8_t)ch) - 32)], sizeof(font_dot_10x14_t), ssd13xxCurrentCurPosParams);
-  } else {
-    for (uint8_t i = 0; i < sizeof(ssd13xxInitCurPosParams_10x14); i++) {
-      ssd13xxCurrentCurPosParams[i] = ssd13xxInitCurPosParams_10x14[i];
-    }
+    #if SSD_DSPL_FONT == 1014
+      for (uint8_t i = 0; i < sizeof(ssd13xxInitCurPosParams_10x14); i++) {
+        ssd13xxCurrentCurPosParams[i] = ssd13xxInitCurPosParams_10x14[i];
+      }
+    #elif SSD_DSPL_FONT == 57
+      for (uint8_t i = 0; i < sizeof(ssd13xxInitCurPosParams_5x7); i++) {
+        ssd13xxCurrentCurPosParams[i] = ssd13xxInitCurPosParams_5x7[i];
+      }
+    #endif
   }
   return (0);
 }
