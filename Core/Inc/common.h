@@ -294,7 +294,7 @@ typedef struct {
   FunctionalState       Lock;
   I2C_TypeDef*          I2Cx;
   uint8_t               I2C_Address;
-  uint8_t*              BufPrt;
+  uint8_t*              BufPtr;
   uint16_t              BufSize;
   DMA_TypeDef*          DMAx;
   DMA_Channel_TypeDef*  DMAxTx;

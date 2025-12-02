@@ -83,7 +83,7 @@ static SSD13xx_TypeDef ssdDisplay_1315 = {
   .Lock         = DISABLE,
   .I2Cx         = I2C1,
   .I2C_Address  = SSD1315_I2C_ADDR,
-  .BufPrt       = ssd1315Buffer,
+  .BufPtr       = ssd1315Buffer,
   .BufSize      = (8 * 128 + 1),
   .DMAx         = DMA1,
   .DMAxTx       = DMA1_Channel6,
@@ -222,9 +222,9 @@ static ErrorStatus whDisplayHealthCheck_Task(WHxxxx_TypeDef* dev) {
 SSD13xx_TypeDef* Get_SsdDiplayDevice(uint16_t model) {
 
   if (model == 1315) {
-    for (uint16_t i = 0; i < (sizeof(ssd1315Buffer) + 1); i++) {
-      ssd1315Buffer[i] = 0;
-    }
+    // for (uint16_t i = 0; i < (sizeof(ssd1315Buffer) + 1); i++) {
+    //   ssd1315Buffer[i] = 0;
+    // }
     return &ssdDisplay_1315;
   }
   // if (model == 1306) return &ssdDisplay_1306;
