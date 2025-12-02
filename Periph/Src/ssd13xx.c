@@ -11,6 +11,7 @@
 
 
 
+
 /* Private variables ---------------------------------------------------------*/
 
 const static uint8_t ssd13xxInitParams[24] = {
@@ -65,7 +66,7 @@ static uint8_t ssd13xxCurrentCurPosParams[8];
  * @param  cmd: ssd13xx command
  * @retval status of operation
  */
-static ErrorStatus sSD13xx_WriteCommand(SSD13xx_TypeDef*, uint8_t);
+static ErrorStatus ssd13xx_send_command(SSD13xx_TypeDef*, uint8_t);
 
 /**
  * @brief  Writes/Sends a text buffer to SSD13xx display.
@@ -74,7 +75,7 @@ static ErrorStatus sSD13xx_WriteCommand(SSD13xx_TypeDef*, uint8_t);
  * @param  pos: pointer to the cursor position
  * @retval status of operation
  */
-static ErrorStatus sSD13xx_WriteBuf(SSD13xx_TypeDef*, const uint8_t*, uint16_t, uint8_t*);
+static ErrorStatus ssd13xx_send_buffer(SSD13xx_TypeDef*, const uint8_t*, uint16_t, uint8_t*);
 
 /**
   * @brief   Adjusts I2C bus according to device requirements.
@@ -97,7 +98,7 @@ __STATIC_INLINE ErrorStatus i2c_dma_unconfigure(SSD13xx_TypeDef*);
   * @param  len Amount of data to be sent
   * @return transmit status
   */
-__STATIC_INLINE ErrorStatus i2c_master_send(SSD13xx_TypeDef*, uint8_t*, uint16_t);
+__STATIC_INLINE ErrorStatus i2c_master_send(SSD13xx_TypeDef*);
 
 /**
   * @brief  Clears the diven device buffer.
@@ -164,25 +165,20 @@ __STATIC_INLINE ErrorStatus i2c_dma_unconfigure(SSD13xx_TypeDef* dev) {
 
 // ----------------------------------------------------------------------------
 
-__STATIC_INLINE ErrorStatus i2c_master_send(SSD13xx_TypeDef* dev, uint8_t *buf, uint16_t len) {
+__STATIC_INLINE ErrorStatus i2c_master_send(SSD13xx_TypeDef* dev) {
   
   uint32_t tmout;
   
   /* Adjust I2C bus with DMA transfer */
   i2c_dma_configure(dev);
   
-  // /* Start bus transmission */
-  // if (I2C_Start(dev->I2Cx)) { return (i2c_dma_unconfigure(dev)); }
-  // if (I2C_SendAddress(dev->I2Cx, dev->I2C_Address, TX)) { return (i2c_dma_unconfigure(dev)); }
-  
-  // _delay_ms(1);
-  
   /* Set counter */
-  dev->DMAxTx->CNDTR = len;
+  dev->DMAxTx->CNDTR = dev->BufSize;
   /* Set buffer pointer address */
-  dev->DMAxTx->CMAR = (uint32_t)buf;
+  dev->DMAxTx->CMAR = (uint32_t)dev->BufPtr;
   /* Enable receiving DMA transfer */
   PREG_SET(dev->I2Cx->CR2, I2C_CR2_DMAEN_Pos);
+
   /* Start bus transmission */
   if (I2C_Start(dev->I2Cx)) { return (i2c_dma_unconfigure(dev)); }
   if (I2C_SendAddress(dev->I2Cx, dev->I2C_Address, TX)) { return (i2c_dma_unconfigure(dev)); }
@@ -190,15 +186,14 @@ __STATIC_INLINE ErrorStatus i2c_master_send(SSD13xx_TypeDef* dev, uint8_t *buf, 
   /* Enable DMS transfer*/
   PREG_SET(dev->DMAxTx->CCR, DMA_CCR_EN_Pos);
   
-  
   /* Wait for transfer is complete */
-  tmout = I2C_BUS_TMOUT * 100000;
+  tmout = I2C_BUS_TMOUT * 1000;
   while(!(PREG_CHECK(dev->DMAx->ISR, DMA_ISR_TCIF6_Pos))) {
     if (!(--tmout)) return (i2c_dma_unconfigure(dev));
   }
   /* Verify after transferring if transmit buffer is empty */
-  tmout = I2C_BUS_TMOUT * 100000;
-  while(!(PREG_CHECK(dev->I2Cx->SR1, I2C_SR1_TXE_Pos))) {
+  tmout = I2C_BUS_TMOUT;
+  while(!(PREG_CHECK(dev->I2Cx->SR1, I2C_SR1_BTF_Pos))) {
     if (!(--tmout)) { return (i2c_dma_unconfigure(dev)); }
   }
   
@@ -228,35 +223,21 @@ ErrorStatus SSD13xx_Init(SSD13xx_TypeDef* dev) {
   _delay_ms(15);
 
   /* --- Initialization commands --- */
-  // for (uint16_t i = 0; i < (sizeof(ssd13xxInitParams) * 2); (i += 2)) {
-  //   // if (sSD13xx_WriteCommand(dev, ssd13xxInitParams[i])) return (ERROR);
-  //   dev->BufPtr[i] = (uint8_t)(~(1 << SSD13xx_Co_BIT) & ~(1 << SSD13xx_DC_BIT));
-  //   dev->BufPtr[i + 1] = ssd13xxInitParams[i / 2];
-  // }
-  // if (i2c_master_send(dev, dev->BufPtr, (sizeof(ssd13xxInitParams) * 2))) return (ERROR);
- 
   for (uint8_t i = 0; i < sizeof(ssd13xxInitParams); i++) {
-    if (sSD13xx_WriteCommand(dev, ssd13xxInitParams[i])) return (ERROR);
+    if (ssd13xx_send_command(dev, ssd13xxInitParams[i])) return (ERROR);
   }
     
   /* --- Clear display --- */
-  // for (uint8_t i = 0; i < (sizeof(ssd13xxClrDspl) * 2); (i +=2)) {
-  //   // if (sSD13xx_WriteCommand(dev, ssd13xxClrDspl[i])) return (ERROR);
-  //   dev->BufPtr[i] = (uint8_t)(~(1 << SSD13xx_Co_BIT) & ~(1 << SSD13xx_DC_BIT));
-  //   dev->BufPtr[i + 1] = ssd13xxClrDspl[i / 2];
-  // }
-  // if (i2c_master_send(dev, dev->BufPtr, (sizeof(ssd13xxClrDspl) * 2))) return (ERROR);
-
   for (uint8_t i = 0; i < sizeof(ssd13xxClrDspl); i++) {
-    if (sSD13xx_WriteCommand(dev, ssd13xxClrDspl[i])) return (ERROR);
+    if (ssd13xx_send_command(dev, ssd13xxClrDspl[i])) return (ERROR);
   }
 
+  dev->BufSize = (8 * 128 + 1);
   ssd13xx_clear_buffer(dev);
-  dev->BufPtr[0] = (uint8_t)((1 << SSD13xx_DC_BIT) & ~(1 << SSD13xx_Co_BIT));
+  dev->BufPtr[0] = SSD13xx_DATA_CTRL;
 
-  // if (i2c_master_send(dev, dev->BufPtr, dev->BufSize)) return (ERROR);
-  if (I2C_Master_Send(dev->I2Cx, dev->I2C_Address, dev->BufPtr, dev->BufSize)) return (ERROR);
-
+  if (i2c_master_send(dev)) return (ERROR);
+  
   /* --- Initialize the init cursor position --- */
   putc_dspl('\n');
  
@@ -268,14 +249,11 @@ ErrorStatus SSD13xx_Init(SSD13xx_TypeDef* dev) {
 
 // ----------------------------------------------------------------------------
 
-static ErrorStatus sSD13xx_WriteCommand(SSD13xx_TypeDef* dev, uint8_t cmd) {
+static ErrorStatus ssd13xx_send_command(SSD13xx_TypeDef* dev, uint8_t cmd) {
 
-  uint8_t cmdBuf[2] = {
-    (uint8_t)(~(1 << SSD13xx_Co_BIT) & ~(1 << SSD13xx_DC_BIT)),
-    cmd
-  };
+  uint8_t cmdBuf[2] = { SSD13xx_CMD_CTRL, cmd };
 
-  if (i2c_master_send(dev, cmdBuf, 2)) return (ERROR);
+  if (I2C_Master_Send(dev->I2Cx, dev->I2C_Address, cmdBuf, 2)) return (ERROR);
 
   return (SUCCESS);
 }
@@ -285,25 +263,14 @@ static ErrorStatus sSD13xx_WriteCommand(SSD13xx_TypeDef* dev, uint8_t cmd) {
 
 // ----------------------------------------------------------------------------
 
-static ErrorStatus sSD13xx_WriteBuf(SSD13xx_TypeDef* dev, const uint8_t* buf, uint16_t len, uint8_t* pos) {
+static ErrorStatus ssd13xx_send_buffer(SSD13xx_TypeDef* dev, const uint8_t* buf, uint16_t len, uint8_t* pos) {
   
   /* --- Set cursor position --- */
   for (uint8_t i = 0; i < 8; i++) {
-    if (sSD13xx_WriteCommand(dev, pos[i])) return (ERROR);
+    if (ssd13xx_send_command(dev, pos[i])) return (ERROR);
   }
-
-  // uint8_t posBuf[8 * 2];
   
-  // for (uint8_t i = 0; i < sizeof(posBuf); (i += 2)) {
-  //   posBuf[i] = (uint8_t)((1 << SSD13xx_DC_BIT) & ~(1 << SSD13xx_Co_BIT));
-  //   posBuf[i + 1] = pos[i / 2];
-  // }
-  
-  // if (i2c_master_send(dev, posBuf, sizeof(posBuf))) return (ERROR);
-
-  
-  uint8_t step_left = 6;
-  uint8_t step_up = 1;
+  uint8_t step_left, step_up;
   
   switch (len) {
     case 24:
@@ -312,8 +279,8 @@ static ErrorStatus sSD13xx_WriteBuf(SSD13xx_TypeDef* dev, const uint8_t* buf, ui
     break;
     
     default:
-    // step_left = 6;
-    // step_up = 1;
+    step_left = 6;
+    step_up = 1;
     break;
   }
   
@@ -336,14 +303,14 @@ static ErrorStatus sSD13xx_WriteBuf(SSD13xx_TypeDef* dev, const uint8_t* buf, ui
   //   pos[4] = pos[4] + 12;
   // }
   
-  uint8_t cmdBuf[len + 1];
+
+  dev->BufSize = (len + 1); // data and one byte for a command
+  // ssd13xx_clear_buffer(dev); // it is not necessary cleaning buffer here though it might help in some cases
+  dev->BufPtr[0] = SSD13xx_DATA_CTRL;
+
+  for (uint16_t i = 0; i < len; i++) { dev->BufPtr[i + 1] = buf[i]; }
   
-  cmdBuf[0] = (uint8_t)((1 << SSD13xx_DC_BIT) & ~(1 << SSD13xx_Co_BIT));
-  for (uint8_t i = 0; i < len; i++) {
-    cmdBuf[i + 1] = buf[i];
-  }
-  
-  if (i2c_master_send(dev, cmdBuf, (len + 1))) return (ERROR);
+  if (i2c_master_send(dev)) return (ERROR);
   
   return (SUCCESS);
 }
@@ -359,9 +326,9 @@ int __attribute__((weak)) putc_dspl_ssd(char ch) {
     SSD13xx_TypeDef* dsplDev = Get_SsdDiplayDevice(SSD_DSPL_MODEL);
 
     #if SSD_DSPL_FONT == 1014
-      sSD13xx_WriteBuf(dsplDev, font_dot_10x14[(((uint8_t)ch) - 32)], sizeof(font_dot_10x14_t), ssd13xxCurrentCurPosParams);
+      ssd13xx_send_buffer(dsplDev, font_dot_10x14[(((uint8_t)ch) - 32)], sizeof(font_dot_10x14_t), ssd13xxCurrentCurPosParams);
     #elif SSD_DSPL_FONT == 57
-      sSD13xx_WriteBuf(dsplDev, font_dot_5x7[(((uint8_t)ch) - 32)], sizeof(font_dot_5x7_t), ssd13xxCurrentCurPosParams);
+      ssd13xx_send_buffer(dsplDev, font_dot_5x7[(((uint8_t)ch) - 32)], sizeof(font_dot_5x7_t), ssd13xxCurrentCurPosParams);
     #endif
   } else {
     #if SSD_DSPL_FONT == 1014

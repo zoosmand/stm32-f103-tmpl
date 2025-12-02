@@ -60,7 +60,7 @@
 
 /* GPIO definitions for OneWire bus */
 #define OneWire_PORT          GPIOB
-#define OneWire_PIN           GPIO_PIN_9
+#define OneWire_PIN           GPIO_PIN_12
 
 
 /* GPIO definition for I2C1 bus */

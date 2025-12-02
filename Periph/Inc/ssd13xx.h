@@ -29,6 +29,8 @@
 #define SSD13xx_Co_BIT      7 // Co bit
 #define SSD13xx_DC_BIT      6 // DC bit (1 - data, 0 - command)
 
+#define SSD13xx_DATA_CTRL   (uint8_t)((1 << SSD13xx_DC_BIT) & ~(1 << SSD13xx_Co_BIT))
+#define SSD13xx_CMD_CTRL    (uint8_t)(~(1 << SSD13xx_Co_BIT) & ~(1 << SSD13xx_DC_BIT))
 
 
 //////////////////////////////////////////////////////////////////////////

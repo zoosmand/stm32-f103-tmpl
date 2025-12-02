@@ -84,7 +84,7 @@ static SSD13xx_TypeDef ssdDisplay_1315 = {
   .I2Cx         = I2C1,
   .I2C_Address  = SSD1315_I2C_ADDR,
   .BufPtr       = ssd1315Buffer,
-  .BufSize      = (8 * 128 + 1),
+  .BufSize      = 0,
   .DMAx         = DMA1,
   .DMAxTx       = DMA1_Channel6,
 };
