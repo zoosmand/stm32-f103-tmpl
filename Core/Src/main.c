@@ -79,7 +79,7 @@ int main(void) {
   /* ----------------------------------*/
   if (CRON_SYSTICK_EVENT) {
 
-    if (FLAG_CHECK(&_ASREG_, GPIO_LED_RF)) { Led_CronHandler(); }
+    if (FLAG_CHECK(&_ASREG_, HEARTBEAT_RF)) { Heartbeat_CronHandler(); }
 
   }
 
@@ -99,7 +99,7 @@ void Cron_Handler(void) {
   SET_BIT(CoreDebug->DEMCR, CoreDebug_DEMCR_TRCENA_Msk);
 
   /* Initialize GPIOs and buses */
-  if (!GPIO_LED_Init())         FLAG_SET(&_ASREG_, GPIO_LED_RF);
+  if (!GPIO_Heartbeat_Init())   FLAG_SET(&_ASREG_, GPIO_HB_RF);
   if (!GPIO_TM163x_Init())      FLAG_SET(&_ASREG_, GPIO_TM_RF);
   if (!GPIO_OneWire_Init())     FLAG_SET(&_ASREG_, GPIO_OW_RF);
   if (!SPI_Init(SPI1))          FLAG_SET(&_ASREG_, SPI1_RF);
@@ -107,6 +107,11 @@ void Cron_Handler(void) {
   
 
   /* Initialize devices based on their own bus */
+
+  if (FLAG_CHECK(&_ASREG_, GPIO_HB_RF)) {
+    if (!Heartbeat_Init(Get_HeartbeatDevice()))         FLAG_SET(&_ASREG_, HEARTBEAT_RF);
+  }
+
   if (FLAG_CHECK(&_ASREG_, GPIO_OW_RF)) {
     if (!OneWireBus_Init(Get_OneWireBusDevice()))     FLAG_SET(&_ASREG_, OW_BUS_RF);
   }

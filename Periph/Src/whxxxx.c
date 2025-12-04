@@ -168,9 +168,9 @@ __STATIC_INLINE ErrorStatus i2c_master_send(WHxxxx_TypeDef* dev, uint8_t *buf, u
     if (!(--tmout)) return (i2c_dma_unconfigure(dev));
   }
 
-  /* Verify after transferring if transmit buffer is empty */
+  /* Verify after transferring if transmition is finished */
   tmout = I2C_BUS_TMOUT;
-  while(!(PREG_CHECK(dev->I2Cx->SR1, I2C_SR1_TXE_Pos))) {
+  while(!(PREG_CHECK(dev->I2Cx->SR1, I2C_SR1_BTF_Pos))) {
     if (!(--tmout)) { return (i2c_dma_unconfigure(dev)); }
   }
 

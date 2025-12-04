@@ -42,25 +42,44 @@
 
 // ----------------------------------------------------------------------------
 
-ErrorStatus GPIO_LED_Init(void) {
+ErrorStatus GPIO_Heartbeat_Init(void) {
 
-  MODIFY_REG(
-    LED_GREEN_Port->CRH, 
-    LED_GREEN_Pin_Mask, 
-    ((GPIO_GPO_PP | GPIO_IOS_2) << ((LED_GREEN_Pin_Pos - 8) * 4))
-  );
+  // MODIFY_REG(
+  //   LED_GREEN_Port->CRH, 
+  //   LED_GREEN_Pin_Mask, 
+  //   ((GPIO_GPO_PP | GPIO_IOS_2) << ((LED_GREEN_Pin_Pos - 8) * 4))
+  // );
 
-  MODIFY_REG(
-    LED_BLUE_Port->CRH, 
-    LED_BLUE_Pin_Mask, 
-    ((GPIO_GPO_PP | GPIO_IOS_2) << ((LED_BLUE_Pin_Pos - 8) * 4))
-  );
+  // /* Init GPIO */
+  // if (LED_GREEN_Pin > 7) {
+  //   MODIFY_REG(
+  //     LED_GREEN_Port->CRH, 
+  //     (0x0f << ((LED_GREEN_Pin - 8) * 4)), 
+  //     ((GPIO_GPO_PP | GPIO_IOS_2) << ((LED_GREEN_Pin - 8) * 4))
+  //   );
+  // } else {
+  //   MODIFY_REG(
+  //     LED_GREEN_Port->CRL, 
+  //     (0x0f << ((LED_GREEN_Pin - 8) * 4)), 
+  //     ((GPIO_GPO_PP | GPIO_IOS_2) << (LED_GREEN_Pin * 4))
+  //   );
+  // }
 
-  MODIFY_REG(
-    LED_RED_Port->CRH, 
-    LED_RED_Pin_Mask, 
-    ((GPIO_GPO_PP | GPIO_IOS_2) << ((LED_RED_Pin_Pos - 8) * 4))
-  );
+  // PIN_H(LED_GREEN_Port, LED_GREEN_Pin);
+  // MODIFY_REG(
+  //   LED_BLUE_Port->CRH, 
+  //   LED_BLUE_Pin_Mask, 
+  //   ((GPIO_GPO_PP | GPIO_IOS_2) << ((LED_BLUE_Pin_Pos - 8) * 4))
+  // );
+
+  // MODIFY_REG(
+  //   LED_RED_Port->CRH, 
+  //   LED_RED_Pin_Mask, 
+  //   ((GPIO_GPO_PP | GPIO_IOS_2) << ((LED_RED_Pin_Pos - 8) * 4))
+  // );
+
+  if (PREG_CHECK(HEARTBEAT_LED_Port->LCKR, HEARTBEAT_LED_Pin)) return (ERROR);
+
 
   return (SUCCESS);
 }

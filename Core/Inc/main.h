@@ -81,7 +81,7 @@ extern uint32_t secCnt;
 
 
 /** Rediness Services Register Flags */
-#define GPIO_LED_RF       0
+#define GPIO_HB_RF        0
 #define GPIO_TM_RF        1
 #define GPIO_OW_RF        2
 #define SPI1_RF           3
@@ -94,6 +94,7 @@ extern uint32_t secCnt;
 #define EEPROM_RF         10
 #define BMX280_RF         11
 #define BMX680_RF         12
+#define HEARTBEAT_RF      13
 
 
 /* Exported defines -----------------------------------------------------------*/
@@ -114,18 +115,11 @@ extern uint32_t secCnt;
 
 
 /* Private structures -------------------------------------------------------------*/
-typedef struct {
-  uint32_t  *counter;
-  uint32_t  *counterSrc;
-  uint32_t  period;
-  uint32_t  *counterReg;
-  uint32_t  entranceFlag;
-} task_scheduler_t;
 
 
 /* Private includes ----------------------------------------------------------*/
 #include "common.h"
-#include "led.h"
+#include "heartbeat.h"
 #include "ow.h"
 #include "ds18b20.h"
 

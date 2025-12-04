@@ -191,7 +191,7 @@ __STATIC_INLINE ErrorStatus i2c_master_send(SSD13xx_TypeDef* dev) {
   while(!(PREG_CHECK(dev->DMAx->ISR, DMA_ISR_TCIF6_Pos))) {
     if (!(--tmout)) return (i2c_dma_unconfigure(dev));
   }
-  /* Verify after transferring if transmit buffer is empty */
+  /* Verify after transferring if transmition is finished */
   tmout = I2C_BUS_TMOUT;
   while(!(PREG_CHECK(dev->I2Cx->SR1, I2C_SR1_BTF_Pos))) {
     if (!(--tmout)) { return (i2c_dma_unconfigure(dev)); }

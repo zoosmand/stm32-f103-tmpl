@@ -30,7 +30,7 @@
             "PREFETCH_ENABLE=1",
             "STM32F103xB",
             "SWO_ITM=0",
-            "DSPL_OUT=putc_dspl_ssd",
+            "DSPL_OUT=putc_dspl_wh",
             "WH_DSPL_MODEL=2004",
             "SSD_DSPL_MODEL=1315",
             "SSD_DSPL_FONT=1014",

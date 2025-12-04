@@ -165,7 +165,7 @@
 /* --- Task control --- */
 #define CRON_SYSTICK_EVENT                                      FLAG_CHECK(&_GEREG_, _SYSTICKF_)
 #define CRON_SEC_EVENT                                          FLAG_CHECK(&_GEREG_, _SYSSECF_)
-#define TASK_CTRL(task)                                         if (FLAG_CHECK(task.scheduler->counterReg, task.scheduler->entranceFlag)) task.callback((uint32_t*)&task);
+#define TASK_CTRL(task)                                         if (FLAG_CHECK(task.Scheduler->counterReg, task.Scheduler->entranceFlag)) task.Callback((uint32_t*)&task);
 
 
 
@@ -188,6 +188,32 @@ typedef enum {
   RX    = 1,
   NOTR  = (!TX & !RX)
 } DataTransmitDirection_TypeDef;
+
+
+
+typedef struct {
+  uint32_t  *counter;
+  uint32_t  *counterSrc;
+  uint32_t  period;
+  uint32_t  *counterReg;
+  uint32_t  entranceFlag;
+} task_scheduler_t;
+
+
+// ----------------------------------------------------------------------------
+
+typedef struct {
+  task_scheduler_t*     Scheduler;
+  GPIO_TypeDef*         Port;
+  uint16_t              Pin;
+  void                  (*Callback)(uint32_t*);
+  uint32_t              *PauseCnt_1;
+  uint32_t              *SrcPauseCnt_1;
+  uint32_t              PauseValue_1;
+  uint32_t              *PauseCnt_2;
+  uint32_t              *SrcPauseCnt_2;
+  uint32_t              PauseValue_2;
+} HearbeatDevice_TypeDev;
 
 
 // ----------------------------------------------------------------------------

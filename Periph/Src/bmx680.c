@@ -98,6 +98,10 @@ __STATIC_INLINE void SPI_Adjust(BMxX80_TypeDef*);
   */
 __STATIC_INLINE ErrorStatus SPI_Unconfigure(BMxX80_TypeDef*);
 
+
+
+
+
 ////////////////////////////////////////////////////////////////////////////////
 
 

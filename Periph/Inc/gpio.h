@@ -30,21 +30,8 @@
 
 /* Private defines -----------------------------------------------------------*/
 /* GPIO definitions for LED indications */
-#define LED_GREEN_Pin         GPIO_PIN_13
-#define LED_GREEN_Pin_Pos     GPIO_PIN_13_Pos
-#define LED_GREEN_Pin_Mask    GPIO_PIN_13_Mask
-#define LED_GREEN_Port        GPIOB
-
-#define LED_BLUE_Pin          GPIO_PIN_15
-#define LED_BLUE_Pin_Pos      GPIO_PIN_15_Pos
-#define LED_BLUE_Pin_Mask     GPIO_PIN_15_Mask
-#define LED_BLUE_Port         GPIOB
-
-#define LED_RED_Pin           GPIO_PIN_8
-#define LED_RED_Pin_Pos       GPIO_PIN_8_Pos
-#define LED_RED_Pin_Mask      GPIO_PIN_8_Mask
-#define LED_RED_Port          GPIOA
-
+#define HEARTBEAT_LED_Pin     GPIO_PIN_13
+#define HEARTBEAT_LED_Port    GPIOC
 
 /* GPIO definitions for TM display */
 #define TM_DIO_Pin            GPIO_PIN_12
@@ -60,7 +47,7 @@
 
 /* GPIO definitions for OneWire bus */
 #define OneWire_PORT          GPIOB
-#define OneWire_PIN           GPIO_PIN_12
+#define OneWire_PIN           GPIO_PIN_9
 
 
 /* GPIO definition for I2C1 bus */
@@ -92,7 +79,7 @@
  * @param   none
  * @retval  status of operation
  */
-ErrorStatus GPIO_LED_Init(void);
+ErrorStatus GPIO_Heartbeat_Init(void);
 
 /**
  * @brief   Initialized GPIO pins for TM163x devices.
