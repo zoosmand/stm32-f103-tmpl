@@ -43,6 +43,8 @@
 #define BMx680_par_t2               0x8a
 #define BMx680_par_t3               0x8c
 
+#define BMx680_calib1               0x8a // 20
+#define BMx680_calib2               0xe1 // 16
 
 /* Exported functions prototypes ---------------------------------------------*/
 

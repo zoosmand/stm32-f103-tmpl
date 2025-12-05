@@ -130,16 +130,16 @@ ErrorStatus BMx680_Init(BMxX80_TypeDef* dev) {
   if (dev->RawBufPtr[0] != BME680_ID) return (ERROR);
   
   /* Get par_t1 calibration value */
-  if (bmx680_receive(dev, BMx680_par_t1, 3)) return (ERROR);
-  par_t1 = *(int16_t*)dev->RawBufPtr;
+  if (bmx680_receive(dev, BMx680_calib1, 20)) return (ERROR);
+  // par_t1 = *(int16_t*)dev->RawBufPtr;
 
-  /* Get par_t2 calibration value */
-  if (bmx680_receive(dev, BMx680_par_t2, 2)) return (ERROR);
-  par_t2 = *(int16_t*)dev->RawBufPtr;
+  // /* Get par_t2 calibration value */
+  // if (bmx680_receive(dev, BMx680_par_t2, 2)) return (ERROR);
+  // par_t2 = *(int16_t*)dev->RawBufPtr;
 
-  /* Get par_t3 calibration value */
-  if (bmx680_receive(dev, BMx680_par_t2, 1)) return (ERROR);
-  par_t3 = *(int8_t*)dev->RawBufPtr;
+  // /* Get par_t3 calibration value */
+  // if (bmx680_receive(dev, BMx680_par_t3, 1)) return (ERROR);
+  // par_t3 = *(int8_t*)dev->RawBufPtr;
 
 
   dev->Lock = DISABLE;
