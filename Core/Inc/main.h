@@ -39,6 +39,8 @@ extern "C" {
 /* Private includes ----------------------------------------------------------*/
 #include "common.h"
 #include "gpio.h"
+#include "monitor.h"
+#include "hchk.h"
 #include "i2c.h"
 #include "spi.h"
 #include "whxxxx.h"
@@ -52,6 +54,8 @@ extern "C" {
 #include "tmpr.h"
 #include "display.h"
 #include "tm163x.h"
+#include "ow.h"
+#include "ds18b20.h"
 
 
 #if defined(USE_FULL_ASSERT)
@@ -118,10 +122,6 @@ extern uint32_t secCnt;
 
 
 /* Private includes ----------------------------------------------------------*/
-#include "common.h"
-#include "heartbeat.h"
-#include "ow.h"
-#include "ds18b20.h"
 
 
 

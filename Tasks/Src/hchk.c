@@ -10,7 +10,7 @@
   */
 
   /* Includes ------------------------------------------------------------------*/
-#include "heartbeat.h"
+#include "hchk.h"
 
 
 static void LedToggle_Task(uint32_t *task);
@@ -42,7 +42,7 @@ static HearbeatDevice_TypeDev ledGreenHearbeatDevice = {
   .Callback       = &LedToggle_Task,
   .PauseCnt_1     = &ledGreenTaskPauseCnt_1,
   .SrcPauseCnt_1  = &sysCnt,
-  .PauseValue_1   = 15,
+  .PauseValue_1   = 1,
   .PauseCnt_2     = &ledGreenTaskPauseCnt_2,
   .SrcPauseCnt_2  = &sysCnt,
   .PauseValue_2   = 50,
@@ -60,89 +60,60 @@ static HearbeatDevice_TypeDev ledGreenHearbeatDevice = {
 
 // ----------------------------------------------------------------------------
 
-ErrorStatus Heartbeat_Init(HearbeatDevice_TypeDev* dev) {
-
-  /* Init GPIO */
-  if (dev->Pin > 7) {
-    MODIFY_REG(
-      dev->Port->CRH, 
-      (0x0f << ((dev->Pin - 8) * 4)), 
-      ((GPIO_GPO_PP | GPIO_IOS_2) << ((dev->Pin - 8) * 4))
-    );
-  } else {
-    MODIFY_REG(
-      dev->Port->CRL, 
-      (0x0f << ((dev->Pin - 8) * 4)), 
-      ((GPIO_GPO_PP | GPIO_IOS_2) << (dev->Pin * 4))
-    );
-  }
-
-  PIN_H(dev->Port, dev->Pin);
-
-  return (SUCCESS);
-}
-
-
-
-
-
-
-
 void Heartbeat_CronHandler(void) {
 
-  // Scheduler_Handler(&ledRedScheduler);
-  // Scheduler_Handler(&ledBlueScheduler);
   Scheduler_Handler(&ledGreenScheduler);
 
-  // TASK_CTRL(ledRedTask);
-  // TASK_CTRL(ledBlueTask);
   TASK_CTRL(ledGreenHearbeatDevice);
 
 }
 
 
+// ----------------------------------------------------------------------------
+
 static void LedToggle_Task(uint32_t *task) {
-//   __I task_led_toggle_t* tmpTask = (task_led_toggle_t*)task;
+  __I HearbeatDevice_TypeDev* tmpTask = (HearbeatDevice_TypeDev*)task;
 
-//   // Turn on the LED
-//   if (!FLAG_CHECK(tmpTask->scheduler->counterReg, 1)) {
-//     FLAG_SET(tmpTask->scheduler->counterReg, 1);
-//     PIN_L(tmpTask->port, tmpTask->pin);
-//     // Set up the first pause
-//     *tmpTask->pauseCnt_1 = *tmpTask->srcPauseCnt_1 + tmpTask->pauseValue_1;
-//     return;
-//   }
+  // Turn on the LED
+  if (!FLAG_CHECK(tmpTask->Scheduler->counterReg, 1)) {
+    FLAG_SET(tmpTask->Scheduler->counterReg, 1);
+    PIN_L(tmpTask->Port, tmpTask->Pin);
+    // Set up the first pause
+    *tmpTask->PauseCnt_1 = *tmpTask->SrcPauseCnt_1 + tmpTask->PauseValue_1;
+    return;
+  }
 
-//   // Handle the first pause
-//   if (!FLAG_CHECK(tmpTask->scheduler->counterReg, 2)) {
-//     if (*tmpTask->pauseCnt_1 > *tmpTask->srcPauseCnt_1) return;
-//     FLAG_SET(tmpTask->scheduler->counterReg, 2);
-//     return;
-//   }
+  // Handle the first pause
+  if (!FLAG_CHECK(tmpTask->Scheduler->counterReg, 2)) {
+    if (*tmpTask->PauseCnt_1 > *tmpTask->SrcPauseCnt_1) return;
+    FLAG_SET(tmpTask->Scheduler->counterReg, 2);
+    return;
+  }
 
-//   // Turn off the LED
-//   if (!FLAG_CHECK(tmpTask->scheduler->counterReg, 3)) {
-//     FLAG_SET(tmpTask->scheduler->counterReg, 3);
-//     PIN_H(tmpTask->port, tmpTask->pin);
-//     // Set up the second pause
-//     *tmpTask->pauseCnt_2 = *tmpTask->srcPauseCnt_2 + tmpTask->pauseValue_2;
-//     return;
-//   }
+  // Turn off the LED
+  if (!FLAG_CHECK(tmpTask->Scheduler->counterReg, 3)) {
+    FLAG_SET(tmpTask->Scheduler->counterReg, 3);
+    PIN_H(tmpTask->Port, tmpTask->Pin);
+    // Set up the second pause
+    *tmpTask->PauseCnt_2 = *tmpTask->SrcPauseCnt_2 + tmpTask->PauseValue_2;
+    return;
+  }
 
-//   // Handle the second pause
-//   if (!FLAG_CHECK(tmpTask->scheduler->counterReg, 4)) {
-//     if (*tmpTask->pauseCnt_2 > *tmpTask->srcPauseCnt_1) return;
-//     FLAG_SET(tmpTask->scheduler->counterReg, 4);
-//     return;
-//   }
+  // Handle the second pause
+  if (!FLAG_CHECK(tmpTask->Scheduler->counterReg, 4)) {
+    if (*tmpTask->PauseCnt_2 > *tmpTask->SrcPauseCnt_1) return;
+    FLAG_SET(tmpTask->Scheduler->counterReg, 4);
+    return;
+  }
 
-//   // Clear dedicated registry
-//   *tmpTask->scheduler->counterReg = 0;
+  // Clear dedicated registry
+  *tmpTask->Scheduler->counterReg = 0;
 
 }
 
 
 
+// ----------------------------------------------------------------------------
 
 HearbeatDevice_TypeDev* Get_HeartbeatDevice(void) {
   return &ledGreenHearbeatDevice;

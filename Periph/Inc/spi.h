@@ -15,6 +15,7 @@
   *
   ******************************************************************************
   */
+
 #ifndef __SPI_H
 #define __SPI_H
 
@@ -28,22 +29,6 @@
 
 /* Private defines -----------------------------------------------------------*/
 #define SPI_BUS_TMOUT   10000 /* cycles timeout on SPI bus operations */
-// #define NSS_0_Pin       GPIO_PIN_4
-// #define NSS_0_Pin_Pos   GPIO_PIN_4_Pos
-// #define NSS_0_Pin_Mask  GPIO_PIN_4_Mask
-// #define NSS_1_Pin       GPIO_PIN_3
-// #define NSS_1_Pin_Pos   GPIO_PIN_3_Pos
-// #define NSS_1_Pin_Mask  GPIO_PIN_3_Mask
-// #define SCK_Pin         GPIO_PIN_5
-// #define SCK_Pin_Pos     GPIO_PIN_5_Pos
-// #define SCK_Pin_Mask    GPIO_PIN_5_Mask
-// #define MISO_Pin        GPIO_PIN_6
-// #define MISO_Pin_Pos    GPIO_PIN_6_Pos
-// #define MISO_Pin_Mask   GPIO_PIN_6_Mask
-// #define MOSI_Pin        GPIO_PIN_7
-// #define MOSI_Pin_Pos    GPIO_PIN_7_Pos
-// #define MOSI_Pin_Mask   GPIO_PIN_7_Mask
-// #define SPI_Port        GPIOA
 
 #define SPI1_NSS_0_H         PIN_H(SPI1_Port, SPI1_NSS_0_Pin)
 #define SPI1_NSS_0_L         PIN_L(SPI1_Port, SPI1_NSS_0_Pin)

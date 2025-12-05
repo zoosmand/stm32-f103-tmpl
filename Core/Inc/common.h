@@ -206,6 +206,7 @@ typedef struct {
   task_scheduler_t*     Scheduler;
   GPIO_TypeDef*         Port;
   uint16_t              Pin;
+  FunctionalState       Lock;
   void                  (*Callback)(uint32_t*);
   uint32_t              *PauseCnt_1;
   uint32_t              *SrcPauseCnt_1;
