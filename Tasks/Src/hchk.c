@@ -1,7 +1,7 @@
 /**
   ******************************************************************************
   * @file           : hchk.c
-  * @brief          : This file contains Health check and monitoring procedures
+  * @brief          : This file contains health check and monitoring procedures
   *                   code.
   ******************************************************************************
   * @attention
@@ -28,9 +28,6 @@ __attribute__((section(".cron"))) static uint32_t hbCounter       = 0;
 __attribute__((section(".cron"))) static uint32_t hbRegister      = 0;
 __attribute__((section(".cron"))) static uint32_t blinkThreshold  = 0;
 
-
-
-/* ----------------------------------------------------------------------------- */
 static task_scheduler_t heartbeatScheduler = {
   .counter        = &hbCounter,
   .counterSrc     = &sysCnt,
@@ -53,9 +50,7 @@ static HearbeatDevice_TypeDev hearbeatLedDevice = {
 
 
 
-
 ////////////////////////////////////////////////////////////////////////////////
-
 
 
 
@@ -122,3 +117,9 @@ void Heartbeat_CronHandler(void) {
 HearbeatDevice_TypeDev* Get_HeartbeatDevice(void) {
   return &hearbeatLedDevice;
 }
+
+
+
+/* -------------------------------------------------------------------------- */
+/* -------------------------------------------------------------------------- */
+/* -------------------------------------------------------------------------- */

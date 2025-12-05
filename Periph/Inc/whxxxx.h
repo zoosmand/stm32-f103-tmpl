@@ -14,8 +14,9 @@
   *
   ******************************************************************************
   */
-#ifndef _DISPLAY_H
-#define _DISPLAY_H
+
+#ifndef _WHXXXX_DSPL_H
+#define _WHXXXX_DSPL_H
 
 #ifdef __cplusplus
  extern "C" {
@@ -56,6 +57,7 @@ ErrorStatus WHxxxx_Print(WHxxxx_TypeDef*, uint8_t*, uint8_t);
 
 
 /* Private defines -----------------------------------------------------------*/
+
 #define WHxxxx_I2C_ADDR       0x27 // WH1602 I2C Address
 #define WHxxxx_8BIT_BUS       0x03 // 8-bit initial bus initialization
 #define WHxxxx_CUR_UPLEFT     0x02 // Cursor positioin up an left
@@ -97,4 +99,4 @@ int __attribute__((weak)) putc_dspl_wh(char);
 #ifdef __cplusplus
 }
 #endif
-#endif // _DISPLAY_H
+#endif // _WHXXXX_DSPL_H

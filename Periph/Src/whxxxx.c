@@ -30,9 +30,11 @@
 #define _WR1NCMD(cmd) ((cmd & WHxxxx_4BIT_BUS_MASK)|(1<<WHxxxx_E)|(1<<WHxxxx_Bl))
 #define _WR2NCMD(cmd) ((cmd & WHxxxx_4BIT_BUS_MASK)|(1<<WHxxxx_Bl))
 
+
 /* Global variables ----------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
+
 static __attribute__((section(".cron"))) uint32_t _DSPLREG_ = 0;
 static uint16_t diplPrintPos = 0;
 static const uint16_t initParams[16] = {
@@ -47,9 +49,8 @@ static const uint16_t initParams[16] = {
 }; 
 
 
-
-
 /* Private function prototypes -----------------------------------------------*/
+
 /**
   * @brief   Adjusts I2C bus according to device requirements.
   * @param   dev: pointer to the device struct

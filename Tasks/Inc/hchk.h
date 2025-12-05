@@ -1,17 +1,25 @@
 /**
   ******************************************************************************
-  * @file           : led.h
-  * @brief          : Header for led.c file.
-  *                   This file contains the common defines of the LED functions.
+  * @file           : hchk.h
+  * @brief          : Header for hchk.c file.
+  *                   This file contains the common defines for health check and
+  *                   monitoring code.
   ******************************************************************************
   * @attention
+  *
+  * Copyright (c) 2025 Askug Ltd.
+  * All rights reserved.
+  *
+  * This software is licensed under terms that can be found in the LICENSE file
+  * in the root directory of this software component.
+  * If no LICENSE file comes with this software, it is provided AS-IS.
   *
   ******************************************************************************
   */
  
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __LED_H
-#define __LED_H
+#ifndef __HCHK_H
+#define __HCHK_H
 
 #ifdef __cplusplus
   extern "C" {
@@ -20,24 +28,27 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 
-/* Private structures -------------------------------------------------------------*/
+
+/* Private structures --------------------------------------------------------*/
 
 
-void Heartbeat_CronHandler(void);
-// void LedToggle_Task(uint32_t*);
-
+/* Exported functions prototypes ---------------------------------------------*/
 
 /**
- * @brief   Returns OneWire device struct pointer.
- * @param   devNum: the number of the device in the set of the bus device
- * @return  the OneWire devices struct pointer
+ * @brief   Provides heartbeat CRON handler procedure.
+ * @return  none
+ */
+void Heartbeat_CronHandler(void);
+
+/**
+ * @brief   Returns the heartbeat device struct pointer.
+ * @return  the heartbeat devices struct pointer
  */
 HearbeatDevice_TypeDev* Get_HeartbeatDevice(void);
-
 
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __LED_H */
+#endif /* __HCHK_H */

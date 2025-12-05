@@ -26,7 +26,6 @@
 #endif
 
 
-
 /* Private defines -----------------------------------------------------------*/
 
 
@@ -34,7 +33,7 @@
 
 /**
  * @brief   Initialized Heartbeat monitoring.
- * @param   none
+ * @param   dev: a pointer to the heartbeat device structure
  * @retval  status of operation
  */
 ErrorStatus Heartbeat_Init(HearbeatDevice_TypeDev*);

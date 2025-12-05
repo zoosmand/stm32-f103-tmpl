@@ -20,8 +20,8 @@
 #include "display.h"
 
 
-/* Private variables ----------------------------------------------------------*/
-/* MAX display related data */
+/* Private variables ---------------------------------------------------------*/
+
 __attribute__((section(".cron"))) static uint32_t displayHealthCheckTaskCnt    = 0;
 __attribute__((section(".cron"))) static uint32_t displayHealthCheckTaskReg    = 0;
 
@@ -46,7 +46,6 @@ static Max72xx_TypeDef maxDisplay_0 = {
   .Lock         = DISABLE,
 };
 
-
 static TM163x_TypeDef tmDisplay_0 = {
   .PortSck      = TM_SCK_Port,
   .PortDio      = TM_DIO_Port,
@@ -59,7 +58,6 @@ static TM163x_TypeDef tmDisplay_0 = {
   .Lock         = DISABLE,
 };
 
-
 static WHxxxx_TypeDef whDisplay_1602 = {
   .Lock         = DISABLE,
   .I2Cx         = I2C1,
@@ -68,7 +66,6 @@ static WHxxxx_TypeDef whDisplay_1602 = {
   .DMAxTx       = DMA1_Channel6,
 };
 
-
 static WHxxxx_TypeDef whDisplay_2004 = {
   .Lock         = DISABLE,
   .I2Cx         = I2C1,
@@ -76,7 +73,6 @@ static WHxxxx_TypeDef whDisplay_2004 = {
   .DMAx         = DMA1,
   .DMAxTx       = DMA1_Channel6,
 };
-
 
 static uint8_t ssd1315Buffer[8 * 128 + 1];
 static SSD13xx_TypeDef ssdDisplay_1315 = {
@@ -240,3 +236,9 @@ static ErrorStatus ssdDisplayHealthCheck_Task(SSD13xx_TypeDef* dev) {
 
   return (SUCCESS);
 }
+
+
+
+/* -------------------------------------------------------------------------- */
+/* -------------------------------------------------------------------------- */
+/* -------------------------------------------------------------------------- */

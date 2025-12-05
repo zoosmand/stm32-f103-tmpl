@@ -27,9 +27,8 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-// #include "bmx280.h"
 
-/* Private structures -------------------------------------------------------------*/
+/* Private structures --------------------------------------------------------*/
 
 
 /* Exported functions prototypes ---------------------------------------------*/
@@ -41,7 +40,7 @@
 void BoschMeasurment_CronHandler(void);
 
 /**
- * @brief   Provides Bosch DS CRON handler procedure.
+ * @brief   Provides DS CRON handler procedure.
  * @return  none
  */
 void DsMeasurment_CronHandler(void);
