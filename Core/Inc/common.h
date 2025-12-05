@@ -165,7 +165,7 @@
 /* --- Task control --- */
 #define CRON_SYSTICK_EVENT                                      FLAG_CHECK(&_GEREG_, _SYSTICKF_)
 #define CRON_SEC_EVENT                                          FLAG_CHECK(&_GEREG_, _SYSSECF_)
-#define TASK_CTRL(task)                                         if (FLAG_CHECK(task.Scheduler->counterReg, task.Scheduler->entranceFlag)) task.Callback((uint32_t*)&task);
+// #define TASK_CTRL(task)                                         if (FLAG_CHECK(task.Scheduler->counterReg, task.Scheduler->entranceFlag)) task.Callback((uint32_t*)&task);
 
 
 
@@ -203,16 +203,15 @@ typedef struct {
 // ----------------------------------------------------------------------------
 
 typedef struct {
-  task_scheduler_t*     Scheduler;
+  // task_scheduler_t*     Scheduler;
   GPIO_TypeDef*         Port;
   uint16_t              Pin;
   FunctionalState       Lock;
-  uint32_t*             PauseCnt_1;
-  uint32_t*             SrcPauseCnt_1;
-  uint32_t              PauseValue_1;
-  uint32_t*             PauseCnt_2;
-  uint32_t*             SrcPauseCnt_2;
-  uint32_t              PauseValue_2;
+  uint8_t               BlinkCount;
+  uint32_t              BlinkDuration;
+  uint32_t              BlinkPause;
+  uint32_t*             BlinkThreshold;
+  uint32_t*             CounterSrc;
   ErrorStatus           (*Callback)(uint32_t*);
 } HearbeatDevice_TypeDev;
 

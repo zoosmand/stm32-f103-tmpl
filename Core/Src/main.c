@@ -83,6 +83,8 @@ int main(void) {
 
   }
 
+  /* TODO Put the MCU into the sleep mode */
+
 }
 
 
