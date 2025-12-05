@@ -192,11 +192,11 @@ typedef enum {
 
 
 typedef struct {
-  uint32_t  *counter;
-  uint32_t  *counterSrc;
-  uint32_t  period;
-  uint32_t  *counterReg;
-  uint32_t  entranceFlag;
+  uint32_t*             counter;
+  uint32_t*             counterSrc;
+  uint32_t              period;
+  uint32_t*             counterReg;
+  uint32_t              entranceFlag;
 } task_scheduler_t;
 
 
@@ -207,13 +207,13 @@ typedef struct {
   GPIO_TypeDef*         Port;
   uint16_t              Pin;
   FunctionalState       Lock;
-  void                  (*Callback)(uint32_t*);
-  uint32_t              *PauseCnt_1;
-  uint32_t              *SrcPauseCnt_1;
+  uint32_t*             PauseCnt_1;
+  uint32_t*             SrcPauseCnt_1;
   uint32_t              PauseValue_1;
-  uint32_t              *PauseCnt_2;
-  uint32_t              *SrcPauseCnt_2;
+  uint32_t*             PauseCnt_2;
+  uint32_t*             SrcPauseCnt_2;
   uint32_t              PauseValue_2;
+  ErrorStatus           (*Callback)(uint32_t*);
 } HearbeatDevice_TypeDev;
 
 
@@ -235,6 +235,7 @@ typedef struct {
   DMA_TypeDef*          DMAx;
   DMA_Channel_TypeDef*  DMAxTx;
   DMA_Channel_TypeDef*  DMAxRx;
+  ErrorStatus           (*Callback)(uint32_t*);
 } BMxX80_TypeDef;
 
 
@@ -255,6 +256,7 @@ typedef struct {
   DMA_TypeDef*          DMAx;
   DMA_Channel_TypeDef*  DMAxTx;
   DMA_Channel_TypeDef*  DMAxRx;
+  ErrorStatus           (*Callback)(uint32_t*);
 } W25qxx_TypeDef;
 
 
@@ -273,6 +275,7 @@ typedef struct {
   uint16_t              SPINssPin;
   DMA_TypeDef*          DMAx;
   DMA_Channel_TypeDef*  DMAxTx;
+  ErrorStatus           (*Callback)(uint32_t*);
 } Max72xx_TypeDef;
 
 
@@ -295,6 +298,7 @@ typedef struct {
   uint8_t               Dig5;
   uint8_t               Dig6;
   uint8_t               Dig7;
+  ErrorStatus           (*Callback)(uint32_t*);
 } TM163x_TypeDef;
 
 
@@ -309,6 +313,7 @@ typedef struct {
   uint8_t               I2C_Address;
   DMA_TypeDef*          DMAx;
   DMA_Channel_TypeDef*  DMAxTx;
+  ErrorStatus           (*Callback)(uint32_t*);
 } WHxxxx_TypeDef;
 
 
@@ -325,6 +330,7 @@ typedef struct {
   uint16_t              BufSize;
   DMA_TypeDef*          DMAx;
   DMA_Channel_TypeDef*  DMAxTx;
+  ErrorStatus           (*Callback)(uint32_t*);
 } SSD13xx_TypeDef;
 
 
@@ -340,6 +346,7 @@ typedef struct {
   uint8_t               Addr[8];
   uint8_t               Spad[9];
   uint32_t*             ParentBusPtr;
+  ErrorStatus           (*Callback)(uint32_t*);
 } OneWireDevice_t;
 
 /**
@@ -351,6 +358,7 @@ typedef struct {
   uint16_t              Pin;
   OneWireDevice_t*      Devs;
   uint8_t               Count;
+  ErrorStatus           (*Callback)(uint32_t*);
 } OneWireBus_TypeDef;
 
 
