@@ -30,7 +30,7 @@ ErrorStatus SPI_Init(SPI_TypeDef* SPIx) {
 
   if (SPIx == SPI1) {
     MODIFY_REG(SPI1_Port->CRL,
-      ((0xf << (SPI1_SCK_Pin * 4U)) | (0xf << (SPI1_MISO_Pin * 4U)) | (0xf << (SPI1_MISO_Pin * 4U))), (
+      ((0xf << (SPI1_SCK_Pin * 4U)) | (0xf << (SPI1_MISO_Pin * 4U)) | (0xf << (SPI1_MOSI_Pin * 4U))), (
         ((GPIO_AF_PP | GPIO_IOS_50) << (SPI1_SCK_Pin * 4U))
       | ((GPIO_AF_PP | GPIO_IOS_50) << (SPI1_MISO_Pin * 4U))
       | ((GPIO_AF_PP | GPIO_IOS_50) << (SPI1_MOSI_Pin * 4U))
