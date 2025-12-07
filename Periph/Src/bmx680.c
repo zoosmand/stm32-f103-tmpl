@@ -130,6 +130,40 @@ ErrorStatus BMx680_Init(BMxX80_TypeDef* dev) {
     dev->DevID = dev->RawBufPtr[0];
   }
 
+  /* Get calibration values from page 0 */
+  if (bmx680_receive(dev, BMx680_calib1, 24)) return (ERROR);
+
+  dev->CalibBufPtr[1] = (uint16_t)((dev->RawBufPtr[1] << 8) | dev->RawBufPtr[0]);
+  dev->CalibBufPtr[2] = (uint16_t)dev->RawBufPtr[2];
+  
+  dev->CalibBufPtr[3] = (uint16_t)((dev->RawBufPtr[5] << 8) | dev->RawBufPtr[4]);
+  dev->CalibBufPtr[4] = (uint16_t)((dev->RawBufPtr[7] << 8) | dev->RawBufPtr[6]);
+  dev->CalibBufPtr[5] = (uint16_t)dev->RawBufPtr[8];
+  dev->CalibBufPtr[6] = (uint16_t)((dev->RawBufPtr[11] << 8) | dev->RawBufPtr[10]);
+  dev->CalibBufPtr[7] = (uint16_t)((dev->RawBufPtr[13] << 8) | dev->RawBufPtr[12]);
+  dev->CalibBufPtr[8] = (uint16_t)dev->RawBufPtr[15];
+  dev->CalibBufPtr[9] = (uint16_t)dev->RawBufPtr[14];
+  dev->CalibBufPtr[10] = (uint16_t)((dev->RawBufPtr[17] << 8) | dev->RawBufPtr[16]);
+  dev->CalibBufPtr[11] = (uint16_t)((dev->RawBufPtr[19] << 8) | dev->RawBufPtr[18]);
+  dev->CalibBufPtr[12] = (uint16_t)dev->RawBufPtr[20];
+  
+  if (bmx680_receive(dev, BMx680_calib2, 16)) return (ERROR);
+  
+  dev->CalibBufPtr[13] = (uint16_t)((dev->RawBufPtr[2] << 8) | (dev->RawBufPtr[1] & 0x0f));
+  dev->CalibBufPtr[14] = (uint16_t)((dev->RawBufPtr[0] << 8) | ((dev->RawBufPtr[1] & 0xf0) >> 4));
+  dev->CalibBufPtr[15] = (uint16_t)dev->RawBufPtr[3];
+  dev->CalibBufPtr[16] = (uint16_t)dev->RawBufPtr[4];
+  dev->CalibBufPtr[17] = (uint16_t)dev->RawBufPtr[5];
+  dev->CalibBufPtr[18] = (uint16_t)dev->RawBufPtr[6];
+  dev->CalibBufPtr[19] = (uint16_t)dev->RawBufPtr[7];
+  
+  dev->CalibBufPtr[0] = (uint16_t)((dev->RawBufPtr[9] << 8) | dev->RawBufPtr[8]);
+  
+  dev->CalibBufPtr[20] = (uint16_t)dev->RawBufPtr[12];
+  dev->CalibBufPtr[21] = (uint16_t)((dev->RawBufPtr[11] << 8) | dev->RawBufPtr[10]);
+  dev->CalibBufPtr[22] = (uint16_t)dev->RawBufPtr[13];
+
+
   /* Change memory page and confirm it is changed */
   dev->RawBufPtr[0] = BMx680_spi_page;
   dev->RawBufPtr[1] = 0x10;
@@ -141,8 +175,6 @@ ErrorStatus BMx680_Init(BMxX80_TypeDef* dev) {
 
   if (dev->RawBufPtr[0] != 0x10) return (ERROR);
 
-    /* Get calibration values */
-  if (bmx680_receive(dev, BMx680_calib1, 20)) return (ERROR);
   
   
   __NOP();

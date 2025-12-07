@@ -52,8 +52,8 @@ static BMxX80_TypeDef bosch_0 = {
   .DMAxRx       = DMA1_Channel7,
 };
 
-static uint8_t  boschRawData_1[32];
-static uint16_t boschCalibData_1[16];
+static uint8_t  boschRawData_1[24];
+static uint16_t boschCalibData_1[24];
 static int32_t  boschResults_1[4];
 
 static BMxX80_TypeDef bosch_1 = {
