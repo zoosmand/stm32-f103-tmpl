@@ -121,46 +121,29 @@ ErrorStatus BMx680_Init(BMxX80_TypeDef* dev) {
   
   _delay_us(10);
   
-  /* Get device ID */
-  if (bmx680_receive(dev, BMx680_dev_id, 1)) return (ERROR);
-  
-  // if (dev->RawBufPtr[0] != BME680_ID) return (ERROR);
-  // dev->DevID = dev->RawBufPtr[0];
-  
-  /* Change SPI memory page */
-  if (dev->SPIx != NULL) {
-    dev->RawBufPtr[0] = BMx680_spi_page;
-    dev->RawBufPtr[1] = 0x10;
+  /* Get device ID in I2C bus */
+  /* The same on SPI leads to catch 22 cause no way back from page 1 to page 0 */
+  if (dev->I2Cx != NULL) {
+    if (bmx680_receive(dev, BMx680_dev_id, 1)) return (ERROR);
     
-    if (bmx680_send(dev, 2)) return (ERROR);
+    if (dev->RawBufPtr[0] != BME680_ID) return (ERROR);
+    dev->DevID = dev->RawBufPtr[0];
   }
 
-  if (bmx680_receive(dev, BMx680_dev_id, 1)) return (ERROR);
-  if (bmx680_receive(dev, BMx680_spi_page, 1)) return (ERROR);
+  /* Change memory page and confirm it is changed */
+  dev->RawBufPtr[0] = BMx680_spi_page;
+  dev->RawBufPtr[1] = 0x10;
   
-  /* Change SPI memory page */
-  if (dev->SPIx != NULL) {
-    dev->RawBufPtr[0] = BMx680_spi_page;
-    dev->RawBufPtr[1] = 0x00;
-    
-    if (bmx680_send(dev, 2)) return (ERROR);
-  }
+  if (bmx680_send(dev, 2)) return (ERROR);
+  _delay_ms(2);
+
+  if (bmx680_receive(dev, (BMx680_spi_page | BMx680_RW_BIT), 1)) return (ERROR);
+
+  if (dev->RawBufPtr[0] != 0x10) return (ERROR);
+
+    /* Get calibration values */
+  if (bmx680_receive(dev, BMx680_calib1, 20)) return (ERROR);
   
-  // // /* Get par_t1 calibration value */
-  // // if (bmx680_receive(dev, BMx680_calib1, 20)) return (ERROR);
-  
-  if (bmx680_receive(dev, BMx680_dev_id, 1)) return (ERROR);
-  if (dev->RawBufPtr[0] != BME680_ID) {
-    if (dev->SPIx != NULL) {
-      dev->RawBufPtr[0] = BMx680_spi_reset;
-      dev->RawBufPtr[1] = 0xb6;
-      
-      if (bmx680_send(dev, 2)) return (ERROR);
-    }
-  }
-  
-  if (bmx680_receive(dev, BMx680_dev_id, 1)) return (ERROR);
-  if (bmx680_receive(dev, BMx680_spi_page, 1)) return (ERROR);
   
   __NOP();
 
@@ -253,15 +236,16 @@ static ErrorStatus i2c_receive(BMxX80_TypeDef* dev, uint8_t reg, uint16_t len) {
 
 static ErrorStatus spi_send(BMxX80_TypeDef *dev, uint16_t len) {
 
-  SPI_Enable(dev->SPIx);
+  if (SPI_Enable(dev->SPIx)) return (ERROR);
 
   PIN_L(dev->SPINssPort, dev->SPINssPin);
-  SPI_Write_8b(dev->SPIx, dev->RawBufPtr, len);
+  if (SPI_Write_8b(dev->SPIx, dev->RawBufPtr, len)) {
+    PIN_H(dev->SPINssPort, dev->SPINssPin);
+    SPI_Disable(dev->SPIx);
+  };
   PIN_H(dev->SPINssPort, dev->SPINssPin);
 
-  _delay_ms(2);
-
-  SPI_Disable(dev->SPIx);
+  if (SPI_Disable(dev->SPIx)) return (ERROR);
 
   return (SUCCESS);
 }
@@ -352,10 +336,26 @@ static ErrorStatus spi_receive(BMxX80_TypeDef *dev, uint8_t reg, uint16_t len) {
   uint32_t tmout;
   uint8_t pump = 0;   /* The pump variable to complete DMA configuration */
   
+  
+  /* AN alternative way to read/receive data from the bus */
+  if (len <= 5) {
+    ErrorStatus tmpStatus = SUCCESS;
+    
+    if (SPI_Enable(dev->SPIx)) return (tmpStatus);
+    PIN_L(dev->SPINssPort, dev->SPINssPin);
+
+    if (SPI_Write_8b(dev->SPIx, &reg, len)) tmpStatus = ERROR;
+    if (SPI_Read_8b(dev->SPIx, dev->RawBufPtr, len)) tmpStatus = ERROR;
+
+    PIN_H(dev->SPINssPort, dev->SPINssPin);
+    if (SPI_Disable(dev->SPIx)) tmpStatus = ERROR;
+
+    return (tmpStatus);
+  }
+  
+  /* configure DMS and run the bus */
   spi_dma_configure(dev);
   if (SPI_Enable(dev->SPIx)) return (spi_dma_unconfigure(dev));
-  
-  /* run the bus */
   PIN_L(dev->SPINssPort, dev->SPINssPin);
   
   /* send a command (register address) to the device */
@@ -367,13 +367,6 @@ static ErrorStatus spi_receive(BMxX80_TypeDef *dev, uint8_t reg, uint16_t len) {
   tmout = SPI_BUS_TMOUT;
   while(!(PREG_CHECK(dev->SPIx->SR, SPI_SR_RXNE_Pos))) { if (!(--tmout)) return (spi_dma_unconfigure(dev)); }
   
-  /* AN alternative way to read/receive data from the bus */
-  if (len <= 5) {
-    if (SPI_Read_8b(dev->SPIx, dev->RawBufPtr, len)) return (ERROR);
-    PIN_H(dev->SPINssPort, dev->SPINssPin);
-    SPI_Disable(dev->SPIx);
-    return (SUCCESS);
-  }
 
   /* --- Read/receive data from the bus via DMA --- */
 

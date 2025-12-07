@@ -225,6 +225,7 @@ typedef struct {
   uint8_t               DevID;
   uint8_t*              RawBufPtr;
   int32_t*              ResBufPtr;
+  int16_t*              CalibBufPtr;
   FunctionalState       Lock;
   I2C_TypeDef*          I2Cx;
   uint8_t               I2C_Address;

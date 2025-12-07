@@ -52,13 +52,15 @@ static BMxX80_TypeDef bosch_0 = {
   .DMAxRx       = DMA1_Channel7,
 };
 
-static uint8_t boschRawData_1[42];
-static int32_t boschResults_1[4];
+static uint8_t  boschRawData_1[32];
+static uint16_t boschCalibData_1[16];
+static int32_t  boschResults_1[4];
 
 static BMxX80_TypeDef bosch_1 = {
   .DevID        = 0,
   .RawBufPtr    = boschRawData_1,
   .ResBufPtr    = boschResults_1,
+  .CalibBufPtr  = boschCalibData_1,
   .Lock         = DISABLE,
   // .I2Cx         = NULL,
   // .I2C_Address  = NULL,
