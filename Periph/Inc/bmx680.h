@@ -38,6 +38,8 @@
 
 /* BMx680 Registers */
 #define BMx680_dev_id               0x50
+#define BMx680_spi_page             0x73
+#define BMx680_spi_reset            0x60
 
 #define BMx680_par_t1               0xe9
 #define BMx680_par_t2               0x8a

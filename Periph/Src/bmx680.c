@@ -25,9 +25,6 @@
 /* Private function prototypes -----------------------------------------------*/
 
 /* Locaal variables ----------------------------------------------------------*/
-static int16_t par_t1 = 0;
-static int16_t par_t2 = 0;
-static int8_t par_t3 = 0;
 
 /* Global variables ----------------------------------------------------------*/
 
@@ -39,7 +36,7 @@ static int8_t par_t3 = 0;
  * @param  len: number of bytes to send
  * @return status of operation
  */
-static ErrorStatus bmx680_send(BMxX80_TypeDef*, uint8_t);
+static ErrorStatus bmx680_send(BMxX80_TypeDef*, uint16_t);
 
 /**
   * @brief  Reads/receives data from a BMx680 device.
@@ -48,7 +45,7 @@ static ErrorStatus bmx680_send(BMxX80_TypeDef*, uint8_t);
   * @param  len: number of bytes to receive
   * @return status of operation
   */
-static ErrorStatus bmx680_receive(BMxX80_TypeDef*, uint8_t, uint8_t);
+static ErrorStatus bmx680_receive(BMxX80_TypeDef*, uint8_t, uint16_t);
 
 /**
   * @brief  Writes/sends data via I2C.
@@ -127,20 +124,45 @@ ErrorStatus BMx680_Init(BMxX80_TypeDef* dev) {
   /* Get device ID */
   if (bmx680_receive(dev, BMx680_dev_id, 1)) return (ERROR);
   
-  if (dev->RawBufPtr[0] != BME680_ID) return (ERROR);
+  // if (dev->RawBufPtr[0] != BME680_ID) return (ERROR);
+  // dev->DevID = dev->RawBufPtr[0];
   
-  /* Get par_t1 calibration value */
-  if (bmx680_receive(dev, BMx680_calib1, 20)) return (ERROR);
-  // par_t1 = *(int16_t*)dev->RawBufPtr;
+  /* Change SPI memory page */
+  if (dev->SPIx != NULL) {
+    dev->RawBufPtr[0] = BMx680_spi_page;
+    dev->RawBufPtr[1] = 0x10;
+    
+    if (bmx680_send(dev, 2)) return (ERROR);
+  }
 
-  // /* Get par_t2 calibration value */
-  // if (bmx680_receive(dev, BMx680_par_t2, 2)) return (ERROR);
-  // par_t2 = *(int16_t*)dev->RawBufPtr;
-
-  // /* Get par_t3 calibration value */
-  // if (bmx680_receive(dev, BMx680_par_t3, 1)) return (ERROR);
-  // par_t3 = *(int8_t*)dev->RawBufPtr;
-
+  if (bmx680_receive(dev, BMx680_dev_id, 1)) return (ERROR);
+  if (bmx680_receive(dev, BMx680_spi_page, 1)) return (ERROR);
+  
+  /* Change SPI memory page */
+  if (dev->SPIx != NULL) {
+    dev->RawBufPtr[0] = BMx680_spi_page;
+    dev->RawBufPtr[1] = 0x00;
+    
+    if (bmx680_send(dev, 2)) return (ERROR);
+  }
+  
+  // // /* Get par_t1 calibration value */
+  // // if (bmx680_receive(dev, BMx680_calib1, 20)) return (ERROR);
+  
+  if (bmx680_receive(dev, BMx680_dev_id, 1)) return (ERROR);
+  if (dev->RawBufPtr[0] != BME680_ID) {
+    if (dev->SPIx != NULL) {
+      dev->RawBufPtr[0] = BMx680_spi_reset;
+      dev->RawBufPtr[1] = 0xb6;
+      
+      if (bmx680_send(dev, 2)) return (ERROR);
+    }
+  }
+  
+  if (bmx680_receive(dev, BMx680_dev_id, 1)) return (ERROR);
+  if (bmx680_receive(dev, BMx680_spi_page, 1)) return (ERROR);
+  
+  __NOP();
 
   dev->Lock = DISABLE;
   return (SUCCESS);
@@ -164,7 +186,7 @@ ErrorStatus BMx680_Measurment(BMxX80_TypeDef *dev) {
 
 // ----------------------------------------------------------------------------
 
-static ErrorStatus bmx680_receive(BMxX80_TypeDef *dev, uint8_t reg, uint8_t len) {
+static ErrorStatus bmx680_receive(BMxX80_TypeDef *dev, uint8_t reg, uint16_t len) {
 
   if (dev->I2Cx != NULL) {
     if (i2c_receive(dev, reg, len)) return (ERROR);
@@ -182,7 +204,7 @@ static ErrorStatus bmx680_receive(BMxX80_TypeDef *dev, uint8_t reg, uint8_t len)
 
 // ----------------------------------------------------------------------------
 
-static ErrorStatus bmx680_send(BMxX80_TypeDef *dev, uint8_t len) {
+static ErrorStatus bmx680_send(BMxX80_TypeDef *dev, uint16_t len) {
   
   if (dev->I2Cx != NULL) {
     if (i2c_send(dev, len)) return (spi_dma_unconfigure(dev));
@@ -190,6 +212,7 @@ static ErrorStatus bmx680_send(BMxX80_TypeDef *dev, uint8_t len) {
   } 
 
   if (dev->SPIx != NULL) {
+    if (spi_send(dev, len)) return (spi_dma_unconfigure(dev));
     return (SUCCESS);
   } 
   return (ERROR);
@@ -229,6 +252,16 @@ static ErrorStatus i2c_receive(BMxX80_TypeDef* dev, uint8_t reg, uint16_t len) {
 // ----------------------------------------------------------------------------
 
 static ErrorStatus spi_send(BMxX80_TypeDef *dev, uint16_t len) {
+
+  SPI_Enable(dev->SPIx);
+
+  PIN_L(dev->SPINssPort, dev->SPINssPin);
+  SPI_Write_8b(dev->SPIx, dev->RawBufPtr, len);
+  PIN_H(dev->SPINssPort, dev->SPINssPin);
+
+  _delay_ms(2);
+
+  SPI_Disable(dev->SPIx);
 
   return (SUCCESS);
 }
@@ -315,6 +348,7 @@ __STATIC_INLINE ErrorStatus spi_dma_unconfigure(BMxX80_TypeDef* dev) {
 // ----------------------------------------------------------------------------
 
 static ErrorStatus spi_receive(BMxX80_TypeDef *dev, uint8_t reg, uint16_t len) {
+
   uint32_t tmout;
   uint8_t pump = 0;   /* The pump variable to complete DMA configuration */
   
@@ -334,9 +368,12 @@ static ErrorStatus spi_receive(BMxX80_TypeDef *dev, uint8_t reg, uint16_t len) {
   while(!(PREG_CHECK(dev->SPIx->SR, SPI_SR_RXNE_Pos))) { if (!(--tmout)) return (spi_dma_unconfigure(dev)); }
   
   /* AN alternative way to read/receive data from the bus */
-  // SPI_Read_8b(dev->SPIx, dev->RawBufPtr, len);
-  // PIN_H(dev->SPINssPort, dev->SPINssPin);
-
+  if (len <= 5) {
+    if (SPI_Read_8b(dev->SPIx, dev->RawBufPtr, len)) return (ERROR);
+    PIN_H(dev->SPINssPort, dev->SPINssPin);
+    SPI_Disable(dev->SPIx);
+    return (SUCCESS);
+  }
 
   /* --- Read/receive data from the bus via DMA --- */
 
@@ -377,6 +414,7 @@ static ErrorStatus spi_receive(BMxX80_TypeDef *dev, uint8_t reg, uint16_t len) {
 
   return (SUCCESS);
 }
+
 
 
 
