@@ -125,7 +125,7 @@ typedef uint32_t                    BMx280_U32_t;
  */
 ErrorStatus BMx280_Init(BMxX80_TypeDef*);
 
-ErrorStatus BMx280_Measurment(BMxX80_TypeDef*);
+ErrorStatus BMx280_Measurement(BMxX80_TypeDef*);
 
 
 #ifdef __cplusplus

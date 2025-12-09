@@ -62,14 +62,16 @@ static BMxX80_TypeDef bosch_1 = {
   .ResBufPtr    = boschResults_1,
   .CalibBufPtr  = boschCalibData_1,
   .Lock         = DISABLE,
-  // .I2Cx         = NULL,
-  // .I2C_Address  = NULL,
-  .SPIx         = SPI1,
-  .SPINssPort   = SPI1_NSS_2_Port,
-  .SPINssPin    = SPI1_NSS_2_Pin,
+  .I2Cx         = I2C1,
+  .I2C_Address  = BMX680_I2C_ADDR,
+  // .SPIx         = SPI1,
+  // .SPINssPort   = SPI1_NSS_2_Port,
+  // .SPINssPin    = SPI1_NSS_2_Pin,
+  // .DMAx         = DMA1,
+  // .DMAxTx       = DMA1_Channel3,
+  // .DMAxRx       = DMA1_Channel2,
   .DMAx         = DMA1,
-  .DMAxTx       = DMA1_Channel3,
-  .DMAxRx       = DMA1_Channel2,
+  .DMAxRx       = DMA1_Channel7,
 };
 
 /* Dallas DS related data */
@@ -119,7 +121,7 @@ void BoschMeasurment_CronHandler(void) {
     FLAG_CLR(boschScheduler.counterReg, boschScheduler.entranceFlag);
     
     if (bosch_0.Lock == DISABLE) {
-      if (BMx280_Measurment(&bosch_0)) {
+      if (BMx280_Measurement(&bosch_0)) {
         /* TODO reinitialize device overwise clear rediness flag */
         printf("Cannot collect Bosch device (BMx280) data\n");
         bosch_0.Lock = ENABLE;
@@ -129,7 +131,7 @@ void BoschMeasurment_CronHandler(void) {
     }
 
     if (bosch_1.Lock == DISABLE) {
-      if (BMx680_Measurment(&bosch_1)) {
+      if (BMx680_Measurement(&bosch_1)) {
         /* TODO reinitialize device overwise clear rediness flag */
         printf("Cannot collect Bosch device (MBx680) data\n");
         bosch_1.Lock = ENABLE;

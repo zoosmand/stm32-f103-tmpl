@@ -95,6 +95,19 @@ __STATIC_INLINE void spi_dma_configure(BMxX80_TypeDef*);
   */
 __STATIC_INLINE ErrorStatus spi_dma_unconfigure(BMxX80_TypeDef*);
 
+/**
+  * @brief   Adjusts I2C bus according to device requirements.
+  * @param   dev: pointer to the device struct
+  * @retval  none
+  */
+__STATIC_INLINE void i2c_dma_configure(BMxX80_TypeDef*);
+
+/**
+  * @brief   Adjusts I2C bus according to device requirements.
+  * @param   dev: pointer to the device struct
+  * @retval  none
+  */
+__STATIC_INLINE ErrorStatus i2c_dma_unconfigure(BMxX80_TypeDef*);
 
 
 
@@ -124,7 +137,7 @@ ErrorStatus BMx680_Init(BMxX80_TypeDef* dev) {
   /* Get device ID in I2C bus */
   /* The same on SPI leads to catch 22 cause no way back from page 1 to page 0 */
   if (dev->I2Cx != NULL) {
-    if (bmx680_receive(dev, BMx680_dev_id, 1)) return (ERROR);
+    if (bmx680_receive(dev, BMx680_i2c_dev_id, 1)) return (ERROR);
     
     if (dev->RawBufPtr[0] != BME680_ID) return (ERROR);
     dev->DevID = dev->RawBufPtr[0];
@@ -132,49 +145,51 @@ ErrorStatus BMx680_Init(BMxX80_TypeDef* dev) {
 
   /* Get calibration values from page 0 */
   if (bmx680_receive(dev, BMx680_calib1, 24)) return (ERROR);
-
-  dev->CalibBufPtr[1] = (uint16_t)((dev->RawBufPtr[1] << 8) | dev->RawBufPtr[0]);
-  dev->CalibBufPtr[2] = (uint16_t)dev->RawBufPtr[2];
-  
-  dev->CalibBufPtr[3] = (uint16_t)((dev->RawBufPtr[5] << 8) | dev->RawBufPtr[4]);
-  dev->CalibBufPtr[4] = (uint16_t)((dev->RawBufPtr[7] << 8) | dev->RawBufPtr[6]);
-  dev->CalibBufPtr[5] = (uint16_t)dev->RawBufPtr[8];
-  dev->CalibBufPtr[6] = (uint16_t)((dev->RawBufPtr[11] << 8) | dev->RawBufPtr[10]);
-  dev->CalibBufPtr[7] = (uint16_t)((dev->RawBufPtr[13] << 8) | dev->RawBufPtr[12]);
-  dev->CalibBufPtr[8] = (uint16_t)dev->RawBufPtr[15];
-  dev->CalibBufPtr[9] = (uint16_t)dev->RawBufPtr[14];
-  dev->CalibBufPtr[10] = (uint16_t)((dev->RawBufPtr[17] << 8) | dev->RawBufPtr[16]);
-  dev->CalibBufPtr[11] = (uint16_t)((dev->RawBufPtr[19] << 8) | dev->RawBufPtr[18]);
-  dev->CalibBufPtr[12] = (uint16_t)dev->RawBufPtr[20];
+  /* temperature */
+  dev->CalibBufPtr[1] = (int16_t)((dev->RawBufPtr[1] << 8) | dev->RawBufPtr[0]);
+  dev->CalibBufPtr[2] = (int16_t)dev->RawBufPtr[2];
+  /* pressure */
+  dev->CalibBufPtr[3] = (int16_t)((dev->RawBufPtr[5] << 8) | dev->RawBufPtr[4]);
+  dev->CalibBufPtr[4] = (int16_t)((dev->RawBufPtr[7] << 8) | dev->RawBufPtr[6]);
+  dev->CalibBufPtr[5] = (int16_t)dev->RawBufPtr[8];
+  dev->CalibBufPtr[6] = (int16_t)((dev->RawBufPtr[11] << 8) | dev->RawBufPtr[10]);
+  dev->CalibBufPtr[7] = (int16_t)((dev->RawBufPtr[13] << 8) | dev->RawBufPtr[12]);
+  dev->CalibBufPtr[8] = (int16_t)dev->RawBufPtr[15];
+  dev->CalibBufPtr[9] = (int16_t)dev->RawBufPtr[14];
+  dev->CalibBufPtr[10] = (int16_t)((dev->RawBufPtr[17] << 8) | dev->RawBufPtr[16]);
+  dev->CalibBufPtr[11] = (int16_t)((dev->RawBufPtr[19] << 8) | dev->RawBufPtr[18]);
+  dev->CalibBufPtr[12] = (int16_t)dev->RawBufPtr[20];
   
   if (bmx680_receive(dev, BMx680_calib2, 16)) return (ERROR);
-  
-  dev->CalibBufPtr[13] = (uint16_t)((dev->RawBufPtr[2] << 8) | (dev->RawBufPtr[1] & 0x0f));
-  dev->CalibBufPtr[14] = (uint16_t)((dev->RawBufPtr[0] << 8) | ((dev->RawBufPtr[1] & 0xf0) >> 4));
-  dev->CalibBufPtr[15] = (uint16_t)dev->RawBufPtr[3];
-  dev->CalibBufPtr[16] = (uint16_t)dev->RawBufPtr[4];
-  dev->CalibBufPtr[17] = (uint16_t)dev->RawBufPtr[5];
-  dev->CalibBufPtr[18] = (uint16_t)dev->RawBufPtr[6];
-  dev->CalibBufPtr[19] = (uint16_t)dev->RawBufPtr[7];
-  
-  dev->CalibBufPtr[0] = (uint16_t)((dev->RawBufPtr[9] << 8) | dev->RawBufPtr[8]);
-  
-  dev->CalibBufPtr[20] = (uint16_t)dev->RawBufPtr[12];
-  dev->CalibBufPtr[21] = (uint16_t)((dev->RawBufPtr[11] << 8) | dev->RawBufPtr[10]);
-  dev->CalibBufPtr[22] = (uint16_t)dev->RawBufPtr[13];
+  /* humidity */
+  dev->CalibBufPtr[13] = (int16_t)((dev->RawBufPtr[2] << 8) | (dev->RawBufPtr[1] & 0x0f));
+  dev->CalibBufPtr[14] = (int16_t)((dev->RawBufPtr[0] << 8) | ((dev->RawBufPtr[1] & 0xf0) >> 4));
+  dev->CalibBufPtr[15] = (int16_t)dev->RawBufPtr[3];
+  dev->CalibBufPtr[16] = (int16_t)dev->RawBufPtr[4];
+  dev->CalibBufPtr[17] = (int16_t)dev->RawBufPtr[5];
+  dev->CalibBufPtr[18] = (int16_t)dev->RawBufPtr[6];
+  dev->CalibBufPtr[19] = (int16_t)dev->RawBufPtr[7];
+  /* temperature */
+  dev->CalibBufPtr[0] = (int16_t)((dev->RawBufPtr[9] << 8) | dev->RawBufPtr[8]);
+  /* gases */
+  dev->CalibBufPtr[20] = (int16_t)dev->RawBufPtr[12];
+  dev->CalibBufPtr[21] = (int16_t)((dev->RawBufPtr[11] << 8) | dev->RawBufPtr[10]);
+  dev->CalibBufPtr[22] = (int16_t)dev->RawBufPtr[13];
 
 
   /* Change memory page and confirm it is changed */
-  dev->RawBufPtr[0] = BMx680_spi_page;
-  dev->RawBufPtr[1] = 0x10;
-  
-  if (bmx680_send(dev, 2)) return (ERROR);
-  _delay_ms(2);
+  if (dev->SPIx != NULL) {
 
-  if (bmx680_receive(dev, (BMx680_spi_page | BMx680_RW_BIT), 1)) return (ERROR);
+    dev->RawBufPtr[0] = BMx680_spi_page;
+    dev->RawBufPtr[1] = 0x10;
+    
+    if (bmx680_send(dev, 2)) return (ERROR);
+    _delay_ms(2);
 
-  if (dev->RawBufPtr[0] != 0x10) return (ERROR);
+    if (bmx680_receive(dev, (BMx680_spi_page | BMx680_RW_BIT), 1)) return (ERROR);
 
+    if (dev->RawBufPtr[0] != 0x10) return (ERROR);
+  }
   
   
   __NOP();
@@ -187,7 +202,7 @@ ErrorStatus BMx680_Init(BMxX80_TypeDef* dev) {
 
 // ----------------------------------------------------------------------------
 
-ErrorStatus BMx680_Measurment(BMxX80_TypeDef *dev) {
+ErrorStatus BMx680_Measurement(BMxX80_TypeDef *dev) {
 
   if (dev->Lock == DISABLE) dev->Lock = ENABLE; else return (ERROR);
 
@@ -204,7 +219,7 @@ ErrorStatus BMx680_Measurment(BMxX80_TypeDef *dev) {
 static ErrorStatus bmx680_receive(BMxX80_TypeDef *dev, uint8_t reg, uint16_t len) {
 
   if (dev->I2Cx != NULL) {
-    if (i2c_receive(dev, reg, len)) return (ERROR);
+    if (i2c_receive(dev, reg, len)) return (i2c_dma_unconfigure(dev));
     return (SUCCESS);
   } 
 
@@ -259,6 +274,55 @@ static ErrorStatus i2c_receive(BMxX80_TypeDef* dev, uint8_t reg, uint16_t len) {
   I2C_Master_Receive(dev->I2Cx, dev->I2C_Address, dev->RawBufPtr, len);
   
   return (SUCCESS);
+}
+
+
+
+
+// ----------------------------------------------------------------------------
+
+__STATIC_INLINE void i2c_dma_configure(BMxX80_TypeDef* dev) {
+
+  /* configure DMA, Channel7 - RX */
+  /* set priority high*/
+  /* set memory to increment */
+  /* clear dir bit, means reading from the bus */
+  MODIFY_REG(dev->DMAxRx->CCR, (DMA_CCR_PL_Msk | DMA_CCR_MINC_Msk | DMA_CCR_DIR_Msk), (DMA_CCR_PL_1 | DMA_CCR_MINC));
+  
+  /* set peripheral address */
+  dev->DMAxRx->CPAR = (uint32_t)&dev->I2Cx->DR;
+  /* set memory address */
+  dev->DMAxRx->CMAR = (uint32_t)dev->RawBufPtr;
+  
+}
+
+
+
+// ----------------------------------------------------------------------------
+
+__STATIC_INLINE ErrorStatus i2c_dma_unconfigure(BMxX80_TypeDef* dev) {
+
+  /* Disable DMA transfer */
+  PREG_CLR(dev->I2Cx->CR2, I2C_CR2_DMAEN);
+
+  /* Disable transfer from peripheral to memory */
+  PREG_CLR(dev->DMAxRx->CCR, DMA_CCR_EN_Pos);
+
+  /* Receive the last byte and send NACK */
+  PREG_CLR(dev->I2Cx->CR1, I2C_CR1_ACK_Pos);
+  I2C_ReadByte(dev->I2Cx); 
+
+  I2C_Stop(dev->I2Cx);
+
+  /* Clear DMA configuration */
+  MODIFY_REG(dev->DMAxRx->CCR, (DMA_CCR_PL_Msk | DMA_CCR_MINC_Msk | DMA_CCR_DIR_Msk), 0UL);
+  
+  /* Clear peripheral address */
+  dev->DMAxRx->CCR = 0UL;
+  /* Clear correspondents DMA interrupt flags */
+  dev->DMAx->IFCR = (DMA_IFCR_CHTIF7_Msk | DMA_IFCR_CGIF7_Msk | DMA_IFCR_CTCIF7_Msk);
+
+  return (ERROR);
 }
 
 

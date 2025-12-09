@@ -57,7 +57,7 @@ static BMx280_S32_t t_fine = 0;
  * @param  len: number of bytes to send
  * @return status of operation
  */
-static ErrorStatus BMx280_Write(BMxX80_TypeDef*, uint8_t);
+static ErrorStatus bmx280_send(BMxX80_TypeDef*, uint8_t);
 
 /**
   * @brief  Reads/receives data from a BMx680 device.
@@ -66,7 +66,7 @@ static ErrorStatus BMx280_Write(BMxX80_TypeDef*, uint8_t);
   * @param  len: number of bytes to receive
   * @return status of operation
   */
-static ErrorStatus BMx280_Read(BMxX80_TypeDef*, uint8_t, uint8_t);
+static ErrorStatus bmx280_receive(BMxX80_TypeDef*, uint8_t, uint8_t);
 
 /**
  * @brief  Writes/sends data via I2C.
@@ -74,7 +74,7 @@ static ErrorStatus BMx280_Read(BMxX80_TypeDef*, uint8_t, uint8_t);
  * @param  len: number of bytes to send
  * @return status of operation
  */
-static ErrorStatus I2C_Write(BMxX80_TypeDef*, uint16_t);
+static ErrorStatus i2c_send(BMxX80_TypeDef*, uint16_t);
 
 /**
  * @brief  Reads/receives data via I2C.
@@ -83,7 +83,7 @@ static ErrorStatus I2C_Write(BMxX80_TypeDef*, uint16_t);
  * @param  len: number of bytes to receive
  * @return status of operation
  */
-static ErrorStatus I2C_Read(BMxX80_TypeDef*, uint8_t, uint16_t);
+static ErrorStatus i2c_receive(BMxX80_TypeDef*, uint8_t, uint16_t);
 
 /**
   * @brief  Calculates temperature in DegC, resolution is 0.01 DegC.
@@ -91,7 +91,7 @@ static ErrorStatus I2C_Read(BMxX80_TypeDef*, uint8_t, uint16_t);
   * @param  adc_T: Raw temperature data
   * @return Measured temprerature
   */
-static BMx280_S32_t bmx280_compensate_T_int32(BMx280_S32_t);
+static BMx280_S32_t bmx280_compensate_t_int32(BMx280_S32_t);
 
 /**
   * @brief  Calcutales pressure in Pa as unsigned 32 bit integer.
@@ -99,7 +99,7 @@ static BMx280_S32_t bmx280_compensate_T_int32(BMx280_S32_t);
   * @param  adc_P: Raw pressure data
   * @return Measured pressure
   */
-static BMx280_U32_t bmx280_compensate_P_int32(BMx280_S32_t);
+static BMx280_U32_t bmx280_compensate_p_int32(BMx280_S32_t);
 
 /**
   * @brief  Calculates humidity in %RH as unsigned 32 bit integer in Q22.10 format 
@@ -108,21 +108,21 @@ static BMx280_U32_t bmx280_compensate_P_int32(BMx280_S32_t);
   * @param  adc_H: Raw humidity data
   * @return Measured humidity
   */
-static BMx280_U32_t bmx280_compensate_H_int32(BMx280_S32_t);
+static BMx280_U32_t bmx280_compensate_h_int32(BMx280_S32_t);
 
 /**
   * @brief   Adjusts I2C bus according to device requirements.
   * @param   dev: pointer to the device struct
   * @retval  none
   */
-__STATIC_INLINE void I2C_Adjust(BMxX80_TypeDef*);
+__STATIC_INLINE void i2c_dma_configure(BMxX80_TypeDef*);
 
 /**
   * @brief   Adjusts I2C bus according to device requirements.
   * @param   dev: pointer to the device struct
   * @retval  none
   */
-__STATIC_INLINE ErrorStatus I2C_Unconfigure(BMxX80_TypeDef*);
+__STATIC_INLINE ErrorStatus i2c_dma_unconfigure(BMxX80_TypeDef*);
 
 
 
@@ -136,7 +136,7 @@ __STATIC_INLINE ErrorStatus I2C_Unconfigure(BMxX80_TypeDef*);
 
 // ----------------------------------------------------------------------------
 
-__STATIC_INLINE void I2C_Adjust(BMxX80_TypeDef* dev) {
+__STATIC_INLINE void i2c_dma_configure(BMxX80_TypeDef* dev) {
 
   /* configure DMA, Channel7 - RX */
   /* set priority high*/
@@ -154,7 +154,7 @@ __STATIC_INLINE void I2C_Adjust(BMxX80_TypeDef* dev) {
 
 // ----------------------------------------------------------------------------
 
-__STATIC_INLINE ErrorStatus I2C_Unconfigure(BMxX80_TypeDef* dev) {
+__STATIC_INLINE ErrorStatus i2c_dma_unconfigure(BMxX80_TypeDef* dev) {
 
   /* Disable DMA transfer */
   PREG_CLR(dev->I2Cx->CR2, I2C_CR2_DMAEN);
@@ -201,14 +201,14 @@ ErrorStatus BMx280_Init(BMxX80_TypeDef* dev) {
 
   /* Read Device ID and if it isn't equal to the current, exit. */
   dev->RawBufPtr[0] = 0;
-  if (BMx280_Read(dev, BMX280_DEV_ID, 1)) return (ERROR);
+  if (bmx280_receive(dev, BMX280_DEV_ID, 1)) return (ERROR);
   
   dev->DevID = dev->RawBufPtr[0];
 
   if (!((dev->DevID == BMP280_ID) || (dev->DevID == BME280_ID))) return (ERROR);
 
   /* Read calibration data. This is common for both sensor's types */
-  if (BMx280_Read(dev, BMX280_CALIB1, 26)) return (ERROR);
+  if (bmx280_receive(dev, BMX280_CALIB1, 26)) return (ERROR);
   
   dig_T1 = (uint16_t)((dev->RawBufPtr[1] << 8) | dev->RawBufPtr[0]);
   dig_T2 = (int16_t)((dev->RawBufPtr[3] << 8) | dev->RawBufPtr[2]);
@@ -227,7 +227,7 @@ ErrorStatus BMx280_Init(BMxX80_TypeDef* dev) {
   if (dev->DevID == BME280_ID) {
     dig_H1 = (uint8_t)dev->RawBufPtr[25];
 
-    if (BMx280_Read(dev, BMX280_CALIB2, 16))return (ERROR);
+    if (bmx280_receive(dev, BMX280_CALIB2, 16))return (ERROR);
     
     dig_H2 = (int16_t)((dev->RawBufPtr[1] << 8) | dev->RawBufPtr[0]);
     dig_H3 = (uint8_t)dev->RawBufPtr[2];
@@ -240,19 +240,19 @@ ErrorStatus BMx280_Init(BMxX80_TypeDef* dev) {
   dev->RawBufPtr[0] = BMX280_SETTINGS;
   dev->RawBufPtr[1] = (BMX280_ConfigInactive_250 << BMX280_ConfigInactive_Pos)
                     | (BMX280_ConfigFilter_4 << BMX280_ConfigFilter_Pos);
-  if (BMx280_Write(dev, 2)) return (ERROR);
+  if (bmx280_send(dev, 2)) return (ERROR);
 
   /* Set the humidity oversampling precision */
   dev->RawBufPtr[0] = BMX280_CTRL_HUM;
   dev->RawBufPtr[1] = (BMX280_HumidityOvs_x4 << BMX280_HumidityOvs_Pos);
-  if (BMx280_Write(dev, 2)) return (ERROR);
+  if (bmx280_send(dev, 2)) return (ERROR);
 
   /* Set the temperature and pressure oversampling precision */
   dev->RawBufPtr[0] = BMX280_CTRL_MEAS;
   dev->RawBufPtr[1] = (BMX280_TemperatureOvs_x4 << BMX280_TemperatureOvs_Pos) 
                     | (BMX280_PressureOvs_x4 << BMX280_PressureOvs_Pos)
                     | (BMX280_NormalMode << BMX280_Mode_Pos);
-  if (BMx280_Write(dev, 2)) return (ERROR);
+  if (bmx280_send(dev, 2)) return (ERROR);
 
   dev->Lock = DISABLE;
   return (SUCCESS);
@@ -266,7 +266,7 @@ ErrorStatus BMx280_Init(BMxX80_TypeDef* dev) {
   * @param  None
   * @return Error status
   */
-ErrorStatus BMx280_Measurment(BMxX80_TypeDef *dev) {
+ErrorStatus BMx280_Measurement(BMxX80_TypeDef *dev) {
 
   if (dev->Lock == DISABLE) dev->Lock = ENABLE; else return (ERROR);
 
@@ -275,29 +275,29 @@ ErrorStatus BMx280_Measurment(BMxX80_TypeDef *dev) {
   dev->RawBufPtr[1] = (BMX280_TemperatureOvs_x4 << BMX280_TemperatureOvs_Pos) 
                     | (BMX280_PressureOvs_x4 << BMX280_PressureOvs_Pos)
                     | (BMX280_ForceMode << BMX280_Mode_Pos);
-  if (BMx280_Write(dev, 2)) return (ERROR);
+  if (bmx280_send(dev, 2)) return (ERROR);
 
   /* Read the status register and check measuring busy flag, wait for conversion */
   uint8_t wait_status_threshold = 250;
   
-  if (BMx280_Read(dev, BMX280_STATUS, 1)) return (ERROR);
+  if (bmx280_receive(dev, BMX280_STATUS, 1)) return (ERROR);
   dev->RawBufPtr[0] = BMX280_Measuring;
   while (dev->RawBufPtr[0] & BMX280_Measuring) {
     _delay_ms(1);
-    if (BMx280_Read(dev, BMX280_STATUS, 1)) return (ERROR);
+    if (bmx280_receive(dev, BMX280_STATUS, 1)) return (ERROR);
     if (!(wait_status_threshold--)) return (ERROR);
   }
 
   /* Read raw data */
-  if (BMx280_Read(dev, BMX280_DATA, 8)) return (ERROR);
+  if (bmx280_receive(dev, BMX280_DATA, 8)) return (ERROR);
 
   BMx280_S32_t adc_P = (((dev->RawBufPtr[0] << 8) | dev->RawBufPtr[1]) << 4) | (dev->RawBufPtr[2] >> 4);
   BMx280_S32_t adc_T = (((dev->RawBufPtr[3] << 8) | dev->RawBufPtr[4]) << 4) | (dev->RawBufPtr[5] >> 4);
   BMx280_S32_t adc_H = (dev->RawBufPtr[6] << 8) | dev->RawBufPtr[7];
 
-  dev->ResBufPtr[0] = bmx280_compensate_T_int32(adc_T);
-  dev->ResBufPtr[1] = bmx280_compensate_P_int32(adc_P);
-  dev->ResBufPtr[2] = bmx280_compensate_H_int32(adc_H);
+  dev->ResBufPtr[0] = bmx280_compensate_t_int32(adc_T);
+  dev->ResBufPtr[1] = bmx280_compensate_p_int32(adc_P);
+  dev->ResBufPtr[2] = bmx280_compensate_h_int32(adc_H);
 
   dev->Lock = DISABLE;
   return (SUCCESS);
@@ -314,11 +314,11 @@ ErrorStatus BMx280_Measurment(BMxX80_TypeDef *dev) {
   * @param  len: length of the buffer
   * @return Error status
   */
-static ErrorStatus BMx280_Read(BMxX80_TypeDef *dev, uint8_t reg, uint8_t len) {
+static ErrorStatus bmx280_receive(BMxX80_TypeDef *dev, uint8_t reg, uint8_t len) {
   if (dev->I2Cx != NULL) {
-    if (I2C_Read(dev, reg, len)) {
+    if (i2c_receive(dev, reg, len)) {
       /* Stop I2C bus */
-      return (I2C_Unconfigure(dev));
+      return (i2c_dma_unconfigure(dev));
     }
     return (SUCCESS);
   } 
@@ -343,11 +343,11 @@ static ErrorStatus BMx280_Read(BMxX80_TypeDef *dev, uint8_t reg, uint8_t len) {
   * @param  len: length of the buffer
   * @return Error status
   */
-static ErrorStatus BMx280_Write(BMxX80_TypeDef *dev, uint8_t len) {
+static ErrorStatus bmx280_send(BMxX80_TypeDef *dev, uint8_t len) {
   if (dev->I2Cx != NULL) {
-    if (I2C_Write(dev, len)) {
+    if (i2c_send(dev, len)) {
       /* Stop I2C bus */
-      return (I2C_Unconfigure(dev));
+      return (i2c_dma_unconfigure(dev));
     }
     return (SUCCESS);
   } 
@@ -376,7 +376,7 @@ static ErrorStatus BMx280_Write(BMxX80_TypeDef *dev, uint8_t len) {
 // ----------------------------------------------------------------------------
 // ----------------------- Device specifiv function ---------------------------
 // ----------------------------------------------------------------------------
-static BMx280_S32_t bmx280_compensate_T_int32(BMx280_S32_t adc_T) {
+static BMx280_S32_t bmx280_compensate_t_int32(BMx280_S32_t adc_T) {
   BMx280_S32_t var1, var2, T;
   var1 = ((((adc_T >> 3) - ((BMx280_S32_t)dig_T1 << 1))) * (BMx280_S32_t)dig_T2) >> 11;
   var2 = (((((adc_T >> 4) - (BMx280_S32_t)dig_T1) * ((adc_T >> 4) - (BMx280_S32_t)dig_T1)) >> 12) * (BMx280_S32_t)dig_T3) >> 14;
@@ -392,7 +392,7 @@ static BMx280_S32_t bmx280_compensate_T_int32(BMx280_S32_t adc_T) {
 // ----------------------- Device specifiv function ---------------------------
 // ----------------------------------------------------------------------------
 
-static BMx280_U32_t bmx280_compensate_P_int32(BMx280_S32_t adc_P) {
+static BMx280_U32_t bmx280_compensate_p_int32(BMx280_S32_t adc_P) {
   BMx280_S32_t var1, var2;
   BMx280_U32_t P;
   var1 = (((BMx280_S32_t)t_fine) >> 1) - (BMx280_S32_t)64000;
@@ -425,7 +425,7 @@ static BMx280_U32_t bmx280_compensate_P_int32(BMx280_S32_t adc_P) {
 // ----------------------- Device specifiv function ---------------------------
 // ----------------------------------------------------------------------------
 
-static BMx280_U32_t bmx280_compensate_H_int32(BMx280_S32_t adc_H) {
+static BMx280_U32_t bmx280_compensate_h_int32(BMx280_S32_t adc_H) {
   // varant 2
   BMx280_U32_t H;
   H = (BMx280_S32_t)t_fine - (BMx280_S32_t)76800;
@@ -445,7 +445,7 @@ static BMx280_U32_t bmx280_compensate_H_int32(BMx280_S32_t adc_H) {
 
 // ----------------------------------------------------------------------------
 
-static ErrorStatus I2C_Write(BMxX80_TypeDef* dev, uint16_t len) {
+static ErrorStatus i2c_send(BMxX80_TypeDef* dev, uint16_t len) {
   
   if (I2C_Master_Send(dev->I2Cx, dev->I2C_Address, dev->RawBufPtr, len)) return (ERROR);
   
@@ -457,12 +457,12 @@ static ErrorStatus I2C_Write(BMxX80_TypeDef* dev, uint16_t len) {
 
 // ----------------------------------------------------------------------------
 
-static ErrorStatus I2C_Read(BMxX80_TypeDef *dev, uint8_t reg, uint16_t len) {
+static ErrorStatus i2c_receive(BMxX80_TypeDef *dev, uint8_t reg, uint16_t len) {
 
   uint32_t tmout;
 
-  if (I2C_Master_Send(dev->I2Cx, dev->I2C_Address, &reg, 1)) return (I2C_Unconfigure(dev));
-  I2C_Adjust(dev);
+  if (I2C_Master_Send(dev->I2Cx, dev->I2C_Address, &reg, 1)) return (i2c_dma_unconfigure(dev));
+  i2c_dma_configure(dev);
 
   /* Set counter */
   dev->DMAxRx->CNDTR = len;
@@ -475,7 +475,7 @@ static ErrorStatus I2C_Read(BMxX80_TypeDef *dev, uint8_t reg, uint16_t len) {
   PREG_SET(dev->I2Cx->CR1, I2C_CR1_ACK_Pos);
 
   /* Start bus transmission */
-  if (I2C_Start(dev->I2Cx)) return (I2C_Unconfigure(dev));  
+  if (I2C_Start(dev->I2Cx)) return (i2c_dma_unconfigure(dev));  
   if (I2C_SendAddress(dev->I2Cx, dev->I2C_Address, RX)) return (ERROR);
   
   /* --- Read/receive data from the bus via DMA --- */
@@ -486,7 +486,7 @@ static ErrorStatus I2C_Read(BMxX80_TypeDef *dev, uint8_t reg, uint16_t len) {
   }
 
   /* Stop I2C bus transmission and unvonfigure DMA */
-  I2C_Unconfigure(dev);
+  i2c_dma_unconfigure(dev);
 
   return (SUCCESS);
 }

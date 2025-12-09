@@ -30,14 +30,16 @@
 
 /* Private defines -----------------------------------------------------------*/
 
-#define BMX680_I2C_ADDR             0x76
+#define BMX680_I2C_ADDR             0x77
 #define BME680_ID                   0x61
 
 #define BMx680_RW_BIT               0x80
 
 
 /* BMx680 Registers */
-#define BMx680_dev_id               0x50
+#define BMx680_i2c_dev_id           0xd0
+#define BMx680_i2c_reset            0xe0
+#define BMx680_spi_dev_id           0x50
 #define BMx680_spi_page             0x73
 #define BMx680_spi_reset            0x60
 
@@ -45,7 +47,7 @@
 #define BMx680_par_t2               0x8a
 #define BMx680_par_t3               0x8c
 
-#define BMx680_calib1               0x8a // 20
+#define BMx680_calib1               0x8a // 21
 #define BMx680_calib2               0xe1 // 16
 
 /* Exported functions prototypes ---------------------------------------------*/
@@ -62,7 +64,7 @@ ErrorStatus BMx680_Init(BMxX80_TypeDef*);
  * @param   dev: pointer to the Bosch BMx680 device struct
  * @retval  status of operation
  */
-ErrorStatus BMx680_Measurment(BMxX80_TypeDef*);
+ErrorStatus BMx680_Measurement(BMxX80_TypeDef*);
 
 
 #ifdef __cplusplus
