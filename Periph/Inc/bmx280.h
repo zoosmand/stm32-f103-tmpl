@@ -27,6 +27,10 @@
 #endif
 
 
+#ifndef BMX280_MODEL
+#define BMX280_MODEL 280
+#endif /* #ifndef BMX280_MODEL */
+
 
 /* Private defines -----------------------------------------------------------*/
 

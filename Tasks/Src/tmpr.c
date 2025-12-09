@@ -24,8 +24,8 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* Bosch related data */
-__attribute__((section(".cron"))) static uint32_t boschTaskCnt    = 0;
-__attribute__((section(".cron"))) static uint32_t boschTaskReg    = 0;
+__attribute__((section(".cron"))) static uint32_t boschTaskCnt = 0;
+__attribute__((section(".cron"))) static uint32_t boschTaskReg = 0;
 
 static task_scheduler_t boschScheduler = {
   .counter        = &boschTaskCnt,
@@ -35,13 +35,13 @@ static task_scheduler_t boschScheduler = {
   .entranceFlag   = 31,
 };
 
-static uint8_t boschRawData_0[32];
-static int32_t boschResults_0[3];
+static uint8_t boschRawData_280[32];
+static int32_t boschResults_280[3];
 
-static BMxX80_TypeDef bosch_0 = {
+static BMxX80_TypeDef bosch_280 = {
   .DevID        = 0,
-  .RawBufPtr    = boschRawData_0,
-  .ResBufPtr    = boschResults_0,
+  .RawBufPtr    = boschRawData_280,
+  .ResBufPtr    = boschResults_280,
   .Lock         = DISABLE,
   .I2Cx         = I2C1,
   .I2C_Address  = BMX280_I2C_ADDR,
@@ -52,15 +52,15 @@ static BMxX80_TypeDef bosch_0 = {
   .DMAxRx       = DMA1_Channel7,
 };
 
-static uint8_t  boschRawData_1[24];
-static uint16_t boschCalibData_1[24];
-static int32_t  boschResults_1[4];
+static uint8_t  boschRawData_680[24];
+static uint16_t boschCalibData_680[24];
+static int32_t  boschResults_680[4];
 
-static BMxX80_TypeDef bosch_1 = {
+static BMxX80_TypeDef bosch_680 = {
   .DevID        = 0,
-  .RawBufPtr    = boschRawData_1,
-  .ResBufPtr    = boschResults_1,
-  .CalibBufPtr  = boschCalibData_1,
+  .RawBufPtr    = boschRawData_680,
+  .ResBufPtr    = boschResults_680,
+  .CalibBufPtr  = boschCalibData_680,
   .Lock         = DISABLE,
   .I2Cx         = I2C1,
   .I2C_Address  = BMX680_I2C_ADDR,
@@ -75,8 +75,8 @@ static BMxX80_TypeDef bosch_1 = {
 };
 
 /* Dallas DS related data */
-__attribute__((section(".cron"))) static uint32_t dsTaskCnt       = 0;
-__attribute__((section(".cron"))) static uint32_t dsTaskReg       = 0;
+__attribute__((section(".cron"))) static uint32_t dsTaskCnt = 0;
+__attribute__((section(".cron"))) static uint32_t dsTaskReg = 0;
 
 static task_scheduler_t dsScheduler = {
   .counter        = &dsTaskCnt,
@@ -120,21 +120,21 @@ void BoschMeasurment_CronHandler(void) {
 
     FLAG_CLR(boschScheduler.counterReg, boschScheduler.entranceFlag);
     
-    if (bosch_0.Lock == DISABLE) {
-      if (BMx280_Measurement(&bosch_0)) {
+    if (bosch_280.Lock == DISABLE) {
+      if (BMx280_Measurement(&bosch_280)) {
         /* TODO reinitialize device overwise clear rediness flag */
         printf("Cannot collect Bosch device (BMx280) data\n");
-        bosch_0.Lock = ENABLE;
+        bosch_280.Lock = ENABLE;
       } else {
-        sprintf(tmpBuf, "%i", boschResults_0[0]);
+        sprintf(tmpBuf, "%i", boschResults_280[0]);
       }
     }
 
-    if (bosch_1.Lock == DISABLE) {
-      if (BMx680_Measurement(&bosch_1)) {
+    if (bosch_680.Lock == DISABLE) {
+      if (BMx680_Measurement(&bosch_680)) {
         /* TODO reinitialize device overwise clear rediness flag */
         printf("Cannot collect Bosch device (MBx680) data\n");
-        bosch_1.Lock = ENABLE;
+        bosch_680.Lock = ENABLE;
       }
     }
 
@@ -185,10 +185,10 @@ void BoschMeasurment_CronHandler(void) {
 
 // ----------------------------------------------------------------------------
 
-BMxX80_TypeDef* Get_BoschDevice(uint8_t devNum) {
+BMxX80_TypeDef* Get_BoschDevice(uint16_t model) {
   
-  if (devNum == 0) return &bosch_0;
-  if (devNum == 1) return &bosch_1;
+  if (model == 280) return &bosch_280;
+  if (model == 680) return &bosch_680;
 
   return NULL;
 }
