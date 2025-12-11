@@ -54,6 +54,47 @@
 #define BMx680_calib1               0x8a // 21
 #define BMx680_calib2               0xe1 // 16
 
+#define BMx680_ctrl_meas                0x74
+#define BMx680_ctrl_meas_sleep_mode     (0b00 << 0)
+#define BMx680_ctrl_meas_forced_mode    (0b01 << 0)
+#define BMx680_ctrl_meas_tmpr_overs_0   (0b000 << 5)
+#define BMx680_ctrl_meas_tmpr_overs_1   (0b001 << 5)
+#define BMx680_ctrl_meas_tmpr_overs_2   (0b010 << 5)
+#define BMx680_ctrl_meas_tmpr_overs_4   (0b011 << 5)
+#define BMx680_ctrl_meas_tmpr_overs_8   (0b100 << 5)
+#define BMx680_ctrl_meas_tmpr_overs_16  (0b101 << 5)
+#define BMx680_ctrl_meas_pres_overs_0   (0b000 << 2)
+#define BMx680_ctrl_meas_pres_overs_1   (0b001 << 2)
+#define BMx680_ctrl_meas_pres_overs_2   (0b010 << 2)
+#define BMx680_ctrl_meas_pres_overs_4   (0b011 << 2)
+#define BMx680_ctrl_meas_pres_overs_8   (0b100 << 2)
+#define BMx680_ctrl_meas_pres_overs_16  (0b101 << 2)
+
+#define BMx680_ctrl_hym                 0x72
+#define BMx680_ctrl_meas_hum_overs_0   (0b000 << 0)
+#define BMx680_ctrl_meas_hum_overs_1   (0b001 << 0)
+#define BMx680_ctrl_meas_hum_overs_2   (0b010 << 0)
+#define BMx680_ctrl_meas_hum_overs_4   (0b011 << 0)
+#define BMx680_ctrl_meas_hum_overs_8   (0b100 << 0)
+#define BMx680_ctrl_meas_hum_overs_16  (0b101 << 0)
+
+#define BMx680_iir_filter           0x75
+#define BMx680_iir_filter_0         (0b000 << 2)
+#define BMx680_iir_filter_1         (0b001 << 2)
+#define BMx680_iir_filter_3         (0b010 << 2)
+#define BMx680_iir_filter_7         (0b011 << 2)
+#define BMx680_iir_filter_15        (0b100 << 2)
+#define BMx680_iir_filter_31        (0b101 << 2)
+#define BMx680_iir_filter_63        (0b110 << 2)
+#define BMx680_iir_filter_127       (0b111 << 2)
+
+#define BMx680_ctrl_gas_0           0x71
+#define BMx680_ctrl_gas_1           0x70
+#define BMx680_gas_wait_x           0x64 // by 0x6d
+#define BMx680_res_heat_x           0x5a // by 0x63
+#define BMx680_ldac_heat_x          0x50 // by 0x59
+
+
 /* Exported functions prototypes ---------------------------------------------*/
 
 /**

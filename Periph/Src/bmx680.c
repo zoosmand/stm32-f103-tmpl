@@ -125,14 +125,16 @@ ErrorStatus BMx680_Init(BMxX80_TypeDef* dev) {
   if (dev->Lock == DISABLE) dev->Lock = ENABLE; else return (ERROR);
 
   /* Initialize NSS Pin */
-  if (dev->SPINssPin > 7) {
-    MODIFY_REG(dev->SPINssPort->CRL, (0xf << ((dev->SPINssPin - 8) * 4)), ((GPIO_GPO_PP | GPIO_IOS_2) << ((dev->SPINssPin -8) * 4)));
-  } else {
-    MODIFY_REG(dev->SPINssPort->CRL, (0xf << (dev->SPINssPin * 4)), ((GPIO_GPO_PP | GPIO_IOS_2) << (dev->SPINssPin * 4)));
+  if (dev->SPIx != NULL) {
+    if (dev->SPINssPin > 7) {
+      MODIFY_REG(dev->SPINssPort->CRL, (0xf << ((dev->SPINssPin - 8) * 4)), ((GPIO_GPO_PP | GPIO_IOS_2) << ((dev->SPINssPin -8) * 4)));
+    } else {
+      MODIFY_REG(dev->SPINssPort->CRL, (0xf << (dev->SPINssPin * 4)), ((GPIO_GPO_PP | GPIO_IOS_2) << (dev->SPINssPin * 4)));
+    }
+    PIN_H(dev->SPINssPort, dev->SPINssPin);
+    
+    _delay_us(10);
   }
-  PIN_H(dev->SPINssPort, dev->SPINssPin);
-  
-  _delay_us(10);
   
   /* Get device ID in I2C bus */
   /* The same on SPI leads to catch 22 cause no way back from page 1 to page 0 */
