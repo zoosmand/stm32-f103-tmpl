@@ -208,6 +208,50 @@ ErrorStatus BMx680_Measurement(BMxX80_TypeDef *dev) {
 
   if (dev->Lock == DISABLE) dev->Lock = ENABLE; else return (ERROR);
 
+  uint32_t tmout;
+
+  __NOP();
+
+
+  dev->RawBufPtr[0] = BMx680_ctrl_meas;
+  dev->RawBufPtr[1] = (BMx680_ctrl_meas_pres_ovrs_4 | BMx680_ctrl_meas_pres_ovrs_4);
+  if (bmx680_send(dev, 2)) return (ERROR);
+
+  dev->RawBufPtr[0] = BMx680_ctrl_hum;
+  dev->RawBufPtr[1] = BMx680_ctrl_meas_hum_ovrs_8;
+  if (bmx680_send(dev, 2)) return (ERROR);
+
+  dev->RawBufPtr[0] = BMx680_config;
+  dev->RawBufPtr[1] = BMx680_config_iir_filter_7;
+  if (bmx680_send(dev, 2)) return (ERROR);
+
+  dev->RawBufPtr[0] = BMx680_ctrl_gas_1;
+  dev->RawBufPtr[1] = (
+      (1 << BMx680_ctrl_gas_run_gas_pos)
+    | ( 0b0000 < BMx680_ctrl_gas_nb_conv_pos)
+  );
+  if (bmx680_send(dev, 2)) return (ERROR);
+
+  dev->RawBufPtr[0] = BMx680_gas_wait_0;
+  dev->RawBufPtr[1] = 0x32;
+  if (bmx680_send(dev, 2)) return (ERROR);
+
+  dev->RawBufPtr[0] = BMx680_res_heat_0;
+  dev->RawBufPtr[1] = 0x32;
+  if (bmx680_send(dev, 2)) return (ERROR);
+
+  dev->RawBufPtr[0] = BMx680_ctrl_meas;
+  dev->RawBufPtr[1] = BMx680_ctrl_meas_forced_mode;
+  if (bmx680_send(dev, 2)) return (ERROR);
+
+  tmout = I2C_BUS_TMOUT * 1000;
+  dev->RawBufPtr[0] = 0;
+  while(!(dev->RawBufPtr[0] & ~(1 << BMx680_measuring_pos))) {
+    if (bmx680_receive(dev, BMx680_eas_status_0, 1)) return (ERROR);
+    if (!(--tmout)) return (ERROR);
+  }
+
+  if (bmx680_receive(dev, BMx680_meas_results, 10)) return (ERROR);
 
   dev->Lock = DISABLE;
   return (SUCCESS);
@@ -271,10 +315,35 @@ static ErrorStatus i2c_send(BMxX80_TypeDef* dev, uint16_t len) {
 
 static ErrorStatus i2c_receive(BMxX80_TypeDef* dev, uint8_t reg, uint16_t len) {
   
-  if (I2C_Master_Send(dev->I2Cx, dev->I2C_Address, &reg, 1)) return (ERROR);
+  uint32_t tmout;
+
+  if (I2C_Master_Send(dev->I2Cx, dev->I2C_Address, &reg, 1)) return (i2c_dma_unconfigure(dev));
+  i2c_dma_configure(dev);
+
+  /* Set counter */
+  dev->DMAxRx->CNDTR = len;
+
+  /* Enable transfer from peripheral to memory */
+  PREG_SET(dev->DMAxRx->CCR, DMA_CCR_EN_Pos);
+
+  /* Enable receiving DMA transfer */
+  PREG_SET(dev->I2Cx->CR2, I2C_CR2_DMAEN_Pos);
+  PREG_SET(dev->I2Cx->CR1, I2C_CR1_ACK_Pos);
+
+  /* Start bus transmission */
+  if (I2C_Start(dev->I2Cx)) return (i2c_dma_unconfigure(dev));  
+  if (I2C_SendAddress(dev->I2Cx, dev->I2C_Address, RX)) return (ERROR);
   
-  I2C_Master_Receive(dev->I2Cx, dev->I2C_Address, dev->RawBufPtr, len);
-  
+  /* --- Read/receive data from the bus via DMA --- */
+  /* Wait for transfer is compete */
+  tmout = I2C_BUS_TMOUT;
+  while(!(PREG_CHECK(dev->DMAx->ISR, DMA_ISR_TCIF7_Pos))) {
+    if (!(--tmout)) return (ERROR);
+  }
+
+  /* Stop I2C bus transmission and unvonfigure DMA */
+  i2c_dma_unconfigure(dev);
+
   return (SUCCESS);
 }
 

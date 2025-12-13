@@ -82,7 +82,7 @@
 #define BMx680_ctrl_meas_tmpr_ovrs_0    (0b000 << BMx680_ctrl_meas_tmpr_ovrs_pos)
 #define BMx680_ctrl_meas_tmpr_ovrs_1    (0b001 << BMx680_ctrl_meas_tmpr_ovrs_pos)
 #define BMx680_ctrl_meas_tmpr_ovrs_2    (0b010 << BMx680_ctrl_meas_tmpr_ovrs_pos)
-#define BMx680_ctrl_meas_tmpr_ovrs_4    (0b011 << BMx680_ctrl_meas_tmpr_ovrs_pos)
+#define BMx680_ctrl_meas_pres_ovrs_4    (0b011 << BMx680_ctrl_meas_tmpr_ovrs_pos)
 #define BMx680_ctrl_meas_tmpr_ovrs_8    (0b100 << BMx680_ctrl_meas_tmpr_ovrs_pos)
 #define BMx680_ctrl_meas_tmpr_ovrs_16   (0b101 << BMx680_ctrl_meas_tmpr_ovrs_pos)
 
@@ -103,9 +103,39 @@
 #define BMx680_ctrl_gas_0               0x70
 #define BMx680_ctrl_gas_heat_pff_pos    3
 
-#define BMx680_gas_wait_x               0x64 // by 0x6d
-#define BMx680_res_heat_x               0x5a // by 0x63
-#define BMx680_ldac_heat_x              0x50 // by 0x59
+#define BMx680_gas_wait_0               0x64
+#define BMx680_gas_wait_1               0x65
+#define BMx680_gas_wait_2               0x66
+#define BMx680_gas_wait_3               0x67
+#define BMx680_gas_wait_4               0x68
+#define BMx680_gas_wait_5               0x69
+#define BMx680_gas_wait_6               0x6a
+#define BMx680_gas_wait_7               0x6b
+#define BMx680_gas_wait_8               0x6c
+#define BMx680_gas_wait_9               0x6d
+
+#define BMx680_res_heat_0               0x5a
+#define BMx680_res_heat_1               0x5b
+#define BMx680_res_heat_2               0x5c
+#define BMx680_res_heat_3               0x5d
+#define BMx680_res_heat_4               0x5e
+#define BMx680_res_heat_5               0x5f
+#define BMx680_res_heat_6               0x60
+#define BMx680_res_heat_7               0x61
+#define BMx680_res_heat_8               0x62
+#define BMx680_res_heat_9               0x63
+
+#define BMx680_ldac_heat_0              0x50
+#define BMx680_ldac_heat_1              0x51
+#define BMx680_ldac_heat_2              0x52
+#define BMx680_ldac_heat_3              0x53
+#define BMx680_ldac_heat_4              0x54
+#define BMx680_ldac_heat_5              0x55
+#define BMx680_ldac_heat_6              0x56
+#define BMx680_ldac_heat_7              0x57
+#define BMx680_ldac_heat_8              0x58
+#define BMx680_ldac_heat_9              0x59
+
 #define BMx680_gas_r_msb                0x2a
 #define BMx680_gas_r_lsb                0x2b // [7:6]
 #define BMx680_gas_valid_r_pos          5
@@ -121,6 +151,7 @@
 #define BMx680_temp_xlsb_pos            4
 
 #define BMx680_pres_msb                 0x1f
+#define BMx680_meas_results             BMx680_pres_msb
 #define BMx680_pres_lsb                 0x20
 #define BMx680_pres_xlsb                0x21 // [7:4]
 #define BMx680_pres_xlsb_pos            4
