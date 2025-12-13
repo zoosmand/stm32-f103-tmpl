@@ -58,6 +58,7 @@ int main(void) {
     
     // printf("The long test message, that might stuck the program but now it does not at all...\n");
     // printf("sec:%li\n", secCnt);
+    __NOP();
     
 
     if (FLAG_CHECK(&_ASREG_, OW_BUS_RF)) { DsMeasurment_CronHandler(); }
