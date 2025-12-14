@@ -126,7 +126,7 @@ void BoschMeasurment_CronHandler(void) {
         printf("Cannot collect Bosch device (BMx280) data\n");
         bosch_280.Lock = ENABLE;
       } else {
-        sprintf(tmpBuf, "%i", bosch_280.Results.temperature);
+        // sprintf(tmpBuf, "%i", bosch_280.Results.temperature);
       }
     }
 
@@ -135,6 +135,8 @@ void BoschMeasurment_CronHandler(void) {
         /* TODO reinitialize device overwise clear rediness flag */
         printf("Cannot collect Bosch device (MBx680) data\n");
         bosch_680.Lock = ENABLE;
+      } else {
+        sprintf(tmpBuf, "%i", bosch_680.Results.temperature);
       }
     }
 

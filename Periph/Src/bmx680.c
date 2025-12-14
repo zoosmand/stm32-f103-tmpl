@@ -24,7 +24,8 @@
 
 /* Private function prototypes -----------------------------------------------*/
 
-/* Locaal variables ----------------------------------------------------------*/
+/* Local variables -----------------------------------------------------------*/
+static int32_t t_fine = 0;
 
 /* Global variables ----------------------------------------------------------*/
 
@@ -108,6 +109,14 @@ __STATIC_INLINE void i2c_dma_configure(BMxX80_TypeDef*);
   * @retval  none
   */
 __STATIC_INLINE ErrorStatus i2c_dma_unconfigure(BMxX80_TypeDef*);
+
+/**
+  * @brief  Calculates temperature in DegC, resolution is 0.01 DegC.
+  *         Output value of “5123” equals 51.23 DegC.
+  * @param  adc_T: Raw temperature data
+  * @return Measured temprerature
+  */
+static BMx280_S32_t bmx680_compensate_t_int32(BMxX80_TypeDef*);
 
 
 
@@ -211,48 +220,31 @@ ErrorStatus BMx680_Measurement(BMxX80_TypeDef *dev) {
 
   uint32_t tmout;
 
-  __NOP();
-
-
-  dev->RawBufPtr[0] = BMx680_ctrl_meas;
-  dev->RawBufPtr[1] = (BMx680_ctrl_meas_tmpr_ovrs_4 | BMx680_ctrl_meas_pres_ovrs_4);
-  if (bmx680_send(dev, 2)) return (ERROR);
-
+  // Disable pressure and humidity oversampling
   dev->RawBufPtr[0] = BMx680_ctrl_hum;
-  dev->RawBufPtr[1] = BMx680_ctrl_meas_hum_ovrs_8;
+  dev->RawBufPtr[1] = BMx680_ctrl_meas_hum_ovrs_0;
   if (bmx680_send(dev, 2)) return (ERROR);
-
-  dev->RawBufPtr[0] = BMx680_config;
-  dev->RawBufPtr[1] = BMx680_config_iir_filter_7;
-  if (bmx680_send(dev, 2)) return (ERROR);
-
-  dev->RawBufPtr[0] = BMx680_ctrl_gas_1;
+  
+  dev->RawBufPtr[0] = BMx680_ctrl_meas;
   dev->RawBufPtr[1] = (
-      (1 << BMx680_ctrl_gas_run_gas_pos)
-    | ( 0b0000 < BMx680_ctrl_gas_nb_conv_pos)
+      BMx680_ctrl_meas_tmpr_ovrs_8
+    | BMx680_ctrl_meas_pres_ovrs_0
+    | BMx680_ctrl_meas_forced_mode
   );
   if (bmx680_send(dev, 2)) return (ERROR);
 
-  dev->RawBufPtr[0] = BMx680_gas_wait_0;
-  dev->RawBufPtr[1] = 0x32;
-  if (bmx680_send(dev, 2)) return (ERROR);
-
-  dev->RawBufPtr[0] = BMx680_res_heat_0;
-  dev->RawBufPtr[1] = 0x32;
-  if (bmx680_send(dev, 2)) return (ERROR);
-
-  dev->RawBufPtr[0] = BMx680_ctrl_meas;
-  dev->RawBufPtr[1] = BMx680_ctrl_meas_forced_mode;
-  if (bmx680_send(dev, 2)) return (ERROR);
-
+  // Wait for measuring bit to clear
   tmout = I2C_BUS_TMOUT * 1000;
-  dev->RawBufPtr[0] = 0;
-  while(!(dev->RawBufPtr[0] & ~(1 << BMx680_measuring_pos))) {
+  while (1) {
     if (bmx680_receive(dev, BMx680_eas_status_0, 1)) return (ERROR);
+    if (!(dev->RawBufPtr[0] & (1 << BMx680_measuring_pos))) break;
     if (!(--tmout)) return (ERROR);
   }
 
-  if (bmx680_receive(dev, BMx680_meas_results, 10)) return (ERROR);
+  // Read temperature result (3 bytes)
+  if (bmx680_receive(dev, BMx680_temp_msb, 3)) return (ERROR);
+
+  bmx680_compensate_t_int32(dev);
 
   dev->Lock = DISABLE;
   return (SUCCESS);
@@ -500,7 +492,7 @@ __STATIC_INLINE ErrorStatus spi_dma_unconfigure(BMxX80_TypeDef* dev) {
 // ----------------------------------------------------------------------------
 
 static ErrorStatus spi_receive(BMxX80_TypeDef *dev, uint8_t reg, uint16_t len) {
-
+  
   uint32_t tmout;
   uint8_t pump = 0;   /* The pump variable to complete DMA configuration */
   
@@ -511,13 +503,13 @@ static ErrorStatus spi_receive(BMxX80_TypeDef *dev, uint8_t reg, uint16_t len) {
     
     if (SPI_Enable(dev->SPIx)) return (tmpStatus);
     PIN_L(dev->SPINssPort, dev->SPINssPin);
-
+    
     if (SPI_Write_8b(dev->SPIx, &reg, len)) tmpStatus = ERROR;
     if (SPI_Read_8b(dev->SPIx, dev->RawBufPtr, len)) tmpStatus = ERROR;
-
+    
     PIN_H(dev->SPINssPort, dev->SPINssPin);
     if (SPI_Disable(dev->SPIx)) tmpStatus = ERROR;
-
+    
     return (tmpStatus);
   }
   
@@ -535,22 +527,22 @@ static ErrorStatus spi_receive(BMxX80_TypeDef *dev, uint8_t reg, uint16_t len) {
   tmout = SPI_BUS_TMOUT;
   while(!(PREG_CHECK(dev->SPIx->SR, SPI_SR_RXNE_Pos))) { if (!(--tmout)) return (spi_dma_unconfigure(dev)); }
   
-
+  
   /* --- Read/receive data from the bus via DMA --- */
-
+  
   /* Enable from memory to peripheral DMA transfer */
   PREG_SET(dev->SPIx->CR2, SPI_CR2_TXDMAEN_Pos);
   /* Enable from peripheral to memory DMA transfer */
   PREG_SET(dev->SPIx->CR2, SPI_CR2_RXDMAEN_Pos);
-
+  
   /* Disable incremental and wait until it clears, due to here only nulls to be sent to the bus */
   PREG_CLR(dev->DMAxTx->CCR, DMA_CCR_MINC_Pos);
   tmout = SPI_BUS_TMOUT;
   while((PREG_CHECK(dev->DMAxTx->CCR, DMA_CCR_MINC_Pos))) { if (!(--tmout)) return (spi_dma_unconfigure(dev)); }
-
+  
   /* Set buffer address to the null pump */
   dev->DMAxTx->CMAR = (uint32_t)&pump;
-
+  
   /* Set counter */
   dev->DMAxRx->CNDTR = len;
   dev->DMAxTx->CNDTR = len;
@@ -559,25 +551,49 @@ static ErrorStatus spi_receive(BMxX80_TypeDef *dev, uint8_t reg, uint16_t len) {
   PREG_SET(dev->DMAxTx->CCR, DMA_CCR_EN_Pos);
   /* Enable transfer from peripheral to memory */
   PREG_SET(dev->DMAxRx->CCR, DMA_CCR_EN_Pos);
-
+  
   /* Wait for transfer TX (memory to peripheral) to be competed */
   tmout = SPI_BUS_TMOUT;
   while(!(PREG_CHECK(dev->DMAx->ISR, DMA_ISR_TCIF3_Pos))) { if (!(--tmout)) return (spi_dma_unconfigure(dev)); }
-
+  
   /* Clear complete transger flag */
   SET_BIT(dev->DMAx->IFCR, DMA_IFCR_CTCIF3);
-
+  
   tmout = SPI_BUS_TMOUT;
   while((PREG_CHECK(dev->SPIx->SR, SPI_SR_BSY_Pos))) { if (!(--tmout)) return (spi_dma_unconfigure(dev)); }
-
+  
   /* stop the bus */
   spi_dma_unconfigure(dev);
-
+  
   return (SUCCESS);
 }
 
 
 
+
+// ----------------------------------------------------------------------------
+static BMx280_S32_t bmx680_compensate_t_int32(BMxX80_TypeDef* dev) {
+  // Compose raw ADC value (20 bits)
+  uint32_t adc_temp = (
+      (((uint32_t)dev->RawBufPtr[0]) << 12)
+    | (((uint32_t)dev->RawBufPtr[1]) << 4)
+    | (((uint32_t)dev->RawBufPtr[2]) >> 4)
+  );
+
+  int32_t var1, var2, var3;
+  BMx680_calib_t* calib = (BMx680_calib_t*)dev->CalibPtr;
+
+  var1 = (((int32_t)adc_temp >> 3) - ((int32_t)calib->par_t1 << 1));
+
+  var2 = (var1 * (int32_t)calib->par_t2) >> 11;
+
+  var3 = ((((var1 >> 1) * (var1 >> 1)) >> 12) * ((int32_t)calib->par_t3) << 4) >> 14;
+  t_fine = var2 + var3;
+
+  // Temperature in °C * 100 (e.g. 2516 = 25.16 °C)
+  dev->Results.temperature = (t_fine * 5 + 128) >> 8;
+
+}
 
 
 /* ------------------------------------------------------------------------------- */
