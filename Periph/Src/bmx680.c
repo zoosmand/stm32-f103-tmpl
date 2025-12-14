@@ -146,37 +146,38 @@ ErrorStatus BMx680_Init(BMxX80_TypeDef* dev) {
   }
 
   /* Get calibration values from page 0 */
+  BMx680_calib_t* calib = (BMx680_calib_t*)dev->CalibPtr;
   if (bmx680_receive(dev, BMx680_calib1, 24)) return (ERROR);
   /* temperature */
-  dev->CalibBufPtr[1] = (int16_t)((dev->RawBufPtr[1] << 8) | dev->RawBufPtr[0]);
-  dev->CalibBufPtr[2] = (int16_t)dev->RawBufPtr[2];
+  calib->par_t2 = (int16_t)((dev->RawBufPtr[1] << 8) | dev->RawBufPtr[0]);
+  calib->par_t3 = (int16_t)dev->RawBufPtr[2];
   /* pressure */
-  dev->CalibBufPtr[3] = (int16_t)((dev->RawBufPtr[5] << 8) | dev->RawBufPtr[4]);
-  dev->CalibBufPtr[4] = (int16_t)((dev->RawBufPtr[7] << 8) | dev->RawBufPtr[6]);
-  dev->CalibBufPtr[5] = (int16_t)dev->RawBufPtr[8];
-  dev->CalibBufPtr[6] = (int16_t)((dev->RawBufPtr[11] << 8) | dev->RawBufPtr[10]);
-  dev->CalibBufPtr[7] = (int16_t)((dev->RawBufPtr[13] << 8) | dev->RawBufPtr[12]);
-  dev->CalibBufPtr[8] = (int16_t)dev->RawBufPtr[15];
-  dev->CalibBufPtr[9] = (int16_t)dev->RawBufPtr[14];
-  dev->CalibBufPtr[10] = (int16_t)((dev->RawBufPtr[17] << 8) | dev->RawBufPtr[16]);
-  dev->CalibBufPtr[11] = (int16_t)((dev->RawBufPtr[19] << 8) | dev->RawBufPtr[18]);
-  dev->CalibBufPtr[12] = (int16_t)dev->RawBufPtr[20];
+  calib->par_p1 = (int16_t)((dev->RawBufPtr[5] << 8) | dev->RawBufPtr[4]);
+  calib->par_p2 = (int16_t)((dev->RawBufPtr[7] << 8) | dev->RawBufPtr[6]);
+  calib->par_p3 = (int16_t)dev->RawBufPtr[8];
+  calib->par_p4 = (int16_t)((dev->RawBufPtr[11] << 8) | dev->RawBufPtr[10]);
+  calib->par_p5 = (int16_t)((dev->RawBufPtr[13] << 8) | dev->RawBufPtr[12]);
+  calib->par_p6 = (int16_t)dev->RawBufPtr[15];
+  calib->par_p7 = (int16_t)dev->RawBufPtr[14];
+  calib->par_p8 = (int16_t)((dev->RawBufPtr[17] << 8) | dev->RawBufPtr[16]);
+  calib->par_p9 = (int16_t)((dev->RawBufPtr[19] << 8) | dev->RawBufPtr[18]);
+  calib->par_p10 = (int16_t)dev->RawBufPtr[20];
   
   if (bmx680_receive(dev, BMx680_calib2, 16)) return (ERROR);
   /* humidity */
-  dev->CalibBufPtr[13] = (int16_t)((dev->RawBufPtr[2] << 8) | (dev->RawBufPtr[1] & 0x0f));
-  dev->CalibBufPtr[14] = (int16_t)((dev->RawBufPtr[0] << 8) | ((dev->RawBufPtr[1] & 0xf0) >> 4));
-  dev->CalibBufPtr[15] = (int16_t)dev->RawBufPtr[3];
-  dev->CalibBufPtr[16] = (int16_t)dev->RawBufPtr[4];
-  dev->CalibBufPtr[17] = (int16_t)dev->RawBufPtr[5];
-  dev->CalibBufPtr[18] = (int16_t)dev->RawBufPtr[6];
-  dev->CalibBufPtr[19] = (int16_t)dev->RawBufPtr[7];
+  calib->par_h1 = (int16_t)((dev->RawBufPtr[2] << 8) | (dev->RawBufPtr[1] & 0x0f));
+  calib->par_h2 = (int16_t)((dev->RawBufPtr[0] << 8) | ((dev->RawBufPtr[1] & 0xf0) >> 4));
+  calib->par_h3 = (int16_t)dev->RawBufPtr[3];
+  calib->par_h4 = (int16_t)dev->RawBufPtr[4];
+  calib->par_h5 = (int16_t)dev->RawBufPtr[5];
+  calib->par_h6 = (int16_t)dev->RawBufPtr[6];
+  calib->par_h7 = (int16_t)dev->RawBufPtr[7];
   /* temperature */
-  dev->CalibBufPtr[0] = (int16_t)((dev->RawBufPtr[9] << 8) | dev->RawBufPtr[8]);
+  calib->par_t1 = (int16_t)((dev->RawBufPtr[9] << 8) | dev->RawBufPtr[8]);
   /* gases */
-  dev->CalibBufPtr[20] = (int16_t)dev->RawBufPtr[12];
-  dev->CalibBufPtr[21] = (int16_t)((dev->RawBufPtr[11] << 8) | dev->RawBufPtr[10]);
-  dev->CalibBufPtr[22] = (int16_t)dev->RawBufPtr[13];
+  calib->par_g1 = (int16_t)dev->RawBufPtr[12];
+  calib->par_g2 = (int16_t)((dev->RawBufPtr[11] << 8) | dev->RawBufPtr[10]);
+  calib->par_g3 = (int16_t)dev->RawBufPtr[13];
 
 
   /* Change memory page and confirm it is changed */

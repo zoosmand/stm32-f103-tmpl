@@ -282,7 +282,7 @@ typedef struct {
   uint8_t               DevID;
   uint8_t*              RawBufPtr;
   BMxX80_results_t      Results;
-  int16_t*              CalibBufPtr;
+  uint32_t*             CalibPtr;
   FunctionalState       Lock;
   I2C_TypeDef*          I2Cx;
   uint8_t               I2C_Address;

@@ -36,13 +36,13 @@ static task_scheduler_t boschScheduler = {
 };
 
 static uint8_t boschRawData_280[32];
-// static int32_t boschResults_280[3];
+static BMx280_calib_t boschCalibData_280;
 
 static BMxX80_TypeDef bosch_280 = {
   .DevID        = 0,
   .RawBufPtr    = boschRawData_280,
   .Results      = {},
-  // .ResBufPtr    = boschResults_280,
+  .CalibPtr     = (uint32_t*)&boschCalibData_280,
   .Lock         = DISABLE,
   .I2Cx         = I2C1,
   .I2C_Address  = BMX280_I2C_ADDR,
@@ -54,14 +54,13 @@ static BMxX80_TypeDef bosch_280 = {
 };
 
 static uint8_t  boschRawData_680[24];
-static uint16_t boschCalibData_680[24];
-// static int32_t  boschResults_680[4];
+static BMx680_calib_t boschCalibData_680;
 
 static BMxX80_TypeDef bosch_680 = {
   .DevID        = 0,
   .RawBufPtr    = boschRawData_680,
   .Results      = {},
-  .CalibBufPtr  = boschCalibData_680,
+  .CalibPtr     = (uint32_t*)&boschCalibData_680,
   .Lock         = DISABLE,
   .I2Cx         = I2C1,
   .I2C_Address  = BMX680_I2C_ADDR,
