@@ -2,7 +2,7 @@
   ******************************************************************************
   * @file           : bmx280.h
   * @brief          : This file contains header definitions BOSCH BMx280 
-  *                   temperature, humidity, ans atmospheric pressue
+  *                   temperature, humidity, and atmospheric pressue censor.
   ******************************************************************************
   * @attention
   *
@@ -26,6 +26,10 @@
  extern "C" {
 #endif
 
+
+#ifndef BMX280_MODEL
+#define BMX280_MODEL 280
+#endif /* #ifndef BMX280_MODEL */
 
 
 /* Private defines -----------------------------------------------------------*/
@@ -125,7 +129,7 @@ typedef uint32_t                    BMx280_U32_t;
  */
 ErrorStatus BMx280_Init(BMxX80_TypeDef*);
 
-ErrorStatus BMx280_Measurment(BMxX80_TypeDef*);
+ErrorStatus BMx280_Measurement(BMxX80_TypeDef*);
 
 
 #ifdef __cplusplus

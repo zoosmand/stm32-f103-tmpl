@@ -30,7 +30,11 @@
             "PREFETCH_ENABLE=1",
             "STM32F103xB",
             "SWO_ITM=0",
-            "DSPL_OUT=putc_dspl_wh2004"
+            "DSPL_OUT=putc_dspl_wh",
+            "WH_DSPL_MODEL=2004",
+            "SSD_DSPL_MODEL=1315",
+            "SSD_DSPL_FONT=1014",
+            "PRINTF_DSPL_RF=SSD_DSPL_RF"
          ],
          "intelliSenseMode": "macos-clang-arm64",
          "cStandard": "c23",
@@ -75,7 +79,11 @@
             "PREFETCH_ENABLE=1",
             "STM32F103xB",
             "USART_OUT=USART1",
-            "DSPL_OUT=putc_dspl_wh1602"
+            "DSPL_OUT=putc_dspl_ssd",
+            "WH_DSPL_MODEL=1602",
+            "SSD_DSPL_MODEL=1315",
+            "SSD_DSPL_FONT=1014",
+            "PRINTF_DSPL_RF=SSD_DSPL_RF"
          ],
          "intelliSenseMode": "linux-gcc-x64",
          "cStandard": "c23",

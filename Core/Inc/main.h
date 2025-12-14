@@ -33,11 +33,15 @@ extern "C" {
 #include <stdlib.h>
 #include <stdint.h>
 #include <time.h>
+#include <stdbool.h>
 
 #include "stm32f1xx.h"
 
 /* Private includes ----------------------------------------------------------*/
 #include "common.h"
+#include "gpio.h"
+#include "monitor.h"
+#include "hchk.h"
 #include "i2c.h"
 #include "spi.h"
 #include "whxxxx.h"
@@ -47,8 +51,12 @@ extern "C" {
 #include "eeprom.h"
 #include "max72xx.h"
 #include "bmx280.h"
+#include "bmx680.h"
 #include "tmpr.h"
 #include "display.h"
+#include "tm163x.h"
+#include "ow.h"
+#include "ds18b20.h"
 
 
 #if defined(USE_FULL_ASSERT)
@@ -69,28 +77,38 @@ extern uint32_t sysCnt;
 extern uint32_t secCnt;
 
 
-
 /* Exported constants --------------------------------------------------------*/
 
 
 /** Global Events Register Flags */
+#define _SYSTICKF_        0
 #define _SYSSECF_         1
 
 
 /** Rediness Services Register Flags */
-#define OneWireBus_RF     0
-#define SSDDisplay_RF     1
-#define WHDisplay_RF      2
+#define GPIO_HB_RF        0
+#define GPIO_TM_RF        1
+#define GPIO_OW_RF        2
 #define SPI1_RF           3
-#define EEPROM_RF         4
-#define MAXDSPL_RF        5
-#define BMX280_RF         6
-#define I2C1_RF           7
-#define BMX680_RF         8
+#define I2C1_RF           4
+#define OW_BUS_RF         5
+#define SSD_DSPL_RF       6
+#define WH_DSPL_RF        7
+#define MAX_DSPL_RF       8
+#define TM_DSPL_RF        9
+#define EEPROM_RF         10
+#define BMX280_RF         11
+#define BMX680_RF         12
+#define HEARTBEAT_RF      13
 
 
 /* Exported defines -----------------------------------------------------------*/
-#define putc_dspl(ch) DSPL_OUT(ch);
+/* print standars output definitions */
+#ifndef PRINTF_DSPL_RF
+#define PRINTF_DSPL_RF    WH_DSPL_RF
+#endif /* #ifndef PRINTF_DSPL_RF */
+
+#define putc_dspl(ch)     DSPL_OUT(ch);
 
 /* Exported macro ------------------------------------------------------------*/
 
@@ -102,26 +120,9 @@ extern uint32_t secCnt;
 
 
 /* Private structures -------------------------------------------------------------*/
-typedef struct {
-  uint32_t  *counter;
-  uint32_t  *counterSrc;
-  uint32_t  period;
-  uint32_t  *counterReg;
-  uint32_t  entranceFlag;
-} task_scheduler_t;
-
-
-typedef struct {
-  uint8_t   addr[8];
-  uint8_t   spad[9];
-} OneWireDevice_t;
 
 
 /* Private includes ----------------------------------------------------------*/
-#include "common.h"
-#include "led.h"
-#include "ow.h"
-#include "ds18b20.h"
 
 
 

@@ -32,13 +32,33 @@
 
 /* Exported functions prototypes ---------------------------------------------*/
 
-void MaxDisplay_CronHandler(void);
+void DisplayHealthCheck_CronHandler(void);
 
 /**
- * @brief Return BMx Bosch device struct pointer.
+ * @brief Return MAX display device struct pointer.
  * @return device struct pointer
  */
 Max72xx_TypeDef* Get_MaxDiplayDevice(void);
+
+/**
+ * @brief Return TM display device struct pointer.
+ * @return device struct pointer
+ */
+TM163x_TypeDef* Get_TmDiplayDevice(void);
+
+/**
+ * @brief Return WH display device struct pointer.
+ * @param model: four digits display model code
+ * @return device struct pointer
+ */
+WHxxxx_TypeDef* Get_WhDiplayDevice(uint16_t);
+
+/**
+ * @brief Return SSD display device struct pointer.
+ * @param model: four digits display model code
+ * @return device struct pointer
+ */
+SSD13xx_TypeDef* Get_SsdDiplayDevice(uint16_t);
 
 
 #ifdef __cplusplus

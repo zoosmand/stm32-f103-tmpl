@@ -21,15 +21,15 @@
 
 
 
-int I2C_Init(I2C_TypeDef* I2Cx) {
+ErrorStatus I2C_Init(I2C_TypeDef* I2Cx) {
 
   /* Condigure PB6 - SCL, PB7 - SDA, 2MHz frequency, alternative*/
 
   if (I2Cx == I2C1) {
-    MODIFY_REG(I2C_Port->CRL,
-      (SCL_Pin_Mask | SDA_Pin_Mask), (
-        ((GPIO_AF_OD | GPIO_IOS_2) << (SCL_Pin_Pos * 4U))
-      | ((GPIO_AF_OD | GPIO_IOS_2) << (SDA_Pin_Pos * 4U))
+    MODIFY_REG(I2C1_Port->CRL,
+      ((0xf << (I2C1_SCL_Pin * 4U)) | (0xf << (I2C1_SDA_Pin * 4U))), (
+        ((GPIO_AF_OD | GPIO_IOS_2) << (I2C1_SCL_Pin * 4U))
+      | ((GPIO_AF_OD | GPIO_IOS_2) << (I2C1_SDA_Pin * 4U))
     ));
   }
 
@@ -42,11 +42,11 @@ int I2C_Init(I2C_TypeDef* I2Cx) {
   if (I2Cx == I2C1) {
     // NVIC_SetPriority(I2C1_ER_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 15, 0));
     // NVIC_EnableIRQ(I2C1_ER_IRQn);
-    return (0);
+    return (SUCCESS);
   }
 
 
-  return (1);
+  return (ERROR);
 }
 
 
@@ -57,7 +57,9 @@ int I2C_Init(I2C_TypeDef* I2Cx) {
  * @param  I2Cx: pointer to the I2C peripherals
  * @retval (int) status of operation
  */
-int I2C_Start(I2C_TypeDef* I2Cx){
+ErrorStatus I2C_Start(I2C_TypeDef* I2Cx){
+
+  uint32_t tmout;
 
   /* Stast I2C Peripherals enable */
   PREG_SET(I2Cx->CR1, I2C_CR1_PE_Pos);
@@ -67,11 +69,11 @@ int I2C_Start(I2C_TypeDef* I2Cx){
   PREG_SET(I2Cx->CR1, I2C_CR1_START_Pos);
   
   /* Wait until the start bit is set*/
-  uint32_t tmout = I2C_BUS_TMOUT;
+  tmout = I2C_BUS_TMOUT;
   while(!(PREG_CHECK(I2Cx->SR1, I2C_SR1_SB_Pos))) {
     if (!(--tmout)) {
       I2C_Stop(I2Cx);
-      return (1);
+      return (ERROR);
     }
   }
   
@@ -80,16 +82,16 @@ int I2C_Start(I2C_TypeDef* I2Cx){
   while(!(PREG_CHECK(I2Cx->SR2, I2C_SR2_MSL_Pos))) {
     if (!(--tmout)) {
       I2C_Stop(I2Cx);
-      return (1);
+      return (ERROR);
     }
   }
-  return (0);
+  return (SUCCESS);
 }
 
 
 
 
-int I2C_SendAddress(I2C_TypeDef* I2Cx, uint8_t addr, DataTransmitDirection_TypeDef dir){
+ErrorStatus I2C_SendAddress(I2C_TypeDef* I2Cx, uint8_t addr, DataTransmitDirection_TypeDef dir){
   
   /* Send the slave address into the bus */
   I2Cx->DR = (addr << 1) | (dir & 0x1);
@@ -99,7 +101,7 @@ int I2C_SendAddress(I2C_TypeDef* I2Cx, uint8_t addr, DataTransmitDirection_TypeD
   while(!(PREG_CHECK(I2Cx->SR1, I2C_SR1_ADDR_Pos))) {
     if (!(--tmout)) {
       I2C_Stop(I2Cx);
-      return (1);
+      return (ERROR);
     }
   }
 
@@ -107,7 +109,7 @@ int I2C_SendAddress(I2C_TypeDef* I2Cx, uint8_t addr, DataTransmitDirection_TypeD
   (void)I2C1->SR1;
   (void)I2C1->SR2;
 
-  return (0);
+  return (SUCCESS);
  }
 
 
@@ -136,9 +138,8 @@ void I2C_Stop(I2C_TypeDef* I2Cx){
  * @param  txByte: byte to send to the given bus
  * @retval (int) status of operation
  */
-int I2C_WriteByte(I2C_TypeDef* I2Cx, uint8_t txByte){
+ErrorStatus I2C_WriteByte(I2C_TypeDef* I2Cx, uint8_t txByte){
 
-  
   /* Send data byte to the couterpart */
   I2Cx->DR = txByte;
 
@@ -147,19 +148,19 @@ int I2C_WriteByte(I2C_TypeDef* I2Cx, uint8_t txByte){
   while(!(PREG_CHECK(I2Cx->SR1, I2C_SR1_BTF_Pos))) {
     if (!(--tmout)) {
       I2C_Stop(I2Cx);
-      return (1);
+      return (ERROR);
     }
   }
   
-  /* Verify after transferring if trasmit buffer is empty */
+  /* Verify after transferring if transmit buffer is empty */
   tmout = I2C_BUS_TMOUT;
   while(!(PREG_CHECK(I2Cx->SR1, I2C_SR1_TXE_Pos))) {
     if (!(--tmout)) {
       I2C_Stop(I2Cx);
-      return (1);
+      return (ERROR);
     }
   }
-  return (0);  
+  return (SUCCESS);  
 }
 
 
@@ -172,7 +173,6 @@ int I2C_WriteByte(I2C_TypeDef* I2Cx, uint8_t txByte){
  */
 uint8_t I2C_ReadByte(I2C_TypeDef* I2Cx){
 
-  
   /* Verify if byte transfer finished */
   uint32_t tmout = I2C_BUS_TMOUT;
   while(!(PREG_CHECK(I2Cx->SR1, I2C_SR1_BTF_Pos))) {
@@ -202,13 +202,14 @@ uint8_t I2C_ReadByte(I2C_TypeDef* I2Cx){
 
 
 // ----------------------------------------------------------------------------
+
 ErrorStatus I2C_Master_Send(I2C_TypeDef* I2Cx, uint16_t slaveAddr, uint8_t *buf, uint32_t len) {
 
-  I2C_Start(I2Cx);
+  if (I2C_Start(I2Cx)) return (ERROR);
   if (I2C_SendAddress(I2Cx, slaveAddr, TX)) return (ERROR);
 
   for (uint16_t i = 0; i < len; i++) {
-    I2C_WriteByte(I2Cx, *buf++); 
+    if (I2C_WriteByte(I2Cx, *buf++)) return (ERROR); 
   }
   I2C_Stop(I2Cx);
   return (SUCCESS);
@@ -218,9 +219,10 @@ ErrorStatus I2C_Master_Send(I2C_TypeDef* I2Cx, uint16_t slaveAddr, uint8_t *buf,
 
 
 // ----------------------------------------------------------------------------
+
 ErrorStatus I2C_Master_Receive(I2C_TypeDef* I2Cx, uint16_t slaveAddr, uint8_t *buf, uint16_t len) {
 
-  I2C_Start(I2Cx);
+  if (I2C_Start(I2Cx)) return (ERROR);
   
   if (I2C_SendAddress(I2Cx, slaveAddr, RX)) return (ERROR);
   

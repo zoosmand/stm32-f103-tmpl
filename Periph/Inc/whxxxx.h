@@ -14,8 +14,9 @@
   *
   ******************************************************************************
   */
-#ifndef _DISPLAY_H
-#define _DISPLAY_H
+
+#ifndef _WHXXXX_DSPL_H
+#define _WHXXXX_DSPL_H
 
 #ifdef __cplusplus
  extern "C" {
@@ -25,6 +26,9 @@
 #include "main.h"
    
 /* Private typedef -----------------------------------------------------------*/
+#ifndef WH_DSPL_MODEL
+#define WH_DSPL_MODEL 1602
+#endif /* #ifndef WH_DSPL_MODEL */
 
 /* Private includes ----------------------------------------------------------*/
 
@@ -35,10 +39,25 @@
 /* Exported macro ------------------------------------------------------------*/
 
 /* Exported functions prototypes ---------------------------------------------*/
-int WHxxxx_Init(I2C_TypeDef*);
+
+/**
+ * @brief  Initializes WHxxxx display.
+ * @param  dev: pointer to the particular device structure
+ * @retval status of operation
+ */
+ErrorStatus WHxxxx_Init(WHxxxx_TypeDef*);
+
+/**
+ * @brief  Prints data to the WHxxxx display.
+ * @param  dev: pointer to the particular device structure
+ * @param  buf: pointer to buffer to print data from
+ * @param  len: number of symbols to print
+ */
+ErrorStatus WHxxxx_Print(WHxxxx_TypeDef*, uint8_t*, uint8_t);
 
 
 /* Private defines -----------------------------------------------------------*/
+
 #define WHxxxx_I2C_ADDR       0x27 // WH1602 I2C Address
 #define WHxxxx_8BIT_BUS       0x03 // 8-bit initial bus initialization
 #define WHxxxx_CUR_UPLEFT     0x02 // Cursor positioin up an left
@@ -69,10 +88,15 @@ int WHxxxx_Init(I2C_TypeDef*);
 #define _0ACF_                1
 
 /* Extern functions prototypes ----------------------------------------------*/
-int __attribute__((weak)) putc_dspl_wh1602(char);
-int __attribute__((weak)) putc_dspl_wh2004(char);
+
+/**
+ * @brief  Writes/Sends cgarachter to the given WH1602 display
+ * @param  ch: charachter to display
+ * @retval status of operation
+ */
+int __attribute__((weak)) putc_dspl_wh(char);
 
 #ifdef __cplusplus
 }
 #endif
-#endif // _DISPLAY_H
+#endif // _WHXXXX_DSPL_H
