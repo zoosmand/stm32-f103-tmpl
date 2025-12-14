@@ -48,10 +48,6 @@
 #define BMx680_spi_page_pos             4
 #define BMx680_spi_reset                0x60
 
-#define BMx680_par_t1                   0xe9
-#define BMx680_par_t2                   0x8a
-#define BMx680_par_t3                   0x8c
-
 #define BMx680_calib1                   0x8a // 21 bytes
 #define BMx680_calib2                   0xe1 // 16 bytes
 
@@ -82,7 +78,7 @@
 #define BMx680_ctrl_meas_tmpr_ovrs_0    (0b000 << BMx680_ctrl_meas_tmpr_ovrs_pos)
 #define BMx680_ctrl_meas_tmpr_ovrs_1    (0b001 << BMx680_ctrl_meas_tmpr_ovrs_pos)
 #define BMx680_ctrl_meas_tmpr_ovrs_2    (0b010 << BMx680_ctrl_meas_tmpr_ovrs_pos)
-#define BMx680_ctrl_meas_pres_ovrs_4    (0b011 << BMx680_ctrl_meas_tmpr_ovrs_pos)
+#define BMx680_ctrl_meas_tmpr_ovrs_4    (0b011 << BMx680_ctrl_meas_tmpr_ovrs_pos)
 #define BMx680_ctrl_meas_tmpr_ovrs_8    (0b100 << BMx680_ctrl_meas_tmpr_ovrs_pos)
 #define BMx680_ctrl_meas_tmpr_ovrs_16   (0b101 << BMx680_ctrl_meas_tmpr_ovrs_pos)
 

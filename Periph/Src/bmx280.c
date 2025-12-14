@@ -295,9 +295,9 @@ ErrorStatus BMx280_Measurement(BMxX80_TypeDef *dev) {
   BMx280_S32_t adc_T = (((dev->RawBufPtr[3] << 8) | dev->RawBufPtr[4]) << 4) | (dev->RawBufPtr[5] >> 4);
   BMx280_S32_t adc_H = (dev->RawBufPtr[6] << 8) | dev->RawBufPtr[7];
 
-  dev->ResBufPtr[0] = bmx280_compensate_t_int32(adc_T);
-  dev->ResBufPtr[1] = bmx280_compensate_p_int32(adc_P);
-  dev->ResBufPtr[2] = bmx280_compensate_h_int32(adc_H);
+  dev->Results.temperature  = bmx280_compensate_t_int32(adc_T);
+  dev->Results.pressure     = bmx280_compensate_p_int32(adc_P);
+  dev->Results.humidity     = bmx280_compensate_h_int32(adc_H);
 
   dev->Lock = DISABLE;
   return (SUCCESS);

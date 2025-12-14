@@ -218,13 +218,70 @@ typedef struct {
 
 // ----------------------------------------------------------------------------
 
+typedef struct {
+  uint32_t pressure;
+  uint32_t temperature;
+  uint16_t humidity;
+  uint16_t gas_resistance;
+  uint8_t gas_range;
+  bool gas_valid;
+  bool heater_stable;
+} BMxX80_results_t;
+
+typedef struct {
+  int16_t par_t1;
+  int16_t par_t2;
+  int16_t par_t3;
+  int16_t par_p1;
+  int16_t par_p2;
+  int16_t par_p3;
+  int16_t par_p4;
+  int16_t par_p5;
+  int16_t par_p6;
+  int16_t par_p7;
+  int16_t par_p8;
+  int16_t par_p9;
+  int16_t par_p10;
+  int16_t par_h1;
+  int16_t par_h2;
+  int16_t par_h3;
+  int16_t par_h4;
+  int16_t par_h5;
+  int16_t par_h6;
+  int16_t par_h7;
+  int16_t par_g1;
+  int16_t par_g2;
+  int16_t par_g3;
+} BMx680_calib_t;
+
+typedef struct {
+  int16_t dig_t1;
+  int16_t dig_t2;
+  int16_t dig_t3;
+  int16_t dig_p1;
+  int16_t dig_p2;
+  int16_t dig_p3;
+  int16_t dig_p4;
+  int16_t dig_p5;
+  int16_t dig_p6;
+  int16_t dig_p7;
+  int16_t dig_p8;
+  int16_t dig_p9;
+  int16_t dig_h1;
+  int16_t dig_h2;
+  int16_t dig_h3;
+  int16_t dig_h4;
+  int16_t dig_h5;
+  int16_t dig_h6;
+} BMx280_calib_t;
+
 /**
  * @brief   Bosch BMx280 device type definition struct.
  */
 typedef struct {  
   uint8_t               DevID;
   uint8_t*              RawBufPtr;
-  int32_t*              ResBufPtr;
+  BMxX80_results_t      Results;
   int16_t*              CalibBufPtr;
   FunctionalState       Lock;
   I2C_TypeDef*          I2Cx;

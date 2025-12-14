@@ -214,7 +214,7 @@ ErrorStatus BMx680_Measurement(BMxX80_TypeDef *dev) {
 
 
   dev->RawBufPtr[0] = BMx680_ctrl_meas;
-  dev->RawBufPtr[1] = (BMx680_ctrl_meas_pres_ovrs_4 | BMx680_ctrl_meas_pres_ovrs_4);
+  dev->RawBufPtr[1] = (BMx680_ctrl_meas_tmpr_ovrs_4 | BMx680_ctrl_meas_pres_ovrs_4);
   if (bmx680_send(dev, 2)) return (ERROR);
 
   dev->RawBufPtr[0] = BMx680_ctrl_hum;
