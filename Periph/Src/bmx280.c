@@ -24,32 +24,13 @@
 
 /* Private function prototypes -----------------------------------------------*/
 
-
-/* Locaal variables ---------------------------------------------------------*/
-static uint16_t dig_T1  = 0;
-static int16_t dig_T2   = 0;
-static int16_t dig_T3   = 0;
-static uint16_t dig_P1  = 0;
-static int16_t dig_P2   = 0;
-static int16_t dig_P3   = 0;
-static int16_t dig_P4   = 0;
-static int16_t dig_P5   = 0;
-static int16_t dig_P6   = 0;
-static int16_t dig_P7   = 0;
-static int16_t dig_P8   = 0;
-static int16_t dig_P9   = 0;
-static uint8_t dig_H1   = 0;
-static int16_t dig_H2   = 0;
-static uint8_t dig_H3   = 0;
-static int16_t dig_H4   = 0;
-static int16_t dig_H5   = 0;
-static int8_t dig_H6    = 0;
+/* Local variables -----------------------------------------------------------*/
 static BMx280_S32_t t_fine = 0;
 
 
-/* Global variables ---------------------------------------------------------*/
+/* Global variables ----------------------------------------------------------*/
 
-/* Private function prototypes ----------------------------------------------*/
+/* Private function prototypes -----------------------------------------------*/
 
 /**
  * @brief  Writes/sends data to a BMx680 device.
@@ -91,7 +72,7 @@ static ErrorStatus i2c_receive(BMxX80_TypeDef*, uint8_t, uint16_t);
   * @param  adc_T: Raw temperature data
   * @return Measured temprerature
   */
-static BMx280_S32_t bmx280_compensate_t_int32(BMx280_S32_t);
+static BMx280_S32_t bmx280_compensate_t_int32(BMxX80_TypeDef*);
 
 /**
   * @brief  Calcutales pressure in Pa as unsigned 32 bit integer.
@@ -99,7 +80,7 @@ static BMx280_S32_t bmx280_compensate_t_int32(BMx280_S32_t);
   * @param  adc_P: Raw pressure data
   * @return Measured pressure
   */
-static BMx280_U32_t bmx280_compensate_p_int32(BMx280_S32_t);
+static BMx280_U32_t bmx280_compensate_p_int32(BMxX80_TypeDef*);
 
 /**
   * @brief  Calculates humidity in %RH as unsigned 32 bit integer in Q22.10 format 
@@ -108,7 +89,7 @@ static BMx280_U32_t bmx280_compensate_p_int32(BMx280_S32_t);
   * @param  adc_H: Raw humidity data
   * @return Measured humidity
   */
-static BMx280_U32_t bmx280_compensate_h_int32(BMx280_S32_t);
+static BMx280_U32_t bmx280_compensate_h_int32(BMxX80_TypeDef*);
 
 /**
   * @brief   Adjusts I2C bus according to device requirements.
@@ -209,31 +190,33 @@ ErrorStatus BMx280_Init(BMxX80_TypeDef* dev) {
 
   /* Read calibration data. This is common for both sensor's types */
   if (bmx280_receive(dev, BMX280_CALIB1, 26)) return (ERROR);
+
+  BMx280_calib_t* calib = (BMx280_calib_t*)dev->CalibPtr;
   
-  dig_T1 = (uint16_t)((dev->RawBufPtr[1] << 8) | dev->RawBufPtr[0]);
-  dig_T2 = (int16_t)((dev->RawBufPtr[3] << 8) | dev->RawBufPtr[2]);
-  dig_T3 = (int16_t)((dev->RawBufPtr[5] << 8) | dev->RawBufPtr[4]);
-  dig_P1 = (uint16_t)((dev->RawBufPtr[7] << 8) | dev->RawBufPtr[6]);
-  dig_P2 = (int16_t)((dev->RawBufPtr[9] << 8) | dev->RawBufPtr[8]);
-  dig_P3 = (int16_t)((dev->RawBufPtr[1] << 8) | dev->RawBufPtr[0]);
-  dig_P4 = (int16_t)((dev->RawBufPtr[3] << 8) | dev->RawBufPtr[2]);
-  dig_P5 = (int16_t)((dev->RawBufPtr[5] << 8) | dev->RawBufPtr[4]);
-  dig_P6 = (int16_t)((dev->RawBufPtr[7] << 8) | dev->RawBufPtr[6]);
-  dig_P7 = (int16_t)((dev->RawBufPtr[9] << 8) | dev->RawBufPtr[8]);
-  dig_P8 = (int16_t)((dev->RawBufPtr[21] << 8) | dev->RawBufPtr[20]);
-  dig_P9 = (int16_t)((dev->RawBufPtr[23] << 8) | dev->RawBufPtr[22]);
+  calib->dig_t1 = (uint16_t)((dev->RawBufPtr[1] << 8) | dev->RawBufPtr[0]);
+  calib->dig_t2 = (int16_t)((dev->RawBufPtr[3] << 8) | dev->RawBufPtr[2]);
+  calib->dig_t3 = (int16_t)((dev->RawBufPtr[5] << 8) | dev->RawBufPtr[4]);
+  calib->dig_p1 = (uint16_t)((dev->RawBufPtr[7] << 8) | dev->RawBufPtr[6]);
+  calib->dig_p2 = (int16_t)((dev->RawBufPtr[9] << 8) | dev->RawBufPtr[8]);
+  calib->dig_p3 = (int16_t)((dev->RawBufPtr[1] << 8) | dev->RawBufPtr[0]);
+  calib->dig_p4 = (int16_t)((dev->RawBufPtr[3] << 8) | dev->RawBufPtr[2]);
+  calib->dig_p5 = (int16_t)((dev->RawBufPtr[5] << 8) | dev->RawBufPtr[4]);
+  calib->dig_p6 = (int16_t)((dev->RawBufPtr[7] << 8) | dev->RawBufPtr[6]);
+  calib->dig_p7 = (int16_t)((dev->RawBufPtr[9] << 8) | dev->RawBufPtr[8]);
+  calib->dig_p8 = (int16_t)((dev->RawBufPtr[21] << 8) | dev->RawBufPtr[20]);
+  calib->dig_p9 = (int16_t)((dev->RawBufPtr[23] << 8) | dev->RawBufPtr[22]);
 
   /* If the sensor is BME280, read additianal block of calibration data */
   if (dev->DevID == BME280_ID) {
-    dig_H1 = (uint8_t)dev->RawBufPtr[25];
+    calib->dig_h1 = (uint8_t)dev->RawBufPtr[25];
 
     if (bmx280_receive(dev, BMX280_CALIB2, 16))return (ERROR);
     
-    dig_H2 = (int16_t)((dev->RawBufPtr[1] << 8) | dev->RawBufPtr[0]);
-    dig_H3 = (uint8_t)dev->RawBufPtr[2];
-    dig_H4 = (int16_t)((dev->RawBufPtr[3] << 4) | (dev->RawBufPtr[4] & 0x0f));
-    dig_H5 = (int16_t)((dev->RawBufPtr[5] << 4) | ((dev->RawBufPtr[4] >> 4) & 0x0f));
-    dig_H6 = (int8_t)dev->RawBufPtr[6];
+    calib->dig_h2 = (int16_t)((dev->RawBufPtr[1] << 8) | dev->RawBufPtr[0]);
+    calib->dig_h3 = (uint8_t)dev->RawBufPtr[2];
+    calib->dig_h4 = (int16_t)((dev->RawBufPtr[3] << 4) | (dev->RawBufPtr[4] & 0x0f));
+    calib->dig_h5 = (int16_t)((dev->RawBufPtr[5] << 4) | ((dev->RawBufPtr[4] >> 4) & 0x0f));
+    calib->dig_h6 = (int8_t)dev->RawBufPtr[6];
   }
 
   /* Set filter coefficient and inactive duration in normal mode */
@@ -291,13 +274,9 @@ ErrorStatus BMx280_Measurement(BMxX80_TypeDef *dev) {
   /* Read raw data */
   if (bmx280_receive(dev, BMX280_DATA, 8)) return (ERROR);
 
-  BMx280_S32_t adc_P = (((dev->RawBufPtr[0] << 8) | dev->RawBufPtr[1]) << 4) | (dev->RawBufPtr[2] >> 4);
-  BMx280_S32_t adc_T = (((dev->RawBufPtr[3] << 8) | dev->RawBufPtr[4]) << 4) | (dev->RawBufPtr[5] >> 4);
-  BMx280_S32_t adc_H = (dev->RawBufPtr[6] << 8) | dev->RawBufPtr[7];
-
-  dev->Results.temperature  = bmx280_compensate_t_int32(adc_T);
-  dev->Results.pressure     = bmx280_compensate_p_int32(adc_P);
-  dev->Results.humidity     = bmx280_compensate_h_int32(adc_H);
+  dev->Results.temperature  = bmx280_compensate_t_int32(dev);
+  dev->Results.pressure     = bmx280_compensate_p_int32(dev);
+  dev->Results.humidity     = bmx280_compensate_h_int32(dev);
 
   dev->Lock = DISABLE;
   return (SUCCESS);
@@ -370,16 +349,20 @@ static ErrorStatus bmx280_send(BMxX80_TypeDef *dev, uint8_t len) {
   and proposed by the BMx280 datasheet. They were set here with minor changes. 
   The logic has been kept.
   
-  t_fine carries fine temperature as global value
+  t_fine carries fine temperature as static value
+
 */
 
 // ----------------------------------------------------------------------------
 // ----------------------- Device specifiv function ---------------------------
 // ----------------------------------------------------------------------------
-static BMx280_S32_t bmx280_compensate_t_int32(BMx280_S32_t adc_T) {
+static BMx280_S32_t bmx280_compensate_t_int32(BMxX80_TypeDef* dev) {
   BMx280_S32_t var1, var2, T;
-  var1 = ((((adc_T >> 3) - ((BMx280_S32_t)dig_T1 << 1))) * (BMx280_S32_t)dig_T2) >> 11;
-  var2 = (((((adc_T >> 4) - (BMx280_S32_t)dig_T1) * ((adc_T >> 4) - (BMx280_S32_t)dig_T1)) >> 12) * (BMx280_S32_t)dig_T3) >> 14;
+  BMx280_S32_t adc_T = (((dev->RawBufPtr[3] << 8) | dev->RawBufPtr[4]) << 4) | (dev->RawBufPtr[5] >> 4);
+  BMx280_calib_t* calib = (BMx280_calib_t*)dev->CalibPtr;
+
+  var1 = ((((adc_T >> 3) - ((BMx280_S32_t)calib->dig_t1 << 1))) * (BMx280_S32_t)calib->dig_t2) >> 11;
+  var2 = (((((adc_T >> 4) - (BMx280_S32_t)calib->dig_t1) * ((adc_T >> 4) - (BMx280_S32_t)calib->dig_t1)) >> 12) * (BMx280_S32_t)calib->dig_t3) >> 14;
   t_fine = var1 + var2;
 
   T = (t_fine * 5 + 128) >> 8;
@@ -392,15 +375,18 @@ static BMx280_S32_t bmx280_compensate_t_int32(BMx280_S32_t adc_T) {
 // ----------------------- Device specifiv function ---------------------------
 // ----------------------------------------------------------------------------
 
-static BMx280_U32_t bmx280_compensate_p_int32(BMx280_S32_t adc_P) {
+static BMx280_U32_t bmx280_compensate_p_int32(BMxX80_TypeDef* dev) {
   BMx280_S32_t var1, var2;
   BMx280_U32_t P;
+  BMx280_S32_t adc_P = (((dev->RawBufPtr[0] << 8) | dev->RawBufPtr[1]) << 4) | (dev->RawBufPtr[2] >> 4);
+  BMx280_calib_t* calib = (BMx280_calib_t*)dev->CalibPtr;
+
   var1 = (((BMx280_S32_t)t_fine) >> 1) - (BMx280_S32_t)64000;
-  var2 = (((var1 >> 2) * (var1 >> 2)) >> 11 ) * ((BMx280_S32_t)dig_P6);
-  var2 = var2 + ((var1 * ((BMx280_S32_t)dig_P5)) << 1);
-  var2 = (var2 >> 2) + (((BMx280_S32_t)dig_P4) << 16);
-  var1 = (((dig_P3 * (((var1 >> 2) * (var1 >> 2)) >> 13 )) >> 3) + ((((BMx280_S32_t)dig_P2) * var1) >> 1)) >> 18;
-  var1 = ((((32768 + var1)) * ((BMx280_S32_t)dig_P1)) >> 15);
+  var2 = (((var1 >> 2) * (var1 >> 2)) >> 11 ) * ((BMx280_S32_t)calib->dig_p6);
+  var2 = var2 + ((var1 * ((BMx280_S32_t)calib->dig_p5)) << 1);
+  var2 = (var2 >> 2) + (((BMx280_S32_t)calib->dig_p4) << 16);
+  var1 = (((calib->dig_p3 * (((var1 >> 2) * (var1 >> 2)) >> 13 )) >> 3) + ((((BMx280_S32_t)calib->dig_p2) * var1) >> 1)) >> 18;
+  var1 = ((((32768 + var1)) * ((BMx280_S32_t)calib->dig_p1)) >> 15);
   
   if (var1 == 0) return (0); // avoid excePtion caused by division by zero
   
@@ -411,10 +397,10 @@ static BMx280_U32_t bmx280_compensate_p_int32(BMx280_S32_t adc_P) {
     P = (P / (BMx280_U32_t)var1) * 2;
   }
   
-  var1 = (((BMx280_S32_t)dig_P9) * ((BMx280_S32_t)(((P >> 3) * (P >> 3)) >> 13))) >> 12;
-  var2 = (((BMx280_S32_t)(P >> 2)) * ((BMx280_S32_t)dig_P8)) >> 13;
+  var1 = (((BMx280_S32_t)calib->dig_p9) * ((BMx280_S32_t)(((P >> 3) * (P >> 3)) >> 13))) >> 12;
+  var2 = (((BMx280_S32_t)(P >> 2)) * ((BMx280_S32_t)calib->dig_p8)) >> 13;
   
-  P = (BMx280_U32_t)((BMx280_S32_t)P + ((var1 + var2 + dig_P7) >> 4));
+  P = (BMx280_U32_t)((BMx280_S32_t)P + ((var1 + var2 + calib->dig_p7) >> 4));
   return (P);
 }
 
@@ -425,12 +411,15 @@ static BMx280_U32_t bmx280_compensate_p_int32(BMx280_S32_t adc_P) {
 // ----------------------- Device specifiv function ---------------------------
 // ----------------------------------------------------------------------------
 
-static BMx280_U32_t bmx280_compensate_h_int32(BMx280_S32_t adc_H) {
+static BMx280_U32_t bmx280_compensate_h_int32(BMxX80_TypeDef* dev) {
   // varant 2
   BMx280_U32_t H;
+  BMx280_S32_t adc_H = (dev->RawBufPtr[6] << 8) | dev->RawBufPtr[7];
+  BMx280_calib_t* calib = (BMx280_calib_t*)dev->CalibPtr;
+
   H = (BMx280_S32_t)t_fine - (BMx280_S32_t)76800;
-  H = (((((adc_H << 14) - ((BMx280_S32_t)dig_H4 << 20) - ((BMx280_S32_t)dig_H5 * H)) + 16384) >> 15) * ((((((((BMx280_S32_t)H * dig_H6) >> 10) * ((((BMx280_S32_t)H * dig_H3) >> 11) + 32768)) >> 10) + 2097152) * (BMx280_S32_t)dig_H2 + 8192) >> 14));
-  H = (H - (((((H >> 15) * (H >> 15)) >> 7) * (BMx280_S32_t)dig_H1) >> 4));
+  H = (((((adc_H << 14) - ((BMx280_S32_t)calib->dig_h4 << 20) - ((BMx280_S32_t)calib->dig_h5 * H)) + 16384) >> 15) * ((((((((BMx280_S32_t)H * calib->dig_h6) >> 10) * ((((BMx280_S32_t)H * calib->dig_h3) >> 11) + 32768)) >> 10) + 2097152) * (BMx280_S32_t)calib->dig_h2 + 8192) >> 14));
+  H = (H - (((((H >> 15) * (H >> 15)) >> 7) * (BMx280_S32_t)calib->dig_h1) >> 4));
 
   if (H > 0x19000000) H = 0x19000000;
   if (H < 0) H = 0;
