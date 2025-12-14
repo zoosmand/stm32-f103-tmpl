@@ -163,8 +163,9 @@
 #define PREG_CHECK(peripheral, key)                             (GET_PERIPH_BB_VAL((uint32_t)&peripheral, 0, key))
 
 /* --- Task control --- */
+#define CRON_SYSTICK_EVENT                                      FLAG_CHECK(&_GEREG_, _SYSTICKF_)
 #define CRON_SEC_EVENT                                          FLAG_CHECK(&_GEREG_, _SYSSECF_)
-#define TASK_CTRL(task)                                         if (FLAG_CHECK(task.scheduler->counterReg, task.scheduler->entranceFlag)) task.callback((uint32_t*)&task);
+// #define TASK_CTRL(task)                                         if (FLAG_CHECK(task.Scheduler->counterReg, task.Scheduler->entranceFlag)) task.Callback((uint32_t*)&task);
 
 
 
@@ -189,18 +190,109 @@ typedef enum {
 } DataTransmitDirection_TypeDef;
 
 
+
+typedef struct {
+  uint32_t*             counter;
+  uint32_t*             counterSrc;
+  uint32_t              period;
+  uint32_t*             counterReg;
+  uint32_t              entranceFlag;
+} task_scheduler_t;
+
+
 // ----------------------------------------------------------------------------
+
+typedef struct {
+  // task_scheduler_t*     Scheduler;
+  GPIO_TypeDef*         Port;
+  uint16_t              Pin;
+  FunctionalState       Lock;
+  uint8_t               BlinkCount;
+  uint32_t              BlinkDuration;
+  uint32_t              BlinkPause;
+  uint32_t*             BlinkThreshold;
+  uint32_t*             CounterSrc;
+  ErrorStatus           (*Callback)(uint32_t*);
+} HearbeatDevice_TypeDev;
+
+
+// ----------------------------------------------------------------------------
+
+typedef struct {
+  uint32_t  pressure;
+  uint32_t  temperature;
+  uint16_t  humidity;
+  uint16_t  gas_resistance;
+  uint8_t   gas_range;
+  bool      gas_valid;
+  bool      heater_stable;
+} BMxX80_results_t;
+
+typedef struct {
+  int16_t   par_t1;
+  int16_t   par_t2;
+  int16_t   par_t3;
+  int16_t   par_p1;
+  int16_t   par_p2;
+  int16_t   par_p3;
+  int16_t   par_p4;
+  int16_t   par_p5;
+  int16_t   par_p6;
+  int16_t   par_p7;
+  int16_t   par_p8;
+  int16_t   par_p9;
+  int16_t   par_p10;
+  int16_t   par_h1;
+  int16_t   par_h2;
+  int16_t   par_h3;
+  int16_t   par_h4;
+  int16_t   par_h5;
+  int16_t   par_h6;
+  int16_t   par_h7;
+  int16_t   par_g1;
+  int16_t   par_g2;
+  int16_t   par_g3;
+} BMx680_calib_t;
+
+typedef struct {
+  uint16_t  dig_t1;
+  int16_t   dig_t2;
+  int16_t   dig_t3;
+  uint16_t  dig_p1;
+  int16_t   dig_p2;
+  int16_t   dig_p3;
+  int16_t   dig_p4;
+  int16_t   dig_p5;
+  int16_t   dig_p6;
+  int16_t   dig_p7;
+  int16_t   dig_p8;
+  int16_t   dig_p9;
+  uint8_t   dig_h1;
+  int16_t   dig_h2;
+  uint8_t   dig_h3;
+  int16_t   dig_h4;
+  int16_t   dig_h5;
+  int8_t    dig_h6;
+} BMx280_calib_t;
 
 /**
  * @brief   Bosch BMx280 device type definition struct.
  */
 typedef struct {  
-  uint8_t         DevID;
-  uint8_t*        RawBufPtr;
-  int32_t*        ResBufPtr;
-  FunctionalState Lock;
-  I2C_TypeDef*    I2CBus;
-  SPI_TypeDef*    SPIBus;
+  uint8_t               DevID;
+  uint8_t*              RawBufPtr;
+  BMxX80_results_t      Results;
+  uint32_t*             CalibPtr;
+  FunctionalState       Lock;
+  I2C_TypeDef*          I2Cx;
+  uint8_t               I2C_Address;
+  SPI_TypeDef*          SPIx;
+  GPIO_TypeDef*         SPINssPort;
+  uint16_t              SPINssPin;
+  DMA_TypeDef*          DMAx;
+  DMA_Channel_TypeDef*  DMAxTx;
+  DMA_Channel_TypeDef*  DMAxRx;
+  ErrorStatus           (*Callback)(uint32_t*);
 } BMxX80_TypeDef;
 
 
@@ -221,13 +313,14 @@ typedef struct {
   DMA_TypeDef*          DMAx;
   DMA_Channel_TypeDef*  DMAxTx;
   DMA_Channel_TypeDef*  DMAxRx;
+  ErrorStatus           (*Callback)(uint32_t*);
 } W25qxx_TypeDef;
 
 
 // ----------------------------------------------------------------------------
 
 /**
- * @brief   MAX7219 device type definition struct.
+ * @brief   MAX72xx device type definition struct.
  */
 typedef struct {
   uint8_t               SegCnt;
@@ -235,10 +328,96 @@ typedef struct {
   uint16_t*             BufPtr;
   FunctionalState       Lock;
   SPI_TypeDef*          SPIx;
+  GPIO_TypeDef*         SPINssPort;
+  uint16_t              SPINssPin;
   DMA_TypeDef*          DMAx;
   DMA_Channel_TypeDef*  DMAxTx;
-  DMA_Channel_TypeDef*  DMAxRx;
+  ErrorStatus           (*Callback)(uint32_t*);
 } Max72xx_TypeDef;
+
+
+// ----------------------------------------------------------------------------
+
+/**
+ * @brief   TM163x device type definition struct.
+ */
+typedef struct {
+  FunctionalState       Lock;
+  GPIO_TypeDef*         PortSck;
+  GPIO_TypeDef*         PortDio;
+  uint16_t              PinSck;
+  uint16_t              PinDio;
+  uint8_t               Dig0;
+  uint8_t               Dig1;
+  uint8_t               Dig2;
+  uint8_t               Dig3;
+  uint8_t               Dig4;
+  uint8_t               Dig5;
+  uint8_t               Dig6;
+  uint8_t               Dig7;
+  ErrorStatus           (*Callback)(uint32_t*);
+} TM163x_TypeDef;
+
+
+// ----------------------------------------------------------------------------
+
+/**
+ * @brief   WHxxxx device type definition struct.
+ */
+typedef struct {
+  FunctionalState       Lock;
+  I2C_TypeDef*          I2Cx;
+  uint8_t               I2C_Address;
+  DMA_TypeDef*          DMAx;
+  DMA_Channel_TypeDef*  DMAxTx;
+  ErrorStatus           (*Callback)(uint32_t*);
+} WHxxxx_TypeDef;
+
+
+// ----------------------------------------------------------------------------
+
+/**
+ * @brief   SSD13xx device type definition struct.
+ */
+typedef struct {
+  FunctionalState       Lock;
+  I2C_TypeDef*          I2Cx;
+  uint8_t               I2C_Address;
+  uint8_t*              BufPtr;
+  uint16_t              BufSize;
+  DMA_TypeDef*          DMAx;
+  DMA_Channel_TypeDef*  DMAxTx;
+  ErrorStatus           (*Callback)(uint32_t*);
+} SSD13xx_TypeDef;
+
+
+// ----------------------------------------------------------------------------
+
+/**
+ * @brief   OnwWire device type definition struct.
+ */
+typedef struct {
+  FunctionalState       Lock;
+  uint8_t               Family;
+  uint8_t               Type;
+  uint8_t               Addr[8];
+  uint8_t               Spad[9];
+  uint32_t*             ParentBusPtr;
+  ErrorStatus           (*Callback)(uint32_t*);
+} OneWireDevice_t;
+
+/**
+ * @brief   OnwWire bus type definition struct.
+ */
+typedef struct {
+  FunctionalState       Lock;
+  GPIO_TypeDef*         Port;
+  uint16_t              Pin;
+  OneWireDevice_t*      Devs;
+  uint8_t               Count;
+  ErrorStatus           (*Callback)(uint32_t*);
+} OneWireBus_TypeDef;
+
 
 
 // ----------------------------------------------------------------------------

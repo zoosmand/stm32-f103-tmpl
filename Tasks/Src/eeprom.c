@@ -38,7 +38,7 @@ static W25qxx_TypeDef eeprom_0 = {
   .DMAx   = DMA1,
   .DMAxTx = DMA1_Channel3,
   .DMAxRx = DMA1_Channel2,
-  .Lock   = ENABLE,
+  .Lock   = DISABLE,
 };
 
 
@@ -77,7 +77,7 @@ void EepromHealthCheck_CronHandler(void) {
 
 static ErrorStatus eepromHealthCheck_Task(W25qxx_TypeDef* dev) {
 
-  if (dev->Lock == ENABLE) dev->Lock = DISABLE; else return (ERROR);
+  if (dev->Lock == DISABLE) dev->Lock = ENABLE; else return (ERROR);
 
   /* TODO realize a propert health check */
   static uint8_t dataBuf[16];
@@ -108,7 +108,7 @@ static ErrorStatus eepromHealthCheck_Task(W25qxx_TypeDef* dev) {
 
   __NOP();
 
-  dev->Lock = ENABLE;
+  dev->Lock = DISABLE;
   return (SUCCESS);
 }
 

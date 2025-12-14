@@ -46,17 +46,17 @@
 /**
  * @brief   Initializes the given MAX72xx device.
  * @param   dev: pointer to the MAX72xx device struct
- * @retval  (int) status of operation
+ * @retval  status of operation
  */
-int MAX72xx_Init(Max72xx_TypeDef*);
+ErrorStatus MAX72xx_Init(Max72xx_TypeDef*);
 
 /**
  * @brief   Prints the buffer from the given MAX72xx dev.
  * @param   dev: pointer to the MAX72xx device struct
  * @param   buf: chars buffer to print
- * @retval  none
+ * @retval  status of operation
  */
-void MAX72xx_Print(Max72xx_TypeDef*, const char*);
+ErrorStatus MAX72xx_Print(Max72xx_TypeDef*, const char*);
 
 
 #ifdef __cplusplus

@@ -1,18 +1,26 @@
-/*
- *
- *
- *
- *
- */
+/**
+  ******************************************************************************
+  * @file           : ssd13xx.c
+  * @brief          : This file contains code of SSD13xx display.
+  ******************************************************************************
+  * @attention
+  *
+  * Copyright (c) 2025 Askug Ltd.
+  * All rights reserved.
+  *
+  * This software is licensed under terms that can be found in the LICENSE file
+  * in the root directory of this software component.
+  * If no LICENSE file comes with this software, it is provided AS-IS.
+  *
+  ******************************************************************************
+  */
 
+/* Includes ------------------------------------------------------------------*/
 
- /* Includes ------------------------------------------------------------------*/
 #include "ssd13xx.h"
 
 
-
 /* Private variables ---------------------------------------------------------*/
-static I2C_TypeDef* I2C_Instance;
 
 const static uint8_t ssd13xxInitParams[24] = {
   0xae,       // set display off
@@ -28,7 +36,7 @@ const static uint8_t ssd13xxInitParams[24] = {
   0x81, 0x7f, // set contrast control register
   0xd9, 0x88, // set pre-charge period; phase 1 in [7:4]; phase 2 in [3:0] 
   0xdb, 0x20, // set vcomh, vcomh level in [5:4]
-  0xa4,       // entire display on; [0]=1 then ignore RAMl [0]=0 then follow RAM
+  0xa4,       // entire display on; [0]=1 then ignore RAM [0]=0 then follow RAM
   0xa6,       // set normal/inverse display; [0]=1 then inverse; [0]=0 then normal
   0xaf        // set display on
 };
@@ -62,133 +70,232 @@ static uint8_t ssd13xxCurrentCurPosParams[8];
 /* Private function prototypes -----------------------------------------------*/
 
 /**
- * @brief  Writes/Sends a command to SSD13xx display
+ * @brief  Writes/Sends a command to SSD13xx display.
  * @param  cmd: ssd13xx command
- * @retval (int) status of operation
+ * @retval status of operation
  */
-static int sSD13xx_WriteCommand(uint8_t cmd);
+static ErrorStatus ssd13xx_send_command(SSD13xx_TypeDef*, uint8_t);
 
 /**
- * @brief  Writes/Sends a data to SSD13xx display
- * @param  data: ssd13xx data byte
- * @retval (int) status of operation
- */
-static int sSD13xx_WriteDataByte(uint8_t data);
-
-/**
- * @brief  Writes/Sends a text buffer to SSD13xx display
+ * @brief  Writes/Sends a text buffer to SSD13xx display.
  * @param  buf: pointer to the character/text buffer
  * @param  len: buffer length
  * @param  pos: pointer to the cursor position
- * @retval (int) status of operation
+ * @retval status of operation
  */
-static int sSD13xx_WriteBuf(const uint8_t* buf, uint16_t len, uint8_t* pos);
+static ErrorStatus ssd13xx_send_buffer(SSD13xx_TypeDef*, const uint8_t*, uint16_t, uint8_t*);
+
+/**
+  * @brief   Adjusts I2C bus according to device requirements.
+  * @param   dev: pointer to the device struct
+  * @retval  none
+  */
+__STATIC_INLINE void i2c_dma_configure(SSD13xx_TypeDef*);
+
+/**
+  * @brief   Adjusts I2C bus according to device requirements.
+  * @param   dev: pointer to the device struct
+  * @retval  none
+  */
+__STATIC_INLINE ErrorStatus i2c_dma_unconfigure(SSD13xx_TypeDef*);
+
+/**
+  * @brief  Transmits in master mode an amount of data.
+  * @param  dev Pointer to the target device structure
+  * @param  buf Pointer to data buffer
+  * @param  len Amount of data to be sent
+  * @return transmit status
+  */
+__STATIC_INLINE ErrorStatus i2c_master_send(SSD13xx_TypeDef*);
+
+/**
+  * @brief  Clears the diven device buffer.
+  * @param  dev Pointer to the target device structure
+  * @return transmit status
+  */
+__STATIC_INLINE void ssd13xx_clear_buffer(SSD13xx_TypeDef*);
 
 
 
 
 
+////////////////////////////////////////////////////////////////////////////////
 
-/******************************************************************************/
+
+
 
 // ----------------------------------------------------------------------------
-int SSD13xx_Init(I2C_TypeDef* i2c) {
 
-  I2C_Instance = i2c;
+__STATIC_INLINE void i2c_dma_configure(SSD13xx_TypeDef* dev) {
+
+  /* Disable DMA transfer */
+  PREG_CLR(dev->DMAxTx->CCR, DMA_CCR_EN_Pos);
+  /* Clear ACK bnit */
+  PREG_CLR(dev->I2Cx->CR1, I2C_CR1_ACK_Pos);
+  /* configure DMA, Channel6 - TX */
+  /* set priority high*/
+  /* set memory to increment */
+  /* set dir bit, means reading from the bus */
+  MODIFY_REG(dev->DMAxTx->CCR, (
+        DMA_CCR_PL_Msk
+      | DMA_CCR_MINC_Msk
+      | DMA_CCR_DIR_Msk
+    ), (
+        DMA_CCR_PL_1 
+      | DMA_CCR_MINC 
+      | DMA_CCR_DIR
+    )
+  );
   
+  /* set peripheral address */
+  dev->DMAxTx->CPAR = (uint32_t)&dev->I2Cx->DR;
+  
+}
+
+
+// ----------------------------------------------------------------------------
+
+__STATIC_INLINE ErrorStatus i2c_dma_unconfigure(SSD13xx_TypeDef* dev) {
+  
+  /* Clear correspondent DMA interrupt flags */
+  dev->DMAx->IFCR = (DMA_IFCR_CHTIF6_Msk | DMA_IFCR_CGIF6_Msk | DMA_IFCR_CTCIF6_Msk);
+  /* Clear DMA configuration */
+  dev->DMAxTx->CPAR   = 0UL;
+  dev->DMAxTx->CMAR   = 0UL;
+  dev->DMAxTx->CNDTR  = 0UL;
+  dev->DMAxTx->CCR    = 0UL;
+  
+  /* Disable DMA transfer on the bus */
+  PREG_CLR(dev->I2Cx->CR2, I2C_CR2_DMAEN);
+  
+  /* Disable I2C bus */
+  I2C_Stop(dev->I2Cx);
+  
+  return (ERROR);
+}
+
+
+// ----------------------------------------------------------------------------
+
+__STATIC_INLINE ErrorStatus i2c_master_send(SSD13xx_TypeDef* dev) {
+  
+  uint32_t tmout;
+  
+  /* Adjust I2C bus with DMA transfer */
+  i2c_dma_configure(dev);
+  
+  /* Set counter */
+  dev->DMAxTx->CNDTR = dev->BufSize;
+  /* Set buffer pointer address */
+  dev->DMAxTx->CMAR = (uint32_t)dev->BufPtr;
+  /* Enable receiving DMA transfer */
+  PREG_SET(dev->I2Cx->CR2, I2C_CR2_DMAEN_Pos);
+
+  /* Start bus transmission */
+  if (I2C_Start(dev->I2Cx)) { return (i2c_dma_unconfigure(dev)); }
+  if (I2C_SendAddress(dev->I2Cx, dev->I2C_Address, TX)) { return (i2c_dma_unconfigure(dev)); }
+  
+  /* Enable DMS transfer*/
+  PREG_SET(dev->DMAxTx->CCR, DMA_CCR_EN_Pos);
+  
+  /* Wait for transfer is complete */
+  tmout = I2C_BUS_TMOUT * 1000;
+  while(!(PREG_CHECK(dev->DMAx->ISR, DMA_ISR_TCIF6_Pos))) {
+    if (!(--tmout)) return (i2c_dma_unconfigure(dev));
+  }
+  /* Verify after transferring if transmition is finished */
+  tmout = I2C_BUS_TMOUT;
+  while(!(PREG_CHECK(dev->I2Cx->SR1, I2C_SR1_BTF_Pos))) {
+    if (!(--tmout)) { return (i2c_dma_unconfigure(dev)); }
+  }
+  
+  /* Unconfigure DMA and stop the I2C bus */
+  i2c_dma_unconfigure(dev);
+  return (SUCCESS);
+}
+
+
+
+// ----------------------------------------------------------------------------
+
+__STATIC_INLINE void ssd13xx_clear_buffer(SSD13xx_TypeDef* dev) {
+  for (uint16_t i = 0; i < dev->BufSize; i++) {
+    dev->BufPtr[i] = 0;
+  }
+}
+
+
+
+
+// ----------------------------------------------------------------------------
+
+ErrorStatus SSD13xx_Init(SSD13xx_TypeDef* dev) {
+
   /* Initial delay according ssd1315 documentation */
   _delay_ms(15);
 
   /* --- Initialization commands --- */
   for (uint8_t i = 0; i < sizeof(ssd13xxInitParams); i++) {
-    if (sSD13xx_WriteCommand(ssd13xxInitParams[i])) return (1);
+    if (ssd13xx_send_command(dev, ssd13xxInitParams[i])) return (ERROR);
   }
-
-    /* --- Clear display --- */
+    
+  /* --- Clear display --- */
   for (uint8_t i = 0; i < sizeof(ssd13xxClrDspl); i++) {
-    if (sSD13xx_WriteCommand(ssd13xxClrDspl[i])) return (1);
+    if (ssd13xx_send_command(dev, ssd13xxClrDspl[i])) return (ERROR);
   }
 
-  if (I2C_Start(I2C_Instance)) return (1);
-  _delay_us(1);
-  /* --- Control ACK on sending address --- */
-  if (I2C_SendAddress(I2C_Instance, SSD1315_I2C_ADDR, TX)) return (1);
-  /* --- Send control byte --- */
-  if (sSD13xx_WriteDataByte((uint8_t)((1 << SSD13xx_DC_BIT) & ~(1 << SSD13xx_Co_BIT)))) return (1);
+  dev->BufSize = (8 * 128 + 1);
+  ssd13xx_clear_buffer(dev);
+  dev->BufPtr[0] = SSD13xx_DATA_CTRL;
 
-  for (uint8_t i = 0; i < 8; i++) {
-    for (uint8_t y = 0; y < 128; y++) {
-      if (sSD13xx_WriteDataByte(0x00)) return (1);
-    }
-  }
-  I2C_Stop(I2C_Instance);
-
+  if (i2c_master_send(dev)) return (ERROR);
+  
   /* --- Initialize the init cursor position --- */
   putc_dspl('\n');
  
-  return (0);
+  return (SUCCESS);
 }
 
 
 
 
 // ----------------------------------------------------------------------------
-static int sSD13xx_WriteCommand(uint8_t cmd) {
 
-  if (I2C_Start(I2C_Instance)) return (1);
-  _delay_us(1);
+static ErrorStatus ssd13xx_send_command(SSD13xx_TypeDef* dev, uint8_t cmd) {
 
-  /* --- Control ACK on sending address --- */
-  if (I2C_SendAddress(I2C_Instance, SSD1315_I2C_ADDR, TX)) return (1);
-  
-  /* --- Send control byte --- */
-  if (I2C_WriteByte(I2C_Instance, (uint8_t)(~(1 << SSD13xx_Co_BIT) & ~(1 << SSD13xx_DC_BIT)))) return (1);
-  
-  /* --- Send data byte --- */
-  if (I2C_WriteByte(I2C_Instance, cmd)) return (1);
+  uint8_t cmdBuf[2] = { SSD13xx_CMD_CTRL, cmd };
 
-  I2C_Stop(I2C_Instance);
+  if (I2C_Master_Send(dev->I2Cx, dev->I2C_Address, cmdBuf, 2)) return (ERROR);
 
-  return (0);
+  return (SUCCESS);
 }
 
 
 
 
 // ----------------------------------------------------------------------------
-static int sSD13xx_WriteDataByte(uint8_t data) {
-  /* --- Send data byte --- */
-  if (I2C_WriteByte(I2C_Instance, data)) return (1);
+
+static ErrorStatus ssd13xx_send_buffer(SSD13xx_TypeDef* dev, const uint8_t* buf, uint16_t len, uint8_t* pos) {
   
-  return (0);
-}
-
-
-
-
-// ----------------------------------------------------------------------------
-static int sSD13xx_WriteBuf(const uint8_t* buf, uint16_t len, uint8_t* pos) {
-
   /* --- Set cursor position --- */
   for (uint8_t i = 0; i < 8; i++) {
-    if (sSD13xx_WriteCommand(pos[i])) return (1);
+    if (ssd13xx_send_command(dev, pos[i])) return (ERROR);
   }
   
-  uint8_t step_left = 6;
-  uint8_t step_up = 1;
-
+  uint8_t step_left, step_up;
+  
   switch (len) {
-  case 24:
+    case 24:
     step_left = 12;
     step_up = 2;
     break;
-  
-  default:
-    // step_left = 6;
-    // step_up = 1;
+    
+    default:
+    step_left = 6;
+    step_up = 1;
     break;
   }
-
+  
   if (((pos[4] + 6) & 0x7f) < pos[3]) {
     pos[3] = 0x00;
     pos[4] = step_left;
@@ -207,58 +314,50 @@ static int sSD13xx_WriteBuf(const uint8_t* buf, uint16_t len, uint8_t* pos) {
   //   pos[3] = pos[4] + 1;
   //   pos[4] = pos[4] + 12;
   // }
+  
 
-  /* --- Write the buffer --- */
-  if (I2C_Start(I2C_Instance)) return (1);
-  _delay_us(1);
+  dev->BufSize = (len + 1); // data and one byte for a command
+  // ssd13xx_clear_buffer(dev); // it is not necessary cleaning buffer here though it might help in some cases
+  dev->BufPtr[0] = SSD13xx_DATA_CTRL;
 
-  /* --- Control ACK on sending address --- */
-  if (I2C_SendAddress(I2C_Instance, SSD1315_I2C_ADDR, TX)) return (1);
-
-  /* --- Send control byte --- */
-  if (sSD13xx_WriteDataByte((uint8_t)((1 << SSD13xx_DC_BIT) & ~(1 << SSD13xx_Co_BIT)))) return (1);
-
-  /* --- Send buffer data --- */
-  for (uint8_t i = 0; i < len; i++) {
-    if (sSD13xx_WriteDataByte(buf[i])) return (1);
-  }
-  I2C_Stop(I2C_Instance);
-
-  return (0);
+  for (uint16_t i = 0; i < len; i++) { dev->BufPtr[i + 1] = buf[i]; }
+  
+  if (i2c_master_send(dev)) return (ERROR);
+  
+  return (SUCCESS);
 }
+    
+    
+    
+    
+// ----------------------------------------------------------------------------
 
-
-
-/**
- * @brief  Writes/Sends character to the given display
- * @param  ch: character to write
- * @retval (int) status of operation
- */
-int __attribute__((weak)) putc_dspl_5x7(char ch) {
+int __attribute__((weak)) putc_dspl_ssd(char ch) {
+  
   if ((ch != 0x0a) && (ch != 0x0d)) {
-    sSD13xx_WriteBuf(font_dot_5x7[(((uint8_t)ch) - 32)], sizeof(font_dot_5x7_t), ssd13xxCurrentCurPosParams);
+    SSD13xx_TypeDef* dsplDev = Get_SsdDiplayDevice(SSD_DSPL_MODEL);
+
+    #if SSD_DSPL_FONT == 1014
+      ssd13xx_send_buffer(dsplDev, font_dot_10x14[(((uint8_t)ch) - 32)], sizeof(font_dot_10x14_t), ssd13xxCurrentCurPosParams);
+    #elif SSD_DSPL_FONT == 57
+      ssd13xx_send_buffer(dsplDev, font_dot_5x7[(((uint8_t)ch) - 32)], sizeof(font_dot_5x7_t), ssd13xxCurrentCurPosParams);
+    #endif
   } else {
-    for (uint8_t i = 0; i < sizeof(ssd13xxInitCurPosParams_5x7); i++) {
-      ssd13xxCurrentCurPosParams[i] = ssd13xxInitCurPosParams_5x7[i];
-    }
+    #if SSD_DSPL_FONT == 1014
+      for (uint8_t i = 0; i < sizeof(ssd13xxInitCurPosParams_10x14); i++) {
+        ssd13xxCurrentCurPosParams[i] = ssd13xxInitCurPosParams_10x14[i];
+      }
+    #elif SSD_DSPL_FONT == 57
+      for (uint8_t i = 0; i < sizeof(ssd13xxInitCurPosParams_5x7); i++) {
+        ssd13xxCurrentCurPosParams[i] = ssd13xxInitCurPosParams_5x7[i];
+      }
+    #endif
   }
   return (0);
 }
 
 
 
-/**
- * @brief  Writes/Sends character to the given display
- * @param  ch: character to write
- * @retval (int) status of operation
- */
-int __attribute__((weak)) putc_dspl_10x14(char ch) {
-  if ((ch != 0x0a) && (ch != 0x0d)) {
-    sSD13xx_WriteBuf(font_dot_10x14[(((uint8_t)ch) - 32)], sizeof(font_dot_10x14_t), ssd13xxCurrentCurPosParams);
-  } else {
-    for (uint8_t i = 0; i < sizeof(ssd13xxInitCurPosParams_10x14); i++) {
-      ssd13xxCurrentCurPosParams[i] = ssd13xxInitCurPosParams_10x14[i];
-    }
-  }
-  return (0);
-}
+/* -------------------------------------------------------------------------- */
+/* -------------------------------------------------------------------------- */
+/* -------------------------------------------------------------------------- */

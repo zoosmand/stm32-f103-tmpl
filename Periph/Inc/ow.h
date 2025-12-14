@@ -26,33 +26,33 @@ extern __attribute__((section(".cron"))) uint32_t _OWREG_;
  * @brief   Inializes OneWire Bus pulling reset.
  * @return  status of operation
  */
-int OneWireBus_Init(void);
+ErrorStatus OneWireBus_Init(OneWireBus_TypeDef*);
 
-int OneWire_Reset(void);
+ErrorStatus OneWire_Reset(OneWireBus_TypeDef*);
 
-void OneWire_WriteByte(uint8_t);
+void OneWire_WriteByte(OneWireBus_TypeDef*, uint8_t);
 
-uint8_t OneWire_ReadBit(void);
+uint8_t OneWire_ReadBit(OneWireBus_TypeDef*);
 
-void OneWire_ReadByte(uint8_t*);
+void OneWire_ReadByte(OneWireBus_TypeDef*, uint8_t*);
 
 uint8_t OneWire_CRC8(uint8_t, uint8_t);
 
-int OneWire_Search(void);
+ErrorStatus OneWire_Search(OneWireBus_TypeDef*);
 
 /**
  * @brief   Defines parasitic powered devices on OnWire bus.
  * @param   addr pointer to OneWire device address
  * @retval  (uint8_t) status of power supply
  */
-uint8_t OneWire_ReadPowerSupply(uint8_t*);
+uint8_t OneWire_ReadPowerSupply(OneWireDevice_t*);
 
 /**
  * @brief   Determines the existent of the device with given address, on the bus.
  * @param   addr pointer to OneWire device address
  * @retval  (uint8_t) status of operation
  */
-int OneWire_MatchROM(uint8_t*);
+ErrorStatus OneWire_MatchROM(OneWireDevice_t*);
 
 
 OneWireDevice_t* Get_OwDevices(void);
@@ -64,8 +64,6 @@ OneWireDevice_t* Get_OwDevices(void);
 #define MatchROM        0x55
 #define SkipROM         0xcc
 
-#define OneWire_PORT    GPIOB
-#define OneWire_PIN     GPIO_PIN_9_Pos
 
 #define OneWire_Low     PIN_H(OneWire_PORT, OneWire_PIN)
 #define OneWire_High    PIN_L(OneWire_PORT, OneWire_PIN)

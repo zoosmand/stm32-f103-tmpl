@@ -104,6 +104,7 @@ void PendSV_Handler(void) {
   */
 void SysTick_Handler(void) {
   sysCnt++;
+  FLAG_SET(&_GEREG_, _SYSTICKF_);
 }
 
 /******************************************************************************/

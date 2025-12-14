@@ -24,8 +24,8 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* Bosch related data */
-__attribute__((section(".cron"))) static uint32_t boschTaskCnt    = 0;
-__attribute__((section(".cron"))) static uint32_t boschTaskReg    = 0;
+__attribute__((section(".cron"))) static uint32_t boschTaskCnt = 0;
+__attribute__((section(".cron"))) static uint32_t boschTaskReg = 0;
 
 static task_scheduler_t boschScheduler = {
   .counter        = &boschTaskCnt,
@@ -35,21 +35,48 @@ static task_scheduler_t boschScheduler = {
   .entranceFlag   = 31,
 };
 
-static uint8_t boschRawData[32];
-static int32_t boschResults[3];
+static uint8_t boschRawData_280[32];
+static BMx280_calib_t boschCalibData_280;
 
-static BMxX80_TypeDef bosch_0 = {
-  .DevID      = 0,
-  .RawBufPtr  = boschRawData,
-  .ResBufPtr  = boschResults,
-  .Lock       = ENABLE,
-  .I2CBus     = I2C1,
-  .SPIBus     = NULL,
+static BMxX80_TypeDef bosch_280 = {
+  .DevID        = 0,
+  .RawBufPtr    = boschRawData_280,
+  .Results      = {},
+  .CalibPtr     = (uint32_t*)&boschCalibData_280,
+  .Lock         = DISABLE,
+  .I2Cx         = I2C1,
+  .I2C_Address  = BMX280_I2C_ADDR,
+  // .SPIx         = NULL,
+  // .SPINssPort   = NULL,
+  // .SPINssPin    = NULL,
+  .DMAx         = DMA1,
+  .DMAxRx       = DMA1_Channel7,
+};
+
+static uint8_t  boschRawData_680[24];
+static BMx680_calib_t boschCalibData_680;
+
+static BMxX80_TypeDef bosch_680 = {
+  .DevID        = 0,
+  .RawBufPtr    = boschRawData_680,
+  .Results      = {},
+  .CalibPtr     = (uint32_t*)&boschCalibData_680,
+  .Lock         = DISABLE,
+  .I2Cx         = I2C1,
+  .I2C_Address  = BMX680_I2C_ADDR,
+  // .SPIx         = SPI1,
+  // .SPINssPort   = SPI1_NSS_2_Port,
+  // .SPINssPin    = SPI1_NSS_2_Pin,
+  // .DMAx         = DMA1,
+  // .DMAxTx       = DMA1_Channel3,
+  // .DMAxRx       = DMA1_Channel2,
+  .DMAx         = DMA1,
+  .DMAxRx       = DMA1_Channel7,
 };
 
 /* Dallas DS related data */
-__attribute__((section(".cron"))) static uint32_t dsTaskCnt       = 0;
-__attribute__((section(".cron"))) static uint32_t dsTaskReg       = 0;
+__attribute__((section(".cron"))) static uint32_t dsTaskCnt = 0;
+__attribute__((section(".cron"))) static uint32_t dsTaskReg = 0;
 
 static task_scheduler_t dsScheduler = {
   .counter        = &dsTaskCnt,
@@ -57,6 +84,16 @@ static task_scheduler_t dsScheduler = {
   .period         = 5,
   .counterReg     = &dsTaskReg,
   .entranceFlag   = 31,
+};
+
+static OneWireDevice_t ow_pack[16];
+
+static OneWireBus_TypeDef ow_set = {
+  .Count    = 16,
+  .Pin      = OneWire_PIN,
+  .Port     = OneWire_PORT,
+  .Devs     = ow_pack,
+  .Lock     = DISABLE,
 };
 
 
@@ -76,18 +113,84 @@ static task_scheduler_t dsScheduler = {
 void BoschMeasurment_CronHandler(void) {
 
   Scheduler_Handler(&boschScheduler);
+  
+  static uint8_t tmpBuf_280[8];
+  static uint8_t tmpBuf_680[8];
 
   if (FLAG_CHECK(boschScheduler.counterReg, boschScheduler.entranceFlag)) {
 
     FLAG_CLR(boschScheduler.counterReg, boschScheduler.entranceFlag);
     
-    if (BMx280_Measurment(&bosch_0)) {
-      /* TODO reinitialize device overwise clear rediness flag */
-      printf("Cannot collect Bosch device data\n");
+    if (bosch_280.Lock == DISABLE) {
+      if (BMx280_Measurement(&bosch_280)) {
+        /* TODO reinitialize device overwise clear rediness flag */
+        printf("Cannot collect Bosch device (BMx280) data\n");
+        bosch_280.Lock = ENABLE;
+      } else {
+        sprintf(tmpBuf_280, "%i", bosch_280.Results.temperature);
+        __NOP();
+      }
+    }
+
+    if (bosch_680.Lock == DISABLE) {
+      if (BMx680_Measurement(&bosch_680)) {
+        /* TODO reinitialize device overwise clear rediness flag */
+        printf("Cannot collect Bosch device (MBx680) data\n");
+        bosch_680.Lock = ENABLE;
+      } else {
+        sprintf(tmpBuf_680, "%i", bosch_680.Results.temperature);
+        __NOP();
+      }
     }
 
     /* TODO handle Bosch data usage */
-    __NOP();
+    TM163x_TypeDef* tmDsplDev = Get_TmDiplayDevice();
+
+    if (tmDsplDev->Lock == DISABLE) {
+      
+        tmDsplDev->Dig0 = tmpBuf_680[0];
+        tmDsplDev->Dig1 = tmpBuf_680[1];
+        tmDsplDev->Dig2 = tmpBuf_680[2];
+        tmDsplDev->Dig3 = tmpBuf_680[3];
+
+        if (TM163x_Print(tmDsplDev)) {
+        printf("Cannot output data to TM display\n");
+        tmDsplDev->Lock = ENABLE;
+      }
+    }
+
+    Max72xx_TypeDef* maxDsplDev = Get_MaxDiplayDevice();
+    
+    if (maxDsplDev->Lock == DISABLE) {
+      if (MAX72xx_Print(maxDsplDev, tmpBuf_680)) {
+        printf("Cannot output data to MAX display\n");
+        maxDsplDev->Lock = ENABLE;
+      }
+    }
+
+    WHxxxx_TypeDef* whDsplDev = Get_WhDiplayDevice(1602);
+    
+    if (whDsplDev->Lock == DISABLE) {
+      static uint8_t tmpBuf2[12];
+
+      tmpBuf2[0] = tmpBuf_280[0];
+      tmpBuf2[1] = tmpBuf_280[1];
+      tmpBuf2[2] = '.';
+      tmpBuf2[3] = tmpBuf_280[2];
+      tmpBuf2[4] = tmpBuf_280[3];
+      tmpBuf2[5] = ' ';
+      tmpBuf2[6] = tmpBuf_680[0];
+      tmpBuf2[7] = tmpBuf_680[1];
+      tmpBuf2[8] = '.';
+      tmpBuf2[9] = tmpBuf_680[2];
+      tmpBuf2[10] = tmpBuf_680[3];
+      tmpBuf2[11] = ' ';
+      
+      if (WHxxxx_Print(whDsplDev, tmpBuf2, sizeof(tmpBuf2))) {
+        printf("Cannot output data to HW display\n");
+        whDsplDev->Lock = ENABLE;
+      }
+    }
   }
 }
 
@@ -96,9 +199,12 @@ void BoschMeasurment_CronHandler(void) {
 
 // ----------------------------------------------------------------------------
 
-BMxX80_TypeDef* Get_BoschDevice(void) {
+BMxX80_TypeDef* Get_BoschDevice(uint16_t model) {
   
-  return &bosch_0;
+  if (model == 280) return &bosch_280;
+  if (model == 680) return &bosch_680;
+
+  return NULL;
 }
 
 
@@ -112,26 +218,42 @@ void DsMeasurment_CronHandler(void) {
 
     FLAG_CLR(dsScheduler.counterReg, dsScheduler.entranceFlag);
 
-    /* TODO reinitialize device overwise clear rediness flag */
+    /* TODO realize heath check */
     
-    OneWireDevice_t* devs = Get_OwDevices();
+    OneWireDevice_t* owDev = Get_OneWireDevice(0);
 
-    for (uint8_t i = 0; i < 2; i++) {
-      if (DS18B20_GetTemperatureMeasurment(&devs[i])) {
+    if (owDev->Lock == DISABLE) {
+      if (DS18B20_GetTemperatureMeasurment(owDev)) {
         /* --- on error, set up -128.00 C --- */
-        devs[i].spad[0] = 0x00;
-        devs[i].spad[1] = 0x08;
+        owDev->Spad[0] = 0x00;
       }
+      uint32_t* t1 = (int32_t*)&owDev->Spad;
+      printf("%d.%02d\n", 
+        (int8_t)((*t1 & 0x0000fff0) >> 4), (uint8_t)(((*t1 & 0x0000000f) * 100) >> 4)
+      );
+
+      /* TODO handle DS data usage */
+      __NOP();
     }
-
-    uint32_t* t1 = (int32_t*)&devs[0].spad;
-    uint32_t* t2 = (int32_t*)&devs[1].spad;
-    printf("%d.%02d %d.%02d\n", 
-      (int8_t)((*t1 & 0x0000fff0) >> 4), (uint8_t)(((*t1 & 0x0000000f) * 100) >> 4),
-      (int8_t)((*t2 & 0x0000fff0) >> 4), (uint8_t)(((*t2 & 0x0000000f) * 100) >> 4)
-    );
-
-    /* TODO handle DS data usage */
-    __NOP();
   }
+}
+
+
+
+// ----------------------------------------------------------------------------
+
+OneWireBus_TypeDef* Get_OneWireBusDevice(void) {
+
+  return &ow_set;
+}
+
+
+// ----------------------------------------------------------------------------
+
+OneWireDevice_t* Get_OneWireDevice(uint8_t denNum) {
+
+  ow_set.Devs[denNum].ParentBusPtr = (uint32_t*)&ow_set;
+  ow_set.Devs[denNum].Lock = DISABLE;
+
+  return &ow_set.Devs[denNum];
 }

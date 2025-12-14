@@ -243,8 +243,8 @@ static int SPI_Transfer(W25qxx_TypeDef* dev, const uint8_t cmd, int32_t addr, co
 
   uint32_t tmout = 0;
   /* Activate slave and wait the level is low */
-  NSS_0_L;
-  while (PREG_CHECK(SPI_Port->IDR, NSS_0_Pin_Pos));
+  SPI1_NSS_0_L;
+  while (PREG_CHECK(SPI1_Port->IDR, SPI1_NSS_0_Pin));
 
   /* write a command, a dummy byte has to be read further */
   dev->SPIx->DR = cmd;
@@ -326,7 +326,7 @@ static int SPI_Transfer(W25qxx_TypeDef* dev, const uint8_t cmd, int32_t addr, co
   }
 
   /* Deactivate slave */
-  NSS_0_H;
+  SPI1_NSS_0_H;
 
   return (0);
 }
@@ -340,7 +340,7 @@ int W25qxx_Init(W25qxx_TypeDef* dev) {
 
   if ((dev->SPIx == NULL) || (dev->DMAx == NULL) || (dev->DMAxRx == NULL) || (dev->DMAxTx == NULL)) return (1); 
 
-  if (dev->Lock == ENABLE) dev->Lock = DISABLE; else return (ERROR);
+  if (dev->Lock == DISABLE) dev->Lock = ENABLE; else return (ERROR);
 
   SPI_Adjust(dev);
   SPI_Enable(dev->SPIx);
@@ -372,7 +372,7 @@ int W25qxx_Init(W25qxx_TypeDef* dev) {
   
   SPI_Disable(dev->SPIx);
   
-  dev->Lock = ENABLE;
+  dev->Lock = DISABLE;
   return ret;
 }
 
@@ -385,7 +385,7 @@ int W25qxx_Init(W25qxx_TypeDef* dev) {
 // -------------------------------------------------------------  
 int W25qxx_Read(W25qxx_TypeDef* dev, const uint32_t addr, const uint16_t cnt, uint8_t *buf) {
 
-  if (dev->Lock == ENABLE) dev->Lock = DISABLE; else return (ERROR);
+  if (dev->Lock == DISABLE) dev->Lock = ENABLE; else return (ERROR);
 
   SPI_Adjust(dev);
   SPI_Enable(dev->SPIx);
@@ -401,7 +401,7 @@ int W25qxx_Read(W25qxx_TypeDef* dev, const uint32_t addr, const uint16_t cnt, ui
 
   SPI_Disable(dev->SPIx);
 
-  dev->Lock = ENABLE;
+  dev->Lock = DISABLE;
   return (0);
 }
 
@@ -412,7 +412,7 @@ int W25qxx_Read(W25qxx_TypeDef* dev, const uint32_t addr, const uint16_t cnt, ui
 // -------------------------------------------------------------  
 int W25qxx_Write(W25qxx_TypeDef* dev, uint32_t addr, uint16_t cnt, uint8_t *buf) {
 
-  if (dev->Lock == ENABLE) dev->Lock = DISABLE; else return (ERROR);
+  if (dev->Lock == DISABLE) dev->Lock = ENABLE; else return (ERROR);
 
   uint8_t pump = 0;
   uint32_t phy_addr = 0;
@@ -443,7 +443,7 @@ int W25qxx_Write(W25qxx_TypeDef* dev, uint32_t addr, uint16_t cnt, uint8_t *buf)
 
   SPI_Disable(dev->SPIx);
 
-  dev->Lock = ENABLE;
+  dev->Lock = DISABLE;
   return (0);
 }
 
@@ -455,7 +455,7 @@ int W25qxx_Write(W25qxx_TypeDef* dev, uint32_t addr, uint16_t cnt, uint8_t *buf)
 // -------------------------------------------------------------  
 int W25qxx_Erase(W25qxx_TypeDef* dev, uint32_t addr, uint16_t sectors) {
 
-  if (dev->Lock == ENABLE) dev->Lock = DISABLE; else return (ERROR);
+  if (dev->Lock == DISABLE) dev->Lock = ENABLE; else return (ERROR);
 
   uint8_t pump = 0;
   uint32_t phy_addr = 0;
@@ -513,7 +513,7 @@ int W25qxx_Erase(W25qxx_TypeDef* dev, uint32_t addr, uint16_t sectors) {
 
   SPI_Disable(dev->SPIx);
 
-  dev->Lock = ENABLE;
+  dev->Lock = DISABLE;
   return (0);
 }
 
@@ -543,7 +543,7 @@ static int W25qxx_IsBusy(W25qxx_TypeDef* dev) {
 // -------------------------------------------------------------  
 int W25qxx_Reset(W25qxx_TypeDef* dev) {
 
-  if (dev->Lock == ENABLE) dev->Lock = DISABLE; else return (ERROR);
+  if (dev->Lock == DISABLE) dev->Lock = ENABLE; else return (ERROR);
 
   uint8_t pump = 0;
 
@@ -557,7 +557,7 @@ int W25qxx_Reset(W25qxx_TypeDef* dev) {
 
   SPI_Disable(dev->SPIx);
 
-  dev->Lock = ENABLE;
+  dev->Lock = DISABLE;
   return (0);
 }
 
@@ -568,7 +568,7 @@ int W25qxx_Reset(W25qxx_TypeDef* dev) {
 // -------------------------------------------------------------  
 uint8_t W25qxx_WriteStatusRegister(W25qxx_TypeDef* dev, uint8_t type, uint8_t status) {
 
-  if (dev->Lock == ENABLE) dev->Lock = DISABLE; else return (ERROR);
+  if (dev->Lock == DISABLE) dev->Lock = ENABLE; else return (ERROR);
 
   uint8_t pump = 0;
 
@@ -599,7 +599,7 @@ uint8_t W25qxx_WriteStatusRegister(W25qxx_TypeDef* dev, uint8_t type, uint8_t st
 
   SPI_Disable(dev->SPIx);
 
-  dev->Lock = ENABLE;
+  dev->Lock = DISABLE;
   return (pump);
 }
 

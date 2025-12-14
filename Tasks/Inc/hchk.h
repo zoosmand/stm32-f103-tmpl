@@ -1,9 +1,9 @@
 /**
   ******************************************************************************
-  * @file           : tmpr.h
-  * @brief          : This file contains header definitions for temperature
-  *                   atmospheric pressure, and humidity measurements code in
-  *                   tmpr.c file.
+  * @file           : hchk.h
+  * @brief          : Header for hchk.c file.
+  *                   This file contains the common defines for health check and
+  *                   monitoring code.
   ******************************************************************************
   * @attention
   *
@@ -18,8 +18,8 @@
   */
  
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __TMPR_H
-#define __TMPR_H
+#ifndef __HCHK_H
+#define __HCHK_H
 
 #ifdef __cplusplus
   extern "C" {
@@ -28,45 +28,27 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 
+
 /* Private structures --------------------------------------------------------*/
 
 
 /* Exported functions prototypes ---------------------------------------------*/
 
 /**
- * @brief   Provides Bosch BMx CRON handler procedure.
+ * @brief   Provides heartbeat CRON handler procedure.
  * @return  none
  */
-void BoschMeasurment_CronHandler(void);
+void Heartbeat_CronHandler(void);
 
 /**
- * @brief   Provides DS CRON handler procedure.
- * @return  none
+ * @brief   Returns the heartbeat device struct pointer.
+ * @return  the heartbeat devices struct pointer
  */
-void DsMeasurment_CronHandler(void);
-
-/**
- * @brief   Returns BMx Bosch device struct pointer.
- * @return  device struct pointer
- */
-BMxX80_TypeDef* Get_BoschDevice(uint16_t);
-
-/**
- * @brief   Returns OneWire bus struct pointer.
- * @return  the set of OneWire devices struct pointer
- */
-OneWireBus_TypeDef* Get_OneWireBusDevice(void);
-
-/**
- * @brief   Returns OneWire device struct pointer.
- * @param   model: the model of the device in the set of the bus device
- * @return  the OneWire devices struct pointer
- */
-OneWireDevice_t* Get_OneWireDevice(uint8_t);
+HearbeatDevice_TypeDev* Get_HeartbeatDevice(void);
 
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __TMPR_H */
+#endif /* __HCHK_H */

@@ -51,26 +51,45 @@ static __attribute__((section(".cron"))) uint32_t secCntCache   = 0;
  */
 int main(void) {
   
+  /* ----------------------------------*/
+  /* ----------------------------------*/
+  /* ----------------------------------*/
   if (CRON_SEC_EVENT) {
     
     // printf("The long test message, that might stuck the program but now it does not at all...\n");
-    printf("sec:%li\n", secCnt);
+    // printf("sec:%li\n", secCnt);
+    __NOP();
     
 
-    if (FLAG_CHECK(&_ASREG_, OneWireBus_RF)) { DsMeasurment_CronHandler(); }
+    if (FLAG_CHECK(&_ASREG_, OW_BUS_RF)) { DsMeasurment_CronHandler(); }
     
     if (FLAG_CHECK(&_ASREG_, BMX280_RF)) { BoschMeasurment_CronHandler(); }
 
-    if (FLAG_CHECK(&_ASREG_, MAXDSPL_RF)) { MaxDisplay_CronHandler(); }
- 
     if (FLAG_CHECK(&_ASREG_, EEPROM_RF)) { EepromHealthCheck_CronHandler(); }
-
+    
+    if (
+         FLAG_CHECK(&_ASREG_, MAX_DSPL_RF) 
+      || FLAG_CHECK(&_ASREG_, TM_DSPL_RF)
+      || FLAG_CHECK(&_ASREG_, WH_DSPL_RF)
+    ) { DisplayHealthCheck_CronHandler(); }
 
   }
 
-  Led_Handler();
+  /* ----------------------------------*/
+  /* ----------------------------------*/
+  /* ----------------------------------*/
+  if (CRON_SYSTICK_EVENT) {
+
+    if (FLAG_CHECK(&_ASREG_, HEARTBEAT_RF)) { Heartbeat_CronHandler(); }
+
+  }
+
+  /* TODO Put the MCU into the sleep mode */
 
 }
+
+
+
 
 
 /**
@@ -82,23 +101,41 @@ void Cron_Handler(void) {
   __NVIC_SetPriorityGrouping(NVIC_PRIORITYGROUP_4);
   SET_BIT(CoreDebug->DEMCR, CoreDebug_DEMCR_TRCENA_Msk);
 
-  if (!OneWireBus_Init())   FLAG_SET(&_ASREG_, OneWireBus_RF);
-  if (!SPI_Init(SPI1))      FLAG_SET(&_ASREG_, SPI1_RF);
-  if (!I2C_Init(I2C1))      FLAG_SET(&_ASREG_, I2C1_RF);
+  /* Initialize GPIOs and buses */
+  if (!GPIO_Heartbeat_Init())   FLAG_SET(&_ASREG_, GPIO_HB_RF);
+  if (!GPIO_TM163x_Init())      FLAG_SET(&_ASREG_, GPIO_TM_RF);
+  if (!GPIO_OneWire_Init())     FLAG_SET(&_ASREG_, GPIO_OW_RF);
+  if (!SPI_Init(SPI1))          FLAG_SET(&_ASREG_, SPI1_RF);
+  if (!I2C_Init(I2C1))          FLAG_SET(&_ASREG_, I2C1_RF);
   
-  /* One Wire contition   */
-  if (FLAG_CHECK(&_ASREG_, OneWireBus_RF)) OneWire_Search();
 
+  /* Initialize devices based on their own bus */
+
+  if (FLAG_CHECK(&_ASREG_, GPIO_HB_RF)) {
+    if (!Heartbeat_Init(Get_HeartbeatDevice()))         FLAG_SET(&_ASREG_, HEARTBEAT_RF);
+  }
+
+  if (FLAG_CHECK(&_ASREG_, GPIO_OW_RF)) {
+    if (!OneWireBus_Init(Get_OneWireBusDevice()))     FLAG_SET(&_ASREG_, OW_BUS_RF);
+  }
+  if (FLAG_CHECK(&_ASREG_, GPIO_TM_RF)) {
+    if (!TM163x_Init(Get_TmDiplayDevice()))           FLAG_SET(&_ASREG_, TM_DSPL_RF);
+  }
+
+  /* Initialize SPI1 bus devices */
   if (FLAG_CHECK(&_ASREG_, SPI1_RF)) {
-    if (!W25qxx_Init(Get_EepromDevice())) FLAG_SET(&_ASREG_, EEPROM_RF);
-    if (!MAX72xx_Init(Get_MaxDiplayDevice())) FLAG_SET(&_ASREG_, MAXDSPL_RF);
+    if (!W25qxx_Init(Get_EepromDevice()))             FLAG_SET(&_ASREG_, EEPROM_RF);
+    if (!MAX72xx_Init(Get_MaxDiplayDevice()))         FLAG_SET(&_ASREG_, MAX_DSPL_RF);
   }
   
+  /* Initialize I2C1 bus devices */
   if (FLAG_CHECK(&_ASREG_, I2C1_RF)) {
-    if (!BMx280_Init(Get_BoschDevice())) FLAG_SET(&_ASREG_, BMX280_RF);
-    // if (!SSD13xx_Init(I2C1))  FLAG_SET(&_ASREG_, SSDDisplay_RF);
-    if (!WHxxxx_Init(I2C1))   FLAG_SET(&_ASREG_, WHDisplay_RF);
+    if (!BMx680_Init(Get_BoschDevice(BMX680_MODEL)))        FLAG_SET(&_ASREG_, BMX680_RF);
+    if (!BMx280_Init(Get_BoschDevice(BMX280_MODEL)))        FLAG_SET(&_ASREG_, BMX280_RF);
+    if (!SSD13xx_Init(Get_SsdDiplayDevice(SSD_DSPL_MODEL))) FLAG_SET(&_ASREG_, SSD_DSPL_RF);
+    if (!WHxxxx_Init(Get_WhDiplayDevice(WH_DSPL_MODEL)))    FLAG_SET(&_ASREG_, WH_DSPL_RF);
   }
+
   /* Display calibration */
   printf("\n");
 
@@ -106,6 +143,10 @@ void Cron_Handler(void) {
   while (1) {
     __disable_irq();
     
+    if (FLAG_CHECK(&_GEREG_, _SYSTICKF_)) {
+      FLAG_CLR(&_GEREG_, _SYSTICKF_);
+    }
+
     if (FLAG_CHECK(&_GEREG_, _SYSSECF_)) {
       FLAG_CLR(&_GEREG_, _SYSSECF_);
       IWDG->KR = IWDG_KEY_RELOAD;
