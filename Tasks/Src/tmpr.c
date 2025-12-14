@@ -114,7 +114,8 @@ void BoschMeasurment_CronHandler(void) {
 
   Scheduler_Handler(&boschScheduler);
   
-  uint8_t tmpBuf[4];
+  static uint8_t tmpBuf_280[8];
+  static uint8_t tmpBuf_680[8];
 
   if (FLAG_CHECK(boschScheduler.counterReg, boschScheduler.entranceFlag)) {
 
@@ -126,7 +127,8 @@ void BoschMeasurment_CronHandler(void) {
         printf("Cannot collect Bosch device (BMx280) data\n");
         bosch_280.Lock = ENABLE;
       } else {
-        // sprintf(tmpBuf, "%i", bosch_280.Results.temperature);
+        sprintf(tmpBuf_280, "%i", bosch_280.Results.temperature);
+        __NOP();
       }
     }
 
@@ -136,7 +138,8 @@ void BoschMeasurment_CronHandler(void) {
         printf("Cannot collect Bosch device (MBx680) data\n");
         bosch_680.Lock = ENABLE;
       } else {
-        sprintf(tmpBuf, "%i", bosch_680.Results.temperature);
+        sprintf(tmpBuf_680, "%i", bosch_680.Results.temperature);
+        __NOP();
       }
     }
 
@@ -145,10 +148,10 @@ void BoschMeasurment_CronHandler(void) {
 
     if (tmDsplDev->Lock == DISABLE) {
       
-        tmDsplDev->Dig0 = tmpBuf[0];
-        tmDsplDev->Dig1 = tmpBuf[1];
-        tmDsplDev->Dig2 = tmpBuf[2];
-        tmDsplDev->Dig3 = tmpBuf[3];
+        tmDsplDev->Dig0 = tmpBuf_680[0];
+        tmDsplDev->Dig1 = tmpBuf_680[1];
+        tmDsplDev->Dig2 = tmpBuf_680[2];
+        tmDsplDev->Dig3 = tmpBuf_680[3];
 
         if (TM163x_Print(tmDsplDev)) {
         printf("Cannot output data to TM display\n");
@@ -159,7 +162,7 @@ void BoschMeasurment_CronHandler(void) {
     Max72xx_TypeDef* maxDsplDev = Get_MaxDiplayDevice();
     
     if (maxDsplDev->Lock == DISABLE) {
-      if (MAX72xx_Print(maxDsplDev, tmpBuf)) {
+      if (MAX72xx_Print(maxDsplDev, tmpBuf_680)) {
         printf("Cannot output data to MAX display\n");
         maxDsplDev->Lock = ENABLE;
       }
@@ -168,13 +171,22 @@ void BoschMeasurment_CronHandler(void) {
     WHxxxx_TypeDef* whDsplDev = Get_WhDiplayDevice(1602);
     
     if (whDsplDev->Lock == DISABLE) {
-      uint8_t tmpBuf2[5];
-      tmpBuf2[0] = tmpBuf[0];
-      tmpBuf2[1] = tmpBuf[1];
+      static uint8_t tmpBuf2[12];
+
+      tmpBuf2[0] = tmpBuf_280[0];
+      tmpBuf2[1] = tmpBuf_280[1];
       tmpBuf2[2] = '.';
-      tmpBuf2[3] = tmpBuf[2];
-      tmpBuf2[4] = tmpBuf[3];
-      if (WHxxxx_Print(whDsplDev, tmpBuf2, 5)) {
+      tmpBuf2[3] = tmpBuf_280[2];
+      tmpBuf2[4] = tmpBuf_280[3];
+      tmpBuf2[5] = ' ';
+      tmpBuf2[6] = tmpBuf_680[0];
+      tmpBuf2[7] = tmpBuf_680[1];
+      tmpBuf2[8] = '.';
+      tmpBuf2[9] = tmpBuf_680[2];
+      tmpBuf2[10] = tmpBuf_680[3];
+      tmpBuf2[11] = ' ';
+      
+      if (WHxxxx_Print(whDsplDev, tmpBuf2, sizeof(tmpBuf2))) {
         printf("Cannot output data to HW display\n");
         whDsplDev->Lock = ENABLE;
       }

@@ -116,7 +116,7 @@ __STATIC_INLINE ErrorStatus i2c_dma_unconfigure(BMxX80_TypeDef*);
   * @param  adc_T: Raw temperature data
   * @return Measured temprerature
   */
-static BMx280_S32_t bmx680_compensate_t_int32(BMxX80_TypeDef*);
+static void bmx680_compensate_t_int32(BMxX80_TypeDef*);
 
 
 
@@ -572,27 +572,25 @@ static ErrorStatus spi_receive(BMxX80_TypeDef *dev, uint8_t reg, uint16_t len) {
 
 
 // ----------------------------------------------------------------------------
-static BMx280_S32_t bmx680_compensate_t_int32(BMxX80_TypeDef* dev) {
+
+static void bmx680_compensate_t_int32(BMxX80_TypeDef* dev) {
   // Compose raw ADC value (20 bits)
+  int32_t var1, var2, var3;
+
   uint32_t adc_temp = (
       (((uint32_t)dev->RawBufPtr[0]) << 12)
     | (((uint32_t)dev->RawBufPtr[1]) << 4)
     | (((uint32_t)dev->RawBufPtr[2]) >> 4)
   );
-
-  int32_t var1, var2, var3;
   BMx680_calib_t* calib = (BMx680_calib_t*)dev->CalibPtr;
 
   var1 = (((int32_t)adc_temp >> 3) - ((int32_t)calib->par_t1 << 1));
-
   var2 = (var1 * (int32_t)calib->par_t2) >> 11;
-
   var3 = ((((var1 >> 1) * (var1 >> 1)) >> 12) * ((int32_t)calib->par_t3) << 4) >> 14;
   t_fine = var2 + var3;
 
   // Temperature in °C * 100 (e.g. 2516 = 25.16 °C)
   dev->Results.temperature = (t_fine * 5 + 128) >> 8;
-
 }
 
 

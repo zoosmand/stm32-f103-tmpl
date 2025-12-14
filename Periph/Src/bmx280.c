@@ -356,9 +356,14 @@ static ErrorStatus bmx280_send(BMxX80_TypeDef *dev, uint8_t len) {
 // ----------------------------------------------------------------------------
 // ----------------------- Device specifiv function ---------------------------
 // ----------------------------------------------------------------------------
+
 static BMx280_S32_t bmx280_compensate_t_int32(BMxX80_TypeDef* dev) {
   BMx280_S32_t var1, var2, T;
-  BMx280_S32_t adc_T = (((dev->RawBufPtr[3] << 8) | dev->RawBufPtr[4]) << 4) | (dev->RawBufPtr[5] >> 4);
+  BMx280_S32_t adc_T = (
+      (((uint32_t)dev->RawBufPtr[3]) << 12)
+    | (((uint32_t)dev->RawBufPtr[4]) << 4)
+    | (((uint32_t)dev->RawBufPtr[5]) >> 4)
+  );
   BMx280_calib_t* calib = (BMx280_calib_t*)dev->CalibPtr;
 
   var1 = ((((adc_T >> 3) - ((BMx280_S32_t)calib->dig_t1 << 1))) * (BMx280_S32_t)calib->dig_t2) >> 11;
