@@ -114,8 +114,8 @@ void BoschMeasurment_CronHandler(void) {
 
   Scheduler_Handler(&boschScheduler);
   
-  static uint8_t tmpBuf_280[8];
-  static uint8_t tmpBuf_680[8];
+  static char tmpBuf_280[8];
+  static char tmpBuf_680[8];
 
   if (FLAG_CHECK(boschScheduler.counterReg, boschScheduler.entranceFlag)) {
 
@@ -127,7 +127,7 @@ void BoschMeasurment_CronHandler(void) {
         printf("Cannot collect Bosch device (BMx280) data\n");
         bosch_280.Lock = ENABLE;
       } else {
-        sprintf(tmpBuf_280, "%i", bosch_280.Results.temperature);
+        sprintf(tmpBuf_280, "%li", bosch_280.Results.temperature);
         __NOP();
       }
     }
@@ -138,7 +138,7 @@ void BoschMeasurment_CronHandler(void) {
         printf("Cannot collect Bosch device (MBx680) data\n");
         bosch_680.Lock = ENABLE;
       } else {
-        sprintf(tmpBuf_680, "%i", bosch_680.Results.temperature);
+        sprintf(tmpBuf_680, "%li", bosch_680.Results.temperature);
         __NOP();
       }
     }

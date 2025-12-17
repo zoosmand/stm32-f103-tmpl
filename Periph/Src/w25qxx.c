@@ -25,7 +25,7 @@
 /**
  * @brief w25qxx EEPROM capacities in blocks.
  */
-const uint16_t w25q[] = {
+static const uint16_t w25q[] = {
     0x0002
   , 0x0004
   , 0x0008
@@ -51,9 +51,9 @@ const uint16_t w25q[] = {
  * @param   dir: direction of data transfer: READ or WRITE
  * @param   offset: offset of a particular EEPROM address
  * @param   buf: pointer to a buffer to write/read the data
- * @retval  (int) status of operation
+ * @retval  status of operation
  */
-static int SPI_Transfer_DMA(W25qxx_TypeDef*, const uint16_t, const DataTransmitDirection_TypeDef, const uint32_t, uint8_t*);
+__STATIC_INLINE ErrorStatus spi_transfer_dma(W25qxx_TypeDef*, const uint16_t, const DataTransmitDirection_TypeDef, const uint32_t, uint8_t*);
 
 /**
  * @brief Transfers SPI commands and service data to/from EEPROM via SPI bus.
@@ -63,23 +63,30 @@ static int SPI_Transfer_DMA(W25qxx_TypeDef*, const uint16_t, const DataTransmitD
  * @param   dir: direction of data transfer: READ or WRITE
  * @param   offset: offset of a particular EEPROM address
  * @param   buf: pointer to a buffer to write/read the data
- * @retval  (int) status of operation
+ * @retval  status of operation
  */
-static int SPI_Transfer(W25qxx_TypeDef*, const uint8_t, int32_t, uint16_t, const DataTransmitDirection_TypeDef, const uint32_t, uint8_t*);
+__STATIC_INLINE ErrorStatus spi_transfer(W25qxx_TypeDef*, const uint8_t, int32_t, uint16_t, const DataTransmitDirection_TypeDef, const uint32_t, uint8_t*);
 
 /**
  * @brief Adjusts SPI bus according to EEPROM parameters.
  * @param   dev: pointer to the flash device struct
  * @retval  none
  */
-__STATIC_INLINE void SPI_Adjust(W25qxx_TypeDef*);
+__STATIC_INLINE void spi_dma_configure(W25qxx_TypeDef*);
+
+/**
+  * @brief   Unconfigure SPI bus.
+  * @param   dev: pointer to the device struct
+  * @retval  none
+  */
+__STATIC_INLINE ErrorStatus spi_dma_unconfigure(W25qxx_TypeDef*);
 
 /**
  * @brief   Controls the busy status of the given EEPROM.
  * @param   dev: pointer to the flash device struct
- * @retval  (int) status of operation
+ * @retval  status of operation
  */
-static int W25qxx_IsBusy(W25qxx_TypeDef*);
+__STATIC_INLINE ErrorStatus w25qxx_busy(W25qxx_TypeDef*);
 
 
 
@@ -91,7 +98,8 @@ static int W25qxx_IsBusy(W25qxx_TypeDef*);
 
 
 // ----------------------------------------------------------------------------
-__STATIC_INLINE void SPI_Adjust(W25qxx_TypeDef* dev) {
+
+__STATIC_INLINE void spi_dma_configure(W25qxx_TypeDef* dev) {
   /* adjust frequency divider, 0b001 = 4, (PCLK)72/4 = 18MHz */
   /* set 8-bit data buffer length */ 
   MODIFY_REG(dev->SPIx->CR1, (SPI_CR1_BR_Msk | SPI_CR1_DFF_Msk), SPI_CR1_BR_0);
@@ -123,13 +131,55 @@ __STATIC_INLINE void SPI_Adjust(W25qxx_TypeDef* dev) {
   dev->DMAxTx->CPAR = (uint32_t)&dev->SPIx->DR;
   /* set memory address */
   dev->DMAxTx->CMAR = (uint32_t)&pump;
+
+  SPI_Enable(dev->SPIx);
 }
 
 
 
 
 // ----------------------------------------------------------------------------
-static int SPI_Transfer_DMA(W25qxx_TypeDef* dev, const uint16_t cnt, const DataTransmitDirection_TypeDef dir, const uint32_t offset, uint8_t *buf) {
+
+__STATIC_INLINE ErrorStatus spi_dma_unconfigure(W25qxx_TypeDef* dev) {
+
+  /* Clear correspondents DMA flags */
+  dev->DMAx->IFCR |= (
+      DMA_IFCR_CGIF2_Msk
+    | DMA_IFCR_CGIF3_Msk
+    | DMA_IFCR_CHTIF2_Msk
+    | DMA_IFCR_CHTIF3_Msk
+    | DMA_IFCR_CTCIF2_Msk
+    | DMA_IFCR_CTCIF3_Msk
+  );
+  
+  /* Disable from memory to peripheral DMA transfer */
+  PREG_CLR(dev->SPIx->CR2, SPI_CR2_TXDMAEN_Pos);
+  /* Disable from peripheral to memory DMA transfer */
+  PREG_CLR(dev->SPIx->CR2, SPI_CR2_RXDMAEN_Pos);
+
+  PIN_H(dev->SPINssPort, dev->SPINssPin);
+  SPI_Disable(dev->SPIx);
+
+  /* Clear DMA registers */
+  dev->DMAxTx->CCR    = 0UL;
+  dev->DMAxTx->CMAR   = 0UL;
+  dev->DMAxTx->CPAR   = 0UL;
+  dev->DMAxTx->CNDTR  = 0UL;
+
+  dev->DMAxRx->CCR    = 0UL;
+  dev->DMAxRx->CMAR   = 0UL;
+  dev->DMAxRx->CPAR   = 0UL;
+  dev->DMAxRx->CNDTR  = 0UL;
+
+  return (ERROR);
+}
+
+
+
+
+// ----------------------------------------------------------------------------
+
+__STATIC_INLINE ErrorStatus spi_transfer_dma(W25qxx_TypeDef* dev, const uint16_t cnt, const DataTransmitDirection_TypeDef dir, const uint32_t offset, uint8_t *buf) {
   uint8_t pump = 0;
   uint32_t tmout = 0;
 
@@ -141,10 +191,7 @@ static int SPI_Transfer_DMA(W25qxx_TypeDef* dev, const uint16_t cnt, const DataT
 
     tmout = SPI_BUS_TMOUT;
     while(!(PREG_CHECK(dev->DMAxTx->CCR, DMA_CCR_MINC_Pos))) {
-      if (!(--tmout)) {
-        SPI_Disable(dev->SPIx);
-        return (1);
-      }
+      if (!(--tmout)) { return spi_dma_unconfigure(dev); }
     }
 
     /* Set buffer address */
@@ -165,10 +212,7 @@ static int SPI_Transfer_DMA(W25qxx_TypeDef* dev, const uint16_t cnt, const DataT
     
     tmout = SPI_BUS_TMOUT;
     while((PREG_CHECK(dev->DMAxTx->CCR, DMA_CCR_MINC_Pos))) {
-      if (!(--tmout)) {
-        SPI_Disable(dev->SPIx);
-        return (1);
-      }
+      if (!(--tmout)) { return spi_dma_unconfigure(dev); }
     }
 
     /* Set buffer address */
@@ -187,11 +231,8 @@ static int SPI_Transfer_DMA(W25qxx_TypeDef* dev, const uint16_t cnt, const DataT
   /* Wait for transfer is compete */
   tmout = SPI_BUS_TMOUT;
   while(!(PREG_CHECK(dev->DMAx->ISR, DMA_ISR_TCIF3_Pos))) {
-    if (!(--tmout)) {
-      SPI_Disable(dev->SPIx);
-      return (1);
-    }
-  }
+     if (!(--tmout)) { return spi_dma_unconfigure(dev); }
+   }
 
   /* Clear complete transger flag */
   SET_BIT(dev->DMAx->IFCR, DMA_IFCR_CTCIF3);
@@ -200,10 +241,7 @@ static int SPI_Transfer_DMA(W25qxx_TypeDef* dev, const uint16_t cnt, const DataT
     /* Wait white SPI is busy */
     tmout = SPI_BUS_TMOUT;
     while((PREG_CHECK(dev->SPIx->SR, SPI_SR_BSY_Pos))) {
-      if (!(--tmout)) {
-        SPI_Disable(dev->SPIx);
-        return (1);
-      }
+      if (!(--tmout)) { return spi_dma_unconfigure(dev); }
     }
 
     /* Disable from memory to peripheral DMA transfer */
@@ -214,10 +252,7 @@ static int SPI_Transfer_DMA(W25qxx_TypeDef* dev, const uint16_t cnt, const DataT
     /* Wait white SPI is busy */
     tmout = SPI_BUS_TMOUT;
     while((PREG_CHECK(dev->SPIx->SR, SPI_SR_BSY_Pos))) {
-      if (!(--tmout)) {
-        SPI_Disable(dev->SPIx);
-        return (1);
-      }
+      if (!(--tmout)) { return spi_dma_unconfigure(dev); }
     }
 
     /* Disable from memory to peripheral DMA transfer */
@@ -232,37 +267,32 @@ static int SPI_Transfer_DMA(W25qxx_TypeDef* dev, const uint16_t cnt, const DataT
   /* Clear correspondents DMA flags */
   dev->DMAx->IFCR |= 0x00000ff0;
 
-  return (0);
+  return (SUCCESS);
 }
 
 
 
 
 // ----------------------------------------------------------------------------
-static int SPI_Transfer(W25qxx_TypeDef* dev, const uint8_t cmd, int32_t addr, const uint16_t cnt, const DataTransmitDirection_TypeDef dir, const uint32_t offset, uint8_t *buf) {
+
+__STATIC_INLINE ErrorStatus spi_transfer(W25qxx_TypeDef* dev, const uint8_t cmd, int32_t addr, const uint16_t cnt, const DataTransmitDirection_TypeDef dir, const uint32_t offset, uint8_t *buf) {
 
   uint32_t tmout = 0;
+
   /* Activate slave and wait the level is low */
-  SPI1_NSS_0_L;
-  while (PREG_CHECK(SPI1_Port->IDR, SPI1_NSS_0_Pin));
+  PIN_L(dev->SPINssPort, dev->SPINssPin);
 
   /* write a command, a dummy byte has to be read further */
   dev->SPIx->DR = cmd;
 
   tmout = SPI_BUS_TMOUT;
   while(!(PREG_CHECK(dev->SPIx->SR, SPI_SR_TXE_Pos))) {
-    if (!(--tmout)) {
-      SPI_Disable(dev->SPIx);
-      return (1);
-    }
+    if (!(--tmout)) { return spi_dma_unconfigure(dev); }
   }
 
   tmout = SPI_BUS_TMOUT;
   while(!(PREG_CHECK(dev->SPIx->SR, SPI_SR_RXNE_Pos))) {
-    if (!(--tmout)) {
-      SPI_Disable(dev->SPIx);
-      return (1);
-    }
+    if (!(--tmout)) { return spi_dma_unconfigure(dev); }
   }
 
   dev->SPIx->DR;
@@ -277,18 +307,12 @@ static int SPI_Transfer(W25qxx_TypeDef* dev, const uint8_t cmd, int32_t addr, co
       /* read a dummy byte from the bus to clear receive buffer */
       tmout = SPI_BUS_TMOUT;
       while(!(PREG_CHECK(dev->SPIx->SR, SPI_SR_TXE_Pos))) {
-        if (!(--tmout)) {
-          SPI_Disable(dev->SPIx);
-          return (1);
-        }
+        if (!(--tmout)) { return spi_dma_unconfigure(dev); }
       }
 
       tmout = SPI_BUS_TMOUT;
       while(!(PREG_CHECK(dev->SPIx->SR, SPI_SR_RXNE_Pos))) {
-        if (!(--tmout)) {
-          SPI_Disable(dev->SPIx);
-          return (1);
-        }
+        if (!(--tmout)) { return spi_dma_unconfigure(dev); }
       }
 
       dev->SPIx->DR;
@@ -302,19 +326,13 @@ static int SPI_Transfer(W25qxx_TypeDef* dev, const uint8_t cmd, int32_t addr, co
 
     tmout = SPI_BUS_TMOUT;
     while(!(PREG_CHECK(dev->SPIx->SR, SPI_SR_TXE_Pos))) {
-      if (!(--tmout)) {
-        SPI_Disable(dev->SPIx);
-        return (1);
-      }
+      if (!(--tmout)) { return spi_dma_unconfigure(dev); }
     }
 
 
     tmout = SPI_BUS_TMOUT;
     while(!(PREG_CHECK(dev->SPIx->SR, SPI_SR_RXNE_Pos))) {
-      if (!(--tmout)) {
-        SPI_Disable(dev->SPIx);
-        return (1);
-      }
+      if (!(--tmout)) { return spi_dma_unconfigure(dev); }
     }
 
     dev->SPIx->DR;
@@ -322,13 +340,13 @@ static int SPI_Transfer(W25qxx_TypeDef* dev, const uint8_t cmd, int32_t addr, co
 
   /* put the date to DMA bus */
   if (cnt) {
-    if (SPI_Transfer_DMA(dev, cnt, dir, offset, buf)) return (1);
+    if (spi_transfer_dma(dev, cnt, dir, offset, buf)) return (1);
   }
 
   /* Deactivate slave */
-  SPI1_NSS_0_H;
+  PIN_H(dev->SPINssPort, dev->SPINssPin);
 
-  return (0);
+  return (SUCCESS);
 }
 
 
@@ -336,41 +354,53 @@ static int SPI_Transfer(W25qxx_TypeDef* dev, const uint8_t cmd, int32_t addr, co
 
 
 // ----------------------------------------------------------------------------
-int W25qxx_Init(W25qxx_TypeDef* dev) {
+
+ErrorStatus W25qxx_Init(W25qxx_TypeDef* dev) {
 
   if ((dev->SPIx == NULL) || (dev->DMAx == NULL) || (dev->DMAxRx == NULL) || (dev->DMAxTx == NULL)) return (1); 
 
   if (dev->Lock == DISABLE) dev->Lock = ENABLE; else return (ERROR);
 
-  SPI_Adjust(dev);
-  SPI_Enable(dev->SPIx);
+  /* Initialize NSS Pin */
+  if (dev->SPIx != NULL) {
+    if (dev->SPINssPin > 7) {
+      MODIFY_REG(dev->SPINssPort->CRL, (0xf << ((dev->SPINssPin - 8) * 4)), ((GPIO_GPO_PP | GPIO_IOS_2) << ((dev->SPINssPin -8) * 4)));
+    } else {
+      MODIFY_REG(dev->SPINssPort->CRL, (0xf << (dev->SPINssPin * 4)), ((GPIO_GPO_PP | GPIO_IOS_2) << (dev->SPINssPin * 4)));
+    }
+    PIN_H(dev->SPINssPort, dev->SPINssPin);
+    
+    _delay_us(10);
+  }
+
+  spi_dma_configure(dev);
 
   uint8_t buf[12];
-  int ret = 0;
+  int ret = SUCCESS;
 
 
-  if (SPI_Transfer(dev, W25Qxx_Read_JedecID, -1, 4, RX, 0, buf)) return (1);
+  if (spi_transfer(dev, W25Qxx_Read_JedecID, -1, 4, RX, 0, buf)) return (ERROR);
   dev->ManID = buf[0];
   dev->Type = buf[1];
   dev->BlockCount = w25q[((buf[2] - 1) & 0x0f)];  
   dev->Capacity = dev->BlockCount * W25Qxx_BLOCK_SIZE;
 
-  if (SPI_Transfer(dev, W25Qxx_Read_UniqueID, -1, 12, RX, 0, buf)) return (1);
+  if (spi_transfer(dev, W25Qxx_Read_UniqueID, -1, 12, RX, 0, buf)) return (ERROR);
   dev->UniqID = *(uint64_t*)(&buf[4]);
 
-  if (SPI_Transfer(dev, W25Qxx_Read_DeviceID, -1, 4, RX, 0, buf)) return (1);
+  if (spi_transfer(dev, W25Qxx_Read_DeviceID, -1, 4, RX, 0, buf)) return (ERROR);
   dev->ID = buf[3];
 
   
-  if (!(dev->ManID == 0xef) && !(dev->Type == 0x40)) ret = 1;
+  if (!(dev->ManID == 0xef) && !(dev->Type == 0x40)) ret = ERROR;
   
   /* protect first 32K */
   // uint8_t stub;
   // stub = W25qxx_WriteStatusRegister(dev, 0, (W25Qxx_SEC | W25Qxx_TB | W25Qxx_BP2));
-  // SPI_Transfer(dev, W25Qxx_Read_StatusRegister_1, -1, 1, READ, 0, &stub);
+  // spi_transfer(dev, W25Qxx_Read_StatusRegister_1, -1, 1, READ, 0, &stub);
   // printf("%x\n", stub);
   
-  SPI_Disable(dev->SPIx);
+  spi_dma_unconfigure(dev);
   
   dev->Lock = DISABLE;
   return ret;
@@ -382,45 +412,45 @@ int W25qxx_Init(W25qxx_TypeDef* dev) {
 
 
 
-// -------------------------------------------------------------  
-int W25qxx_Read(W25qxx_TypeDef* dev, const uint32_t addr, const uint16_t cnt, uint8_t *buf) {
+// -------------------------------------------------------------
+
+ErrorStatus W25qxx_Read(W25qxx_TypeDef* dev, const uint32_t addr, const uint16_t cnt, uint8_t *buf) {
 
   if (dev->Lock == DISABLE) dev->Lock = ENABLE; else return (ERROR);
 
-  SPI_Adjust(dev);
-  SPI_Enable(dev->SPIx);
+  spi_dma_configure(dev);
 
   uint32_t phy_addr = 0;
-  if (W25qxx_IsBusy(dev)) return (1);
+  if (w25qxx_busy(dev)) return (1);
   
   phy_addr = W25Qxx_BLOCK_SIZE * ((addr >> 8) & 0xffff);
   phy_addr += W25Qxx_SECTOR_SIZE * ((addr >> 4) & 0xf);
   phy_addr += W25Qxx_PAGE_SIZE * (addr & 0xf);
   
-  if (SPI_Transfer(dev, W25Qxx_FastRead, (phy_addr << 8), cnt, RX, 0, buf)) return (1);
+  if (spi_transfer(dev, W25Qxx_FastRead, (phy_addr << 8), cnt, RX, 0, buf)) return (ERROR);
 
-  SPI_Disable(dev->SPIx);
+  spi_dma_unconfigure(dev);
 
   dev->Lock = DISABLE;
-  return (0);
+  return (SUCCESS);
 }
 
 
 
 
 
-// -------------------------------------------------------------  
-int W25qxx_Write(W25qxx_TypeDef* dev, uint32_t addr, uint16_t cnt, uint8_t *buf) {
+// -------------------------------------------------------------
+
+ErrorStatus W25qxx_Write(W25qxx_TypeDef* dev, uint32_t addr, uint16_t cnt, uint8_t *buf) {
 
   if (dev->Lock == DISABLE) dev->Lock = ENABLE; else return (ERROR);
 
   uint8_t pump = 0;
   uint32_t phy_addr = 0;
 
-  SPI_Adjust(dev);
-  SPI_Enable(dev->SPIx);
+  spi_dma_configure(dev);
 
-  if (W25qxx_IsBusy(dev)) return (1);
+  if (w25qxx_busy(dev)) return (1);
   
   phy_addr = W25Qxx_BLOCK_SIZE * ((addr >> 8) & 0xffff);
   phy_addr += W25Qxx_SECTOR_SIZE * ((addr >> 4) & 0xf);
@@ -429,22 +459,22 @@ int W25qxx_Write(W25qxx_TypeDef* dev, uint32_t addr, uint16_t cnt, uint8_t *buf)
   uint32_t i = 0;
   
   for (i = 0; i < (cnt / 256); i++) {
-    if (SPI_Transfer(dev, W25Qxx_WriteEnable, -1, 0, NOTR, 0, &pump)) return (1);
-    if (SPI_Transfer(dev, W25Qxx_PageProgram, (phy_addr << 8), 256, TX, i, buf)) return (1);
+    if (spi_transfer(dev, W25Qxx_WriteEnable, -1, 0, NOTR, 0, &pump)) return (ERROR);
+    if (spi_transfer(dev, W25Qxx_PageProgram, (phy_addr << 8), 256, TX, i, buf)) return (ERROR);
     phy_addr += W25Qxx_PAGE_SIZE;
-    if (W25qxx_IsBusy(dev)) return (1);
+    if (w25qxx_busy(dev)) return (ERROR);
   }
   
   if (cnt % 256) {
-    if (SPI_Transfer(dev, W25Qxx_WriteEnable, -1, 0, NOTR, 0, &pump)) return (1);
-    if (SPI_Transfer(dev, W25Qxx_PageProgram, (phy_addr << 8), (cnt % 256), TX, i, buf)) return (1);
-    if (W25qxx_IsBusy(dev)) return (1);
+    if (spi_transfer(dev, W25Qxx_WriteEnable, -1, 0, NOTR, 0, &pump)) return (ERROR);
+    if (spi_transfer(dev, W25Qxx_PageProgram, (phy_addr << 8), (cnt % 256), TX, i, buf)) return (ERROR);
+    if (w25qxx_busy(dev)) return (ERROR);
   }
 
-  SPI_Disable(dev->SPIx);
+  spi_dma_unconfigure(dev);
 
   dev->Lock = DISABLE;
-  return (0);
+  return (SUCCESS);
 }
 
 
@@ -452,8 +482,9 @@ int W25qxx_Write(W25qxx_TypeDef* dev, uint32_t addr, uint16_t cnt, uint8_t *buf)
 
 
 
-// -------------------------------------------------------------  
-int W25qxx_Erase(W25qxx_TypeDef* dev, uint32_t addr, uint16_t sectors) {
+// -------------------------------------------------------------
+
+ErrorStatus W25qxx_Erase(W25qxx_TypeDef* dev, uint32_t addr, uint16_t sectors) {
 
   if (dev->Lock == DISABLE) dev->Lock = ENABLE; else return (ERROR);
 
@@ -461,24 +492,23 @@ int W25qxx_Erase(W25qxx_TypeDef* dev, uint32_t addr, uint16_t sectors) {
   uint32_t phy_addr = 0;
   phy_addr = W25Qxx_BLOCK_SIZE * ((addr >> 8) & 0xffff);
   
-  SPI_Adjust(dev);
-  SPI_Enable(dev->SPIx);
+  spi_dma_configure(dev);
   
   if (sectors > 8) {
     if (sectors > 16) {
       // *******************************  
       uint32_t blocks = (sectors / 16);
       for (int i = 0; i < blocks; i++) {
-        if (SPI_Transfer(dev, W25Qxx_WriteEnable, -1, 0, NOTR, 0, &pump)) return (1);
-        if (SPI_Transfer(dev, W25Qxx_Erase_Block_64, (phy_addr << 8), 0, NOTR, 0, &pump)) return (1);
+        if (spi_transfer(dev, W25Qxx_WriteEnable, -1, 0, NOTR, 0, &pump)) return (ERROR);
+        if (spi_transfer(dev, W25Qxx_Erase_Block_64, (phy_addr << 8), 0, NOTR, 0, &pump)) return (ERROR);
         phy_addr += W25Qxx_BLOCK_SIZE;
-        if (W25qxx_IsBusy(dev)) return (1);
+        if (w25qxx_busy(dev)) return (ERROR);
       }
       uint32_t remain_addr = (addr & 0xffffff00) + (blocks << 8);
       if (sectors % 16) {
-        if (SPI_Transfer(dev, W25Qxx_WriteEnable, -1, 0, NOTR, 0, &pump)) return (1);
-        if (W25qxx_Erase(dev, remain_addr, (sectors % 16))) return (1);
-        if (W25qxx_IsBusy(dev)) return (1);
+        if (spi_transfer(dev, W25Qxx_WriteEnable, -1, 0, NOTR, 0, &pump)) return (ERROR);
+        if (W25qxx_Erase(dev, remain_addr, (sectors % 16))) return (ERROR);
+        if (w25qxx_busy(dev)) return (ERROR);
       }
       // *******************************  
     } else {
@@ -487,15 +517,15 @@ int W25qxx_Erase(W25qxx_TypeDef* dev, uint32_t addr, uint16_t sectors) {
         phy_addr += W25Qxx_SECTOR_SIZE * ((addr >> 4) & 0xf);
       }
 
-      if (SPI_Transfer(dev, W25Qxx_WriteEnable, -1, 0, NOTR, 0, &pump)) return (1);
-      if (SPI_Transfer(dev, W25Qxx_Erase_Block_32, (phy_addr << 8), 0, NOTR, 0, &pump)) return (1);
+      if (spi_transfer(dev, W25Qxx_WriteEnable, -1, 0, NOTR, 0, &pump)) return (ERROR);
+      if (spi_transfer(dev, W25Qxx_Erase_Block_32, (phy_addr << 8), 0, NOTR, 0, &pump)) return (ERROR);
       uint32_t remain_addr = (addr & 0xffffff80) + (8 << 4);
-      if (W25qxx_IsBusy(dev)) return (1);
+      if (w25qxx_busy(dev)) return (ERROR);
       
       if (sectors - 8) {
-        if (SPI_Transfer(dev, W25Qxx_WriteEnable, -1, 0, NOTR, 0, &pump)) return (1);
-        if (W25qxx_Erase(dev, remain_addr, sectors - 8)) return (1);
-        if (W25qxx_IsBusy(dev)) return (1);
+        if (spi_transfer(dev, W25Qxx_WriteEnable, -1, 0, NOTR, 0, &pump)) return (ERROR);
+        if (W25qxx_Erase(dev, remain_addr, sectors - 8)) return (ERROR);
+        if (w25qxx_busy(dev)) return (ERROR);
       }
     // *******************************  
     }
@@ -503,37 +533,38 @@ int W25qxx_Erase(W25qxx_TypeDef* dev, uint32_t addr, uint16_t sectors) {
     // *******************************  
     phy_addr += W25Qxx_SECTOR_SIZE * ((addr >> 4) & 0xf);
     for (int i = 0; i < sectors; i++) {
-      if (SPI_Transfer(dev, W25Qxx_WriteEnable, -1, 0, NOTR, 0, &pump)) return (1);
-      if (SPI_Transfer(dev, W25Qxx_Erase_Sector, (phy_addr << 8), 0, NOTR, 0, &pump)) return (1);
+      if (spi_transfer(dev, W25Qxx_WriteEnable, -1, 0, NOTR, 0, &pump)) return (ERROR);
+      if (spi_transfer(dev, W25Qxx_Erase_Sector, (phy_addr << 8), 0, NOTR, 0, &pump)) return (ERROR);
       phy_addr += W25Qxx_SECTOR_SIZE;
-      if (W25qxx_IsBusy(dev)) return (1);
+      if (w25qxx_busy(dev)) return (ERROR);
     }
     // *******************************  
   }
 
-  SPI_Disable(dev->SPIx);
+  spi_dma_unconfigure(dev);
 
   dev->Lock = DISABLE;
-  return (0);
+  return (SUCCESS);
 }
 
 
 
 
-// -------------------------------------------------------------  
-static int W25qxx_IsBusy(W25qxx_TypeDef* dev) {
+// -------------------------------------------------------------
+
+__STATIC_INLINE ErrorStatus w25qxx_busy(W25qxx_TypeDef* dev) {
   uint8_t pump = W25Qxx_BUSY;
   uint32_t tmout = SPI_BUS_TMOUT * 5;
 
   while (pump & W25Qxx_BUSY) {
-    if (SPI_Transfer(dev, W25Qxx_Read_StatusRegister_1, -1, 1, RX, 0, &pump)) return (1);
+    if (spi_transfer(dev, W25Qxx_Read_StatusRegister_1, -1, 1, RX, 0, &pump)) return (ERROR);
     if (!(--tmout)) {
       SPI_Disable(dev->SPIx);
-      return (1);
+      return (ERROR);
     }
   }
 
-  return (0);
+  return (SUCCESS);
 }
 
 
@@ -541,24 +572,24 @@ static int W25qxx_IsBusy(W25qxx_TypeDef* dev) {
 
 
 // -------------------------------------------------------------  
-int W25qxx_Reset(W25qxx_TypeDef* dev) {
+
+ErrorStatus W25qxx_Reset(W25qxx_TypeDef* dev) {
 
   if (dev->Lock == DISABLE) dev->Lock = ENABLE; else return (ERROR);
 
   uint8_t pump = 0;
 
-  SPI_Adjust(dev);
-  SPI_Enable(dev->SPIx);
+  spi_dma_configure(dev);
 
-  if (SPI_Transfer(dev, W25Qxx_EnableReset, -1, 0, NOTR, 0, &pump)) return (1);
-  if (SPI_Transfer(dev, W25Qxx_ResetProccess, -1, 0, NOTR, 0, &pump)) return (1);
+  if (spi_transfer(dev, W25Qxx_EnableReset, -1, 0, NOTR, 0, &pump)) return (ERROR);
+  if (spi_transfer(dev, W25Qxx_ResetProccess, -1, 0, NOTR, 0, &pump)) return (ERROR);
   _delay_ms(10);
-  if (SPI_Transfer(dev, W25Qxx_ReleasePowerDown, -1, 0, NOTR, 0, &pump)) return (1);
+  if (spi_transfer(dev, W25Qxx_ReleasePowerDown, -1, 0, NOTR, 0, &pump)) return (ERROR);
 
-  SPI_Disable(dev->SPIx);
+  spi_dma_unconfigure(dev);
 
   dev->Lock = DISABLE;
-  return (0);
+  return (SUCCESS);
 }
 
 
@@ -566,22 +597,22 @@ int W25qxx_Reset(W25qxx_TypeDef* dev) {
 
 /* type: 0 - non-volatile bits, 1 - volatile bits*/
 // -------------------------------------------------------------  
+
 uint8_t W25qxx_WriteStatusRegister(W25qxx_TypeDef* dev, uint8_t type, uint8_t status) {
 
   if (dev->Lock == DISABLE) dev->Lock = ENABLE; else return (ERROR);
 
   uint8_t pump = 0;
 
-  SPI_Adjust(dev);
-  SPI_Enable(dev->SPIx);
+  spi_dma_configure(dev);
 
   if (type) {
-    if (SPI_Transfer(dev, W25Qxx_Write_StatusNVRegEnable, -1, 0, NOTR, 0, &pump)) return (1);
+    if (spi_transfer(dev, W25Qxx_Write_StatusNVRegEnable, -1, 0, NOTR, 0, &pump)) return (1);
   } else {
-    if (SPI_Transfer(dev, W25Qxx_WriteEnable, -1, 0, NOTR, 0, &pump)) return (1);
+    if (spi_transfer(dev, W25Qxx_WriteEnable, -1, 0, NOTR, 0, &pump)) return (1);
   }
   
-  if (SPI_Transfer(dev, W25Qxx_Write_StatusRegister_1, -1, 1, TX, 0, &status)) return (1);
+  if (spi_transfer(dev, W25Qxx_Write_StatusRegister_1, -1, 1, TX, 0, &status)) return (1);
 
   /* Skip one trash bytes */
   uint32_t tmout = SPI_BUS_TMOUT;
@@ -594,10 +625,10 @@ uint8_t W25qxx_WriteStatusRegister(W25qxx_TypeDef* dev, uint8_t type, uint8_t st
 
   dev->SPIx->DR;
 
-  if (W25qxx_IsBusy(dev)) return (1);
-  if (SPI_Transfer(dev, W25Qxx_Read_StatusRegister_1, -1, 1, RX, 0, &pump)) return (1);
+  if (w25qxx_busy(dev)) return (1);
+  if (spi_transfer(dev, W25Qxx_Read_StatusRegister_1, -1, 1, RX, 0, &pump)) return (1);
 
-  SPI_Disable(dev->SPIx);
+  spi_dma_unconfigure(dev);
 
   dev->Lock = DISABLE;
   return (pump);

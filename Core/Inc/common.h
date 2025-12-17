@@ -310,6 +310,8 @@ typedef struct {
   uint32_t              Capacity;
   FunctionalState       Lock;
   SPI_TypeDef*          SPIx;
+  GPIO_TypeDef*         SPINssPort;
+  uint16_t              SPINssPin;
   DMA_TypeDef*          DMAx;
   DMA_Channel_TypeDef*  DMAxTx;
   DMA_Channel_TypeDef*  DMAxRx;

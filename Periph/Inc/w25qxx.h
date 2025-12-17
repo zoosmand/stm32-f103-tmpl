@@ -26,6 +26,9 @@
  extern "C" {
 #endif
 
+
+/* Private defines -----------------------------------------------------------*/
+
 #define W25Qxx_WriteEnable              0x06
 #define W25Qxx_WriteDisable             0x04
 #define W25Qxx_Read_JedecID             0x9f
@@ -72,38 +75,22 @@
 #define W25Qxx_BLOCK_SIZE               0x00010000 // 64536
 
 
-// /**
-//  * @brief   EEPROM W25Qxx device type definition struct.
-//  */
-// typedef struct {
-//   uint8_t               ID;
-//   uint8_t               ManID;
-//   uint8_t               Type;
-//   uint64_t              UniqID;
-//   uint16_t              BlockCount;
-//   uint32_t              Capacity;
-//   uint8_t               Lock;
-//   SPI_TypeDef*          SPIx;
-//   DMA_TypeDef*          DMAx;
-//   DMA_Channel_TypeDef*  DMAxTx;
-//   DMA_Channel_TypeDef*  DMAxRx;
-// } W25qxx_TypeDef;
 
-
+/* Exported functions prototypes ---------------------------------------------*/
 
 /**
  * @brief   Initializes the given EEPROM device.
  * @param   dev: pointer to the EEPROM device struct
- * @retval  (int) status of operation
+ * @retval  status of operation
  */
-int W25qxx_Init(W25qxx_TypeDef*);
+ErrorStatus W25qxx_Init(W25qxx_TypeDef*);
 
 /**
  * @brief   Resets the given EEPROM device.
  * @param   dev: pointer to the EEPROM device struct
- * @retval  (int) status of operation
+ * @retval  status of operation
  */
-int W25qxx_Reset(W25qxx_TypeDef*);
+ErrorStatus W25qxx_Reset(W25qxx_TypeDef*);
 
 /**
  * @brief Reads data from the given EEPROM device.
@@ -126,9 +113,9 @@ int W25qxx_Reset(W25qxx_TypeDef*);
  * 
  * @param   cnt: number of bytes to read
  * @param   buf: pointer to a buffer to store the read data
- * @retval  (int) status of operation
+ * @retval  status of operation
  */
-int W25qxx_Read(W25qxx_TypeDef*, const uint32_t, const uint16_t, uint8_t*);
+ErrorStatus W25qxx_Read(W25qxx_TypeDef*, const uint32_t, const uint16_t, uint8_t*);
 
 /**
  * @brief Writes data to the given EEPROM device.
@@ -151,9 +138,9 @@ int W25qxx_Read(W25qxx_TypeDef*, const uint32_t, const uint16_t, uint8_t*);
  * 
  * @param   cnt: number of bytes to read
  * @param   buf: pointer to a buffer to store the read data
- * @retval  (int) status of operation
+ * @retval  status of operation
  */
-int W25qxx_Write(W25qxx_TypeDef*, const uint32_t, const uint16_t, uint8_t*);
+ErrorStatus W25qxx_Write(W25qxx_TypeDef*, const uint32_t, const uint16_t, uint8_t*);
 
 /**
  * @brief   Wipes out data on the given EEPROM device.
@@ -175,9 +162,9 @@ int W25qxx_Write(W25qxx_TypeDef*, const uint32_t, const uint16_t, uint8_t*);
  * ---
  * 
  * @param   sector: number of sectors to erase
- * @retval  (int) status of operation
+ * @retval  status of operation
  */
-int W25qxx_Erase(W25qxx_TypeDef*, uint32_t, uint16_t);
+ErrorStatus W25qxx_Erase(W25qxx_TypeDef*, uint32_t, uint16_t);
 
 /**
  * @brief   Updates register status of the given EEPROM device.

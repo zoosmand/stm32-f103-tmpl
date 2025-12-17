@@ -63,7 +63,10 @@ int main(void) {
 
     if (FLAG_CHECK(&_ASREG_, OW_BUS_RF)) { DsMeasurment_CronHandler(); }
     
-    if (FLAG_CHECK(&_ASREG_, BMX280_RF)) { BoschMeasurment_CronHandler(); }
+    if (
+         FLAG_CHECK(&_ASREG_, BMX280_RF)
+      || FLAG_CHECK(&_ASREG_, BMX680_RF)
+    ) { BoschMeasurment_CronHandler(); }
 
     if (FLAG_CHECK(&_ASREG_, EEPROM_RF)) { EepromHealthCheck_CronHandler(); }
     
@@ -72,6 +75,8 @@ int main(void) {
       || FLAG_CHECK(&_ASREG_, TM_DSPL_RF)
       || FLAG_CHECK(&_ASREG_, WH_DSPL_RF)
     ) { DisplayHealthCheck_CronHandler(); }
+
+    __NOP();
 
   }
 
