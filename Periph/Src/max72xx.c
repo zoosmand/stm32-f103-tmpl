@@ -278,7 +278,7 @@ static ErrorStatus mAX72xx_PrintBuf(Max72xx_TypeDef* dev, uint16_t len) {
 
 // ----------------------------------------------------------------------------
 
-ErrorStatus MAX72xx_Print(Max72xx_TypeDef* dev, const char* buf) {
+ErrorStatus MAX72xx_Print(Max72xx_TypeDef* dev, char* buf) {
 
   uint16_t len = 0;
   const char *buf_ = buf;

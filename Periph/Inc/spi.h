@@ -30,10 +30,6 @@
 /* Private defines -----------------------------------------------------------*/
 #define SPI_BUS_TMOUT   10000 /* cycles timeout on SPI bus operations */
 
-#define SPI1_NSS_0_H         PIN_H(SPI1_Port, SPI1_NSS_0_Pin)
-#define SPI1_NSS_0_L         PIN_L(SPI1_Port, SPI1_NSS_0_Pin)
-
-
 
 /* Exported functions prototypes ---------------------------------------------*/
 

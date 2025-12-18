@@ -35,15 +35,7 @@ ErrorStatus SPI_Init(SPI_TypeDef* SPIx) {
       | ((GPIO_AF_PP | GPIO_IOS_50) << (SPI1_MISO_Pin * 4U))
       | ((GPIO_AF_PP | GPIO_IOS_50) << (SPI1_MOSI_Pin * 4U))
     ));
-
-    MODIFY_REG(SPI1_Port->CRL,
-      (0xf << (SPI1_NSS_0_Pin * 4U)), (
-        ((GPIO_GPO_PP | GPIO_IOS_2) << (SPI1_NSS_0_Pin * 4U))
-    ));
   }
-
-  /* set ready NSS pins for the multimaster mode */
-  SPI1_NSS_0_H;
 
   /* Enbale SPI master mode */
   SET_BIT(SPIx->CR1, SPI_CR1_MSTR);

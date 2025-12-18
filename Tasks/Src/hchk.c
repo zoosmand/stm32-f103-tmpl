@@ -65,7 +65,6 @@ void Heartbeat_CronHandler(void) {
   }
 
   Scheduler_Handler(&heartbeatScheduler);
-  uint32_t regPos = 0;
 
   if (FLAG_CHECK(heartbeatScheduler.counterReg, heartbeatScheduler.entranceFlag)) {
 
