@@ -56,14 +56,14 @@ ErrorStatus Heartbeat_Init(HearbeatDevice_TypeDev* dev) {
   } else {
     MODIFY_REG(
       dev->Port->CRL, 
-      (0x0f << ((dev->Pin - 8) * 4)), 
+      (0x0f << (dev->Pin * 4)), 
       ((GPIO_GPO_PP | GPIO_IOS_2) << (dev->Pin * 4))
     );
   }
   
   PIN_H(dev->Port, dev->Pin);
   
-  dev->Lock == DISABLE;
+  dev->Lock = DISABLE;
   return (SUCCESS);
 }
 

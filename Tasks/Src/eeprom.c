@@ -34,11 +34,13 @@ static task_scheduler_t eepromScheduler = {
 };
 
 static W25qxx_TypeDef eeprom_0 = {
-  .SPIx   = SPI1,
-  .DMAx   = DMA1,
-  .DMAxTx = DMA1_Channel3,
-  .DMAxRx = DMA1_Channel2,
-  .Lock   = DISABLE,
+  .SPIx       = SPI1,
+  .SPINssPort = SPI1_Port,
+  .SPINssPin  = SPI1_NSS_0_Pin,
+  .DMAx       = DMA1,
+  .DMAxTx     = DMA1_Channel3,
+  .DMAxRx     = DMA1_Channel2,
+  .Lock       = DISABLE,
 };
 
 
@@ -77,8 +79,6 @@ void EepromHealthCheck_CronHandler(void) {
 
 static ErrorStatus eepromHealthCheck_Task(W25qxx_TypeDef* dev) {
 
-  if (dev->Lock == DISABLE) dev->Lock = ENABLE; else return (ERROR);
-
   /* TODO realize a propert health check */
   static uint8_t dataBuf[16];
   static uint8_t dataBuf2[256];
@@ -108,7 +108,6 @@ static ErrorStatus eepromHealthCheck_Task(W25qxx_TypeDef* dev) {
 
   __NOP();
 
-  dev->Lock = DISABLE;
   return (SUCCESS);
 }
 

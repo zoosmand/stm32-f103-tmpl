@@ -56,7 +56,7 @@ ErrorStatus MAX72xx_Init(Max72xx_TypeDef*);
  * @param   buf: chars buffer to print
  * @retval  status of operation
  */
-ErrorStatus MAX72xx_Print(Max72xx_TypeDef*, const char*);
+ErrorStatus MAX72xx_Print(Max72xx_TypeDef*, char*);
 
 
 #ifdef __cplusplus
