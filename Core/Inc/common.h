@@ -364,6 +364,19 @@ typedef struct {
 // ----------------------------------------------------------------------------
 
 /**
+ * @brief   TM1803 device type definition struct.
+ */
+typedef struct {
+  FunctionalState       Lock;
+  GPIO_TypeDef*         PortData;
+  uint16_t              PinSData;
+  ErrorStatus           (*Callback)(uint32_t*);
+} TM1803_TypeDef;
+
+
+// ----------------------------------------------------------------------------
+
+/**
  * @brief   WHxxxx device type definition struct.
  */
 typedef struct {

@@ -106,7 +106,7 @@ ErrorStatus TM163x_Init(TM163x_TypeDef* dev) {
   } else {
     MODIFY_REG(
       dev->PortDio->CRL, 
-      (0x0f << ((dev->PinDio - 8) * 4)), 
+      (0x0f << (dev->PinDio * 4)), 
       ((GPIO_GPO_PP | GPIO_IOS_10) << (dev->PinDio * 4))
     );
   }
@@ -120,7 +120,7 @@ ErrorStatus TM163x_Init(TM163x_TypeDef* dev) {
   } else {
     MODIFY_REG(
       dev->PortSck->CRL, 
-      (0x0f << ((dev->PinSck - 8) * 4)), 
+      (0x0f << (dev->PinSck * 4)), 
       ((GPIO_GPO_PP | GPIO_IOS_10) << (dev->PinSck * 4))
     );
   }
@@ -270,3 +270,9 @@ static ErrorStatus tm163x_WriteByte(TM163x_TypeDef* dev, uint8_t byte) {
   TM_SCK_Low;
   return (SUCCESS);
 }
+
+
+
+/* -------------------------------------------------------------------------- */
+/* -------------------------------------------------------------------------- */
+/* -------------------------------------------------------------------------- */
