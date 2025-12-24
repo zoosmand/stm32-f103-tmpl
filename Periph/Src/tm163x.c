@@ -163,7 +163,9 @@ ErrorStatus TM163x_Print(TM163x_TypeDef *dev) {
 
   /* TODO Modify the output for TM1638 */
   if (tm163x_WriteByte(dev, symbols[dev->Dig0 - cop])) return (ERROR);
-  if (tm163x_WriteByte(dev, (symbols[dev->Dig1 - cop]) | 0x80)) return (ERROR);
+  uint8_t dotty = symbols[dev->Dig1 - cop];
+  if (dev->UseDot) dotty |= 0x80;
+  if (tm163x_WriteByte(dev, dotty)) return (ERROR);
   if (tm163x_WriteByte(dev, symbols[dev->Dig2 - cop])) return (ERROR);
   if (tm163x_WriteByte(dev, symbols[dev->Dig3 - cop])) return (ERROR);
 
@@ -226,7 +228,7 @@ static ErrorStatus tm163x_ReadAck(TM163x_TypeDef* dev) {
     
   _delay_us(5);
 
-  while (TM_DIO_Level) { if (!(--tmout)) return (ERROR); }
+  while (TM_DIO_Level(dev)) { if (!(--tmout)) return (ERROR); }
 
   if (dev->PinDio > 7) {
     MODIFY_REG(
@@ -252,22 +254,22 @@ static ErrorStatus tm163x_ReadAck(TM163x_TypeDef* dev) {
 static ErrorStatus tm163x_WriteByte(TM163x_TypeDef* dev, uint8_t byte) {
 
   for (uint8_t i = 0; i < 8; i++) {
-    TM_SCK_Low;
-    if (byte & 0x01) { TM_DIO_High; } else { TM_DIO_Low; }
+    TM_SCK_Low(dev);
+    if (byte & 0x01) { TM_DIO_High(dev); } else { TM_DIO_Low(dev); }
     byte >>= 1;
     _delay_us(3);
-    TM_SCK_High;
+    TM_SCK_High(dev);
     _delay_us(3);
   }
   
-  TM_SCK_Low;
-  TM_DIO_Low;
+  TM_SCK_Low(dev);
+  TM_DIO_Low(dev);
 
   if (tm163x_ReadAck(dev)) return (ERROR);
 
-  TM_SCK_High;
+  TM_SCK_High(dev);
   _delay_us(2);
-  TM_SCK_Low;
+  TM_SCK_Low(dev);
   return (SUCCESS);
 }
 

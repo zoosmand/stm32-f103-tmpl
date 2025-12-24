@@ -31,12 +31,12 @@
 /* Private defines -----------------------------------------------------------*/
 #define TM_BUS_TMOUT   5000 /* cycles timeout on TM bus operations */
 
-#define TM_DIO_Low            PIN_L(TM_DIO_Port, TM_DIO_Pin)
-#define TM_DIO_High           PIN_H(TM_DIO_Port, TM_DIO_Pin)
-#define TM_SCK_Low            PIN_L(TM_SCK_Port, TM_SCK_Pin)
-#define TM_SCK_High           PIN_H(TM_SCK_Port, TM_SCK_Pin)
+#define TM_DIO_Low(dev)       PIN_L(dev->PortDio, dev->PinDio)
+#define TM_DIO_High(dev)      PIN_H(dev->PortDio, dev->PinDio)
+#define TM_SCK_Low(dev)       PIN_L(dev->PortSck, dev->PinSck)
+#define TM_SCK_High(dev)      PIN_H(dev->PortSck, dev->PinSck)
 
-#define TM_DIO_Level          (PIN_LEVEL(TM_DIO_Port, TM_DIO_Pin))
+#define TM_DIO_Level(dev)    (PIN_LEVEL(dev->PortDio, dev->PinDio))
 
 
 

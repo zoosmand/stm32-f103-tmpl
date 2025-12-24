@@ -39,13 +39,9 @@
 
 /* GPIO definitions for TM display */
 #define TM_DIO_Pin            GPIO_PIN_12
-#define TM_DIO_Pin_Pos        GPIO_PIN_12_Pos
-#define TM_DIO_Pin_Mask       GPIO_PIN_12_Mask
 #define TM_DIO_Port           GPIOA
 
 #define TM_SCK_Pin            GPIO_PIN_11
-#define TM_SCK_Pin_Pos        GPIO_PIN_11_Pos
-#define TM_SCK_Pin_Mask       GPIO_PIN_11_Mask
 #define TM_SCK_Port           GPIOA
 
 

@@ -349,6 +349,7 @@ typedef struct {
   GPIO_TypeDef*         PortDio;
   uint16_t              PinSck;
   uint16_t              PinDio;
+  bool                  UseDot;
   uint8_t               Dig0;
   uint8_t               Dig1;
   uint8_t               Dig2;
