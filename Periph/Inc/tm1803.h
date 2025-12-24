@@ -29,12 +29,12 @@
 
 
 /* Private defines -----------------------------------------------------------*/
-#define TM1803_BUS_TMOUT   5000 /* cycles timeout on TM bus operations */
+#define STRIP_BUS_TMOUT   5000 /* cycles timeout on TM bus operations */
 
-#define TM_DATA_Low            PIN_L(TM_DIO_Port, TM_DIO_Pin)
-#define TM_DATA_High           PIN_H(TM_DIO_Port, TM_DIO_Pin)
+#define STRIP_DATA_Low(dev)       PIN_L(dev->PortData, dev->PinData)
+#define STRIP_DATA_High(dev)      PIN_H(dev->PortData, dev->PinData)
 
-#define TM_DATA_Level          (PIN_LEVEL(TM_DIO_Port, TM_DIO_Pin))
+#define STRIP_DATA_Level(dev)    (PIN_LEVEL(dev->PortData, dev->PinData))
 
 
 
@@ -45,7 +45,7 @@
  * @param   dev pointer to the TM163x device struct
  * @retval  status of operation
  */
-ErrorStatus TM1803x_Init(TM1803_TypeDef*);
+ErrorStatus TM1803_Init(StripDevice_TypeDev*);
 
 
 

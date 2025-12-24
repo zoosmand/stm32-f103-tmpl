@@ -34,8 +34,8 @@
 #define HEARTBEAT_LED_Port    GPIOC
 
 /* GPIO definitions for TM1803 3-channel LED controller */
-#define TM_DATA_Pin           GPIO_PIN_8
-#define TM_DATA_Port          GPIOB
+#define STRIP_DATA_Pin        GPIO_PIN_8
+#define STRIP_DATA_Port       GPIOB
 
 /* GPIO definitions for TM display */
 #define TM_DIO_Pin            GPIO_PIN_12
@@ -89,11 +89,18 @@ ErrorStatus GPIO_Heartbeat_Init(void);
 ErrorStatus GPIO_TM163x_Init(void);
 
 /**
- * @brief   Initialized GPIO pins for OnwWire bus.
+ * @brief   Initialized GPIO pins for the OnwWire bus.
  * @param   none
  * @return  status of operation
  */
 ErrorStatus GPIO_OneWire_Init(void);
+
+/**
+ * @brief   Initialized GPIO pins for the Strip bus.
+ * @param   none
+ * @return  status of operation
+ */
+ErrorStatus GPIO_Strip_Init(void);
 
 
 #ifdef __cplusplus

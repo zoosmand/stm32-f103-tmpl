@@ -87,6 +87,8 @@ int main(void) {
 
     if (FLAG_CHECK(&_ASREG_, HEARTBEAT_RF)) { Heartbeat_CronHandler(); }
 
+    if (FLAG_CHECK(&_ASREG_, STRIP_RF)) { Strip_CronHandler(); }
+
   }
 
   /* TODO Put the MCU into the sleep mode */
@@ -110,6 +112,7 @@ void Cron_Handler(void) {
   if (!GPIO_Heartbeat_Init())   FLAG_SET(&_ASREG_, GPIO_HB_RF);
   if (!GPIO_TM163x_Init())      FLAG_SET(&_ASREG_, GPIO_TM_RF);
   if (!GPIO_OneWire_Init())     FLAG_SET(&_ASREG_, GPIO_OW_RF);
+  if (!GPIO_Strip_Init())        FLAG_SET(&_ASREG_, GPIO_STRIP_RF);
   if (!SPI_Init(SPI1))          FLAG_SET(&_ASREG_, SPI1_RF);
   if (!I2C_Init(I2C1))          FLAG_SET(&_ASREG_, I2C1_RF);
   
@@ -117,14 +120,19 @@ void Cron_Handler(void) {
   /* Initialize devices based on their own bus */
 
   if (FLAG_CHECK(&_ASREG_, GPIO_HB_RF)) {
-    if (!Heartbeat_Init(Get_HeartbeatDevice()))         FLAG_SET(&_ASREG_, HEARTBEAT_RF);
+    if (!Heartbeat_Init(Get_HeartbeatDevice()))       FLAG_SET(&_ASREG_, HEARTBEAT_RF);
   }
 
   if (FLAG_CHECK(&_ASREG_, GPIO_OW_RF)) {
     if (!OneWireBus_Init(Get_OneWireBusDevice()))     FLAG_SET(&_ASREG_, OW_BUS_RF);
   }
+
   if (FLAG_CHECK(&_ASREG_, GPIO_TM_RF)) {
     if (!TM163x_Init(Get_TmDiplayDevice()))           FLAG_SET(&_ASREG_, TM_DSPL_RF);
+  }
+
+  if (FLAG_CHECK(&_ASREG_, GPIO_STRIP_RF)) {
+    if (!TM1803_Init(Get_StripDevice()))               FLAG_SET(&_ASREG_,  STRIP_RF);
   }
 
   /* Initialize SPI1 bus devices */

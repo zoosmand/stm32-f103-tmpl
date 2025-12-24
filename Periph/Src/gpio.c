@@ -79,6 +79,18 @@ ErrorStatus GPIO_OneWire_Init(void) {
 
 
 
+// ----------------------------------------------------------------------------
+
+ErrorStatus GPIO_Strip_Init(void) {
+
+  /* Check if pins are not locked */
+  if (PREG_CHECK(STRIP_DATA_Port->LCKR, STRIP_DATA_Pin)) return (ERROR);
+
+  return (SUCCESS);
+}
+
+
+
 
 /* ------------------------------------------------------------------------------- */
 /* ------------------------------------------------------------------------------- */

@@ -362,18 +362,6 @@ typedef struct {
 } TM163x_TypeDef;
 
 
-// ----------------------------------------------------------------------------
-
-/**
- * @brief   TM1803 device type definition struct.
- */
-typedef struct {
-  FunctionalState       Lock;
-  GPIO_TypeDef*         PortData;
-  uint16_t              PinSData;
-  ErrorStatus           (*Callback)(uint32_t*);
-} TM1803_TypeDef;
-
 
 // ----------------------------------------------------------------------------
 
@@ -433,6 +421,19 @@ typedef struct {
   uint8_t               Count;
   ErrorStatus           (*Callback)(uint32_t*);
 } OneWireBus_TypeDef;
+
+
+
+// ----------------------------------------------------------------------------
+/**
+ * @brief   Strip LED type definition struct.
+ */
+typedef struct {
+  FunctionalState       Lock;
+  GPIO_TypeDef*         PortData;
+  uint16_t              PinData;
+  ErrorStatus           (*Callback)(uint32_t*);
+} StripDevice_TypeDev;
 
 
 

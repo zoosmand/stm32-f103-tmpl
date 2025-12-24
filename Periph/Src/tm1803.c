@@ -42,22 +42,22 @@
 
 // ----------------------------------------------------------------------------
 
-ErrorStatus TM1803_Init(TM1803_TypeDef* dev) {
+ErrorStatus TM1803_Init(StripDevice_TypeDev* dev) {
   
   if (dev->Lock == DISABLE) dev->Lock = ENABLE; else return (ERROR);
 
   /* Init GPIO */
-  if (dev->PinSData > 7) {
+  if (dev->PinData > 7) {
     MODIFY_REG(
       dev->PortData->CRH, 
-      (0x0f << ((dev->PinSData - 8) * 4)), 
-      ((GPIO_GPO_PP | GPIO_IOS_10) << ((dev->PinSData - 8) * 4))
+      (0x0f << ((dev->PinData - 8) * 4)), 
+      ((GPIO_GPO_PP | GPIO_IOS_10) << ((dev->PinData - 8) * 4))
     );
   } else {
     MODIFY_REG(
       dev->PortData->CRL, 
-      (0x0f << (dev->PinSData * 4)), 
-      ((GPIO_GPO_PP | GPIO_IOS_10) << (dev->PinSData * 4))
+      (0x0f << (dev->PinData * 4)), 
+      ((GPIO_GPO_PP | GPIO_IOS_10) << (dev->PinData * 4))
     );
   }
 
