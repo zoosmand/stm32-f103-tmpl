@@ -30,7 +30,9 @@
 
 /* Private function prototypes ----------------------------------------------*/
 
-
+__STATIC_INLINE void send_color(StripDevice_TypeDev*, uint32_t);
+__STATIC_INLINE void send_zero(StripDevice_TypeDev*);
+__STATIC_INLINE void send_one(StripDevice_TypeDev*);
 
 
 
@@ -45,7 +47,7 @@
 ErrorStatus TM1803_Init(StripDevice_TypeDev* dev) {
   
   if (dev->Lock == DISABLE) dev->Lock = ENABLE; else return (ERROR);
-
+  
   /* Init GPIO */
   if (dev->PinData > 7) {
     MODIFY_REG(
@@ -61,11 +63,49 @@ ErrorStatus TM1803_Init(StripDevice_TypeDev* dev) {
     );
   }
 
-
   dev->Lock = DISABLE;
   return (SUCCESS);
 }
 
+
+
+
+// ----------------------------------------------------------------------------
+
+__STATIC_INLINE void send_zero(StripDevice_TypeDev* dev) {
+  STRIP_DATA_High(dev);
+  _delay_us(8);
+  STRIP_DATA_Low(dev);
+  _delay_us(20);
+}
+
+
+
+
+// ----------------------------------------------------------------------------
+
+__STATIC_INLINE void send_one(StripDevice_TypeDev* dev) {
+  STRIP_DATA_High(dev);
+  _delay_us(20);
+  STRIP_DATA_Low(dev);
+  _delay_us(8);
+}
+
+
+
+
+// ----------------------------------------------------------------------------
+
+__STATIC_INLINE void send_color(StripDevice_TypeDev* dev, uint32_t color) {
+
+  for (int8_t i = 23; i >= 0; i--) {
+    if (color & (1UL << i)) {
+      send_one(dev);
+    } else {
+      send_zero(dev);
+    }
+  }
+}
 
 
 
