@@ -34,9 +34,6 @@
 #define STRIP_DATA_Low(dev)       PIN_L(dev->PortData, dev->PinData)
 #define STRIP_DATA_High(dev)      PIN_H(dev->PortData, dev->PinData)
 
-#define STRIP_DATA_Level(dev)    (PIN_LEVEL(dev->PortData, dev->PinData))
-
-
 
 /* Exported functions prototypes ---------------------------------------------*/
 

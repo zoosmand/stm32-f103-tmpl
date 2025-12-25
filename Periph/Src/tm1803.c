@@ -48,6 +48,7 @@ ErrorStatus TM1803_Init(StripDevice_TypeDev* dev) {
   
   if (dev->Lock == DISABLE) dev->Lock = ENABLE; else return (ERROR);
   
+  #ifdef STRIP_DEV
   /* Init GPIO */
   if (dev->PinData > 7) {
     MODIFY_REG(
@@ -65,6 +66,11 @@ ErrorStatus TM1803_Init(StripDevice_TypeDev* dev) {
 
   dev->Lock = DISABLE;
   return (SUCCESS);
+
+  #else
+    dev->Lock = ENABLE;
+    return (ERROR);
+  #endif /* ifdef STRIP_DEV */
 }
 
 
