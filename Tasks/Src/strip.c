@@ -34,9 +34,13 @@ static task_scheduler_t stripScheduler = {
   .entranceFlag   = 31,
 };
 
+
+static uint32_t stripDeviceBuf_01[5];
 static StripDevice_TypeDev stripDevice_01 = {
   .PortData       = STRIP_DATA_Port,
   .PinData        = STRIP_DATA_Pin,
+  .BufPtr         = stripDeviceBuf_01,
+  .Count          = 5,
   .Lock           = DISABLE,
 };
 
@@ -61,7 +65,12 @@ void Strip_CronHandler(void) {
 
   if (FLAG_CHECK(stripScheduler.counterReg, stripScheduler.entranceFlag)) {
 
-
+    stripDeviceBuf_01[0] = 0x00000000;
+    stripDeviceBuf_01[1] = 0x00000000;
+    stripDeviceBuf_01[2] = 0x00000000;
+    stripDeviceBuf_01[3] = 0x00000000;
+    stripDeviceBuf_01[4] = 0x00000000;
+    TM1803_RunStrip(&stripDevice_01);
 
     // Clear the dedicated registry
     *stripScheduler.counterReg = 0;

@@ -48,6 +48,10 @@
 ErrorStatus TM1803_Init(StripDevice_TypeDev*);
 
 
+ErrorStatus TM1803_RunStrip(StripDevice_TypeDev*);
+
+
+
 
 #ifdef __cplusplus
 }
