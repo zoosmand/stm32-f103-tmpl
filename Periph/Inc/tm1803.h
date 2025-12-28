@@ -30,9 +30,12 @@
 
 /* Private defines -----------------------------------------------------------*/
 #define STRIP_BUS_TMOUT   5000 /* cycles timeout on TM bus operations */
+#define STRIP_DEV
 
-#define STRIP_DATA_Low(dev)       PIN_L(dev->PortData, dev->PinData)
-#define STRIP_DATA_High(dev)      PIN_H(dev->PortData, dev->PinData)
+// #define STRIP_DATA_Low(dev)       PIN_L(dev->PortData, dev->PinData)
+// #define STRIP_DATA_High(dev)      PIN_H(dev->PortData, dev->PinData)
+#define STRIP_DATA_Low       PIN_L(STRIP_DATA_Port, STRIP_DATA_Pin)
+#define STRIP_DATA_High      PIN_H(STRIP_DATA_Port, STRIP_DATA_Pin)
 
 
 /* Exported functions prototypes ---------------------------------------------*/

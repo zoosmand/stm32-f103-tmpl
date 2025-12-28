@@ -31,8 +31,9 @@
 /* Private function prototypes ----------------------------------------------*/
 
 __STATIC_INLINE void send_color(StripDevice_TypeDev*, uint32_t);
-__STATIC_INLINE void send_zero(StripDevice_TypeDev*);
-__STATIC_INLINE void send_one(StripDevice_TypeDev*);
+
+__STATIC_INLINE void send_bit(StripDevice_TypeDev*, uint8_t);
+
 
 
 
@@ -77,22 +78,45 @@ ErrorStatus TM1803_Init(StripDevice_TypeDev* dev) {
 
 // ----------------------------------------------------------------------------
 
-__STATIC_INLINE void delay_cycles(uint32_t c) {
-  while (c--) {
-    __asm volatile("nop");
-  }
-}
-
-
-
-// ----------------------------------------------------------------------------
-
 __STATIC_INLINE void send_bit(StripDevice_TypeDev* dev, uint8_t bit) {
-  STRIP_DATA_High(dev);
-  delay_cycles(26);
-  delay_cycles(bit ? 26 : 0);
-  STRIP_DATA_Low(dev);
-  delay_cycles(bit ? 12 : 38);
+  STRIP_DATA_High;
+  __asm volatile(" \
+    nop\n\t \
+    nop\n\t \
+    nop\n\t \
+    nop\n\t \
+    nop\n\t \
+    nop\n\t \
+  ");
+  if (bit) {
+    __asm volatile(" \
+      nop\n\t \
+      nop\n\t \
+      nop\n\t \
+      nop\n\t \
+      nop\n\t \
+      nop\n\t \
+    ");
+  }
+  STRIP_DATA_Low;
+  if (!bit) {
+    __asm volatile(" \
+      nop\n\t \
+      nop\n\t \
+      nop\n\t \
+      nop\n\t \
+      nop\n\t \
+      nop\n\t \
+    ");
+  }
+  __asm volatile(" \
+    nop\n\t \
+    nop\n\t \
+    nop\n\t \
+    nop\n\t \
+    nop\n\t \
+    nop\n\t \
+  ");
 }
 
 
@@ -102,7 +126,7 @@ __STATIC_INLINE void send_bit(StripDevice_TypeDev* dev, uint8_t bit) {
 __STATIC_INLINE void send_color(StripDevice_TypeDev* dev, uint32_t color) {
   
   for (int8_t i = 23; i >= 0; i--) {
-    send_bit(dev, (color & (1UL << i)));
+    send_bit(dev, (uint8_t)((color >> i) & 1));
   }
 }
 
@@ -118,6 +142,8 @@ ErrorStatus TM1803_RunStrip(StripDevice_TypeDev* dev) {
   }
   _delay_us(500);
   __enable_irq();
+
+  return (SUCCESS);
 }
 
 

@@ -66,9 +66,7 @@ _Init_SYSTEM_CLOCK_hse_wake_up:
 	bcc _Init_SYSTEM_CLOCK_hse_wake_up
 
   STRW \
-    RCC_CFGR_PLLMULL_2 \
-  | RCC_CFGR_PLLMULL_1 \
-  | RCC_CFGR_PLLMULL_0 \
+    RCC_CFGR_PLLMULL_3 \
   | RCC_CFGR_PLLSRC \
   | RCC_CFGR_PPRE1_DIV2 \
   , RCC_CFGR

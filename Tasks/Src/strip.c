@@ -65,11 +65,11 @@ void Strip_CronHandler(void) {
 
   if (FLAG_CHECK(stripScheduler.counterReg, stripScheduler.entranceFlag)) {
 
-    stripDeviceBuf_01[0] = 0x00000000;
-    stripDeviceBuf_01[1] = 0x00000000;
-    stripDeviceBuf_01[2] = 0x00000000;
-    stripDeviceBuf_01[3] = 0x00000000;
-    stripDeviceBuf_01[4] = 0x00000000;
+    stripDeviceBuf_01[0] = 0x00550000;
+    stripDeviceBuf_01[1] = 0x00005500;
+    stripDeviceBuf_01[2] = 0x00000055;
+    stripDeviceBuf_01[3] = 0x00555500;
+    stripDeviceBuf_01[4] = 0x00005555;
     TM1803_RunStrip(&stripDevice_01);
 
     // Clear the dedicated registry
