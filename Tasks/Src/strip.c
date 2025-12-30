@@ -34,13 +34,8 @@ static task_scheduler_t stripScheduler = {
   .entranceFlag   = 31,
 };
 
-#define STEPS 40
-static uint16_t stripDeviceBuf_2812_01[STEPS + 10] = {
-    0, 5, 10, 15, 20, 25, 30, 35, 40, 45,
-    50, 55, 60, 65, 70, 75, 80, 85, 90, 95,
-    90, 85, 80, 75, 70, 65, 60, 55, 50, 45,
-    40, 35, 30, 25, 20, 15, 10, 5
-  };
+#define STEPS ((8 * 24) + 50)
+static uint8_t stripDeviceBuf_2812_01[STEPS];
 static StripDevice_TypeDev stripDevice_2812_01 = {
   .Timer          = TIM1,
   .BufPtr         = stripDeviceBuf_2812_01,
@@ -48,11 +43,63 @@ static StripDevice_TypeDev stripDevice_2812_01 = {
   .Lock           = DISABLE,
 };
 
+uint32_t index = 0;
 
 
 
 ////////////////////////////////////////////////////////////////////////////////
 
+
+// ----------------------------------------------------------------------------
+
+__STATIC_INLINE void start_bus(StripDevice_TypeDev* dev) {
+
+  TIM_TypeDef* TIMx = dev->Timer;
+
+  PREG_CLR(DMA1_Channel2->CCR, DMA_CCR_EN_Pos);
+  DMA1->IFCR = DMA_IFCR_CGIF2;        // clear all flags for CH2
+
+  DMA1_Channel2->CMAR = (uint32_t)dev->BufPtr;
+  DMA1_Channel2->CPAR = (uint32_t)&TIM1->CCR1;
+  DMA1_Channel2->CNDTR = dev->Count;
+
+
+  PREG_SET(TIMx->DIER, TIM_DIER_CC1DE_Pos);
+  PREG_SET(TIMx->DIER, TIM_DIER_UDE_Pos);
+  PREG_SET(TIMx->EGR, TIM_EGR_UG_Pos);
+  PREG_SET(DMA1_Channel2->CCR, DMA_CCR_EN_Pos);
+  PREG_SET(TIMx->CCER, TIM_CCER_CC1E_Pos);
+  PREG_SET(TIMx->BDTR, TIM_BDTR_MOE_Pos);
+  PREG_SET(TIMx->CR1, TIM_CR1_CEN_Pos);
+
+}
+
+
+
+// ----------------------------------------------------------------------------
+
+__STATIC_INLINE ErrorStatus stop_bus(StripDevice_TypeDev* dev) {
+  uint32_t tmout = 10000;
+  ErrorStatus status = SUCCESS;
+  TIM_TypeDef* TIMx = dev->Timer;
+
+  while(!(PREG_CHECK(DMA1->ISR, DMA_ISR_TCIF2_Pos))) {
+    if (!(--tmout)) { status = ERROR; }
+  }
+
+  PREG_CLR(TIMx->CR1, TIM_CR1_CEN_Pos);
+  PREG_CLR(TIMx->BDTR, TIM_BDTR_MOE_Pos);
+  PREG_CLR(TIMx->CCER, TIM_CCER_CC1E_Pos);
+  PREG_CLR(DMA1_Channel2->CCR, DMA_CCR_EN_Pos);
+
+  PREG_CLR(TIMx->DIER, TIM_DIER_CC1DE_Pos);
+  PREG_CLR(TIMx->DIER, TIM_DIER_UDE_Pos);
+  PREG_CLR(TIMx->EGR, TIM_EGR_UG_Pos);
+
+  DMA1->IFCR = DMA_IFCR_CGIF2;
+
+  return (status);
+}
 
 
 
@@ -71,12 +118,32 @@ void Strip_CronHandler(void) {
 
   if (FLAG_CHECK(stripScheduler.counterReg, stripScheduler.entranceFlag)) {
 
-    dev->BufPtr[0] = 0x00550000;
-    dev->BufPtr[1] = 0x00005500;
-    dev->BufPtr[2] = 0x00000055;
-    dev->BufPtr[3] = 0x00555500;
-    dev->BufPtr[4] = 0x00005555;
-    // RunStrip(dev);
+
+    uint32_t color = 0;
+
+
+    for (uint8_t i = 0; i < 8; i++) {
+
+      color = rand();
+
+      for (int8_t i = 23; i >= 0; i--) {
+        dev->BufPtr[index++] = (color & (1 << i)) ? 60 : 30;
+      }
+
+    }
+
+    for (uint8_t i = 0; i < 50; i++) {
+      dev->BufPtr[index++] = 0;
+    }
+
+    start_bus(dev);
+    stop_bus(dev);
+
+    index = 0;
+
+
+
+
 
     // Clear the dedicated registry
     *stripScheduler.counterReg = 0;

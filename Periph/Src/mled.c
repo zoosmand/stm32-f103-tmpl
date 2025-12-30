@@ -34,6 +34,10 @@ __STATIC_INLINE void send_color(StripDevice_TypeDev*, uint32_t);
 
 __STATIC_INLINE void send_bit(StripDevice_TypeDev*, uint8_t);
 
+__STATIC_INLINE void start_bus(StripDevice_TypeDev*);
+
+__STATIC_INLINE ErrorStatus stop_bus(StripDevice_TypeDev*);
+
 
 
 
@@ -52,7 +56,7 @@ ErrorStatus WS281x_Init(StripDevice_TypeDev* dev) {
   #ifdef STRIP_DEV
 
   TIM_TypeDef* TIMx = dev->Timer;
-  uint16_t* buf = dev->BufPtr;
+  uint8_t* buf = dev->BufPtr;
 
   if (TIMx == TIM1) {
     /* Init GPIO */
@@ -64,9 +68,9 @@ ErrorStatus WS281x_Init(StripDevice_TypeDev* dev) {
     );
 
     /* Set prescaler */
-    TIM1->PSC = 7200U - 1U;
+    TIM1->PSC = 0;
     /* Set autoreload value */
-    TIM1->ARR = 100U - 1U;
+    TIM1->ARR = 90U - 1U;
 
     MODIFY_REG(TIMx->CR1, 0x1f, (
         (0 << TIM_CR1_CKD_Pos)    // No PSCK division
@@ -125,21 +129,12 @@ ErrorStatus WS281x_Init(StripDevice_TypeDev* dev) {
 
   }
 
-  static uint16_t buf2[40] = {
-    0, 5, 10, 15, 20, 25, 30, 35, 40, 45,
-    50, 55, 60, 65, 70, 75, 80, 85, 90, 95,
-    90, 85, 80, 75, 70, 65, 60, 55, 50, 45,
-    40, 35, 30, 25, 20, 15, 10, 5
-  };
-  
-
   PREG_CLR(DMA1_Channel2->CCR, DMA_CCR_EN_Pos);
   DMA1->IFCR = DMA_IFCR_CGIF2;        // clear all flags for CH2
 
   // DMA1_Channel2->CMAR = (uint32_t)buf;
-  DMA1_Channel2->CMAR = (uint32_t)buf2;
-  DMA1_Channel2->CPAR = (uint32_t)&TIM1->CCR1;
-  DMA1_Channel2->CNDTR = dev->Count;
+  // DMA1_Channel2->CPAR = (uint32_t)&TIM1->CCR1;
+  // DMA1_Channel2->CNDTR = dev->Count;
 
 
   MODIFY_REG(DMA1_Channel2->CCR, (
@@ -154,23 +149,23 @@ ErrorStatus WS281x_Init(StripDevice_TypeDev* dev) {
     ), (
         (0 << DMA_CCR_MEM2MEM_Pos)    // Memory to memory disabled
       | (0b00 << DMA_CCR_PL_Pos)      // Priority LOW
-      | (0b01 << DMA_CCR_MSIZE_Pos)   // 16-bit memory bandwidth
+      | (0b00 << DMA_CCR_MSIZE_Pos)   // 8-bit memory bandwidth
       | (0b01 << DMA_CCR_PSIZE_Pos)   // 16-bit peripheral bandwidth
       | (1 << DMA_CCR_MINC_Pos)       // Memory increment mode ON
       | (0 << DMA_CCR_PINC_Pos)       // Peripheral increment mode OFF
-      | (1 << DMA_CCR_CIRC_Pos)       // Circular mode ON
+      | (0 << DMA_CCR_CIRC_Pos)       // Circular mode OFF
       | (1 << DMA_CCR_DIR_Pos)        // Direction from memory to peropheral
     )
   );
 
   
-  PREG_SET(TIMx->DIER, TIM_DIER_CC1DE_Pos);
-  PREG_SET(TIMx->DIER, TIM_DIER_UDE_Pos);
-  PREG_SET(TIMx->EGR, TIM_EGR_UG_Pos);
-  PREG_SET(DMA1_Channel2->CCR, DMA_CCR_EN_Pos);
-  PREG_SET(TIMx->CCER, TIM_CCER_CC1E_Pos);
-  PREG_SET(TIMx->BDTR, TIM_BDTR_MOE_Pos);
-  PREG_SET(TIMx->CR1, TIM_CR1_CEN_Pos);
+  // PREG_SET(TIMx->DIER, TIM_DIER_CC1DE_Pos);
+  // PREG_SET(TIMx->DIER, TIM_DIER_UDE_Pos);
+  // PREG_SET(TIMx->EGR, TIM_EGR_UG_Pos);
+  // PREG_SET(DMA1_Channel2->CCR, DMA_CCR_EN_Pos);
+  // PREG_SET(TIMx->CCER, TIM_CCER_CC1E_Pos);
+  // PREG_SET(TIMx->BDTR, TIM_BDTR_MOE_Pos);
+  // PREG_SET(TIMx->CR1, TIM_CR1_CEN_Pos);
 
 
 
@@ -182,6 +177,44 @@ ErrorStatus WS281x_Init(StripDevice_TypeDev* dev) {
     dev->Lock = ENABLE;
     return (ERROR);
   #endif /* ifdef STRIP_DEV */
+}
+
+
+
+// ----------------------------------------------------------------------------
+
+__STATIC_INLINE void start_bus(StripDevice_TypeDev* dev) {
+
+  TIM_TypeDef* TIMx = dev->Timer;
+
+  // PREG_SET(TIMx->DIER, TIM_DIER_CC1DE_Pos);
+  // PREG_SET(TIMx->DIER, TIM_DIER_UDE_Pos);
+  // PREG_SET(TIMx->EGR, TIM_EGR_UG_Pos);
+  PREG_SET(DMA1_Channel2->CCR, DMA_CCR_EN_Pos);
+  PREG_SET(TIMx->CCER, TIM_CCER_CC1E_Pos);
+  PREG_SET(TIMx->BDTR, TIM_BDTR_MOE_Pos);
+  PREG_SET(TIMx->CR1, TIM_CR1_CEN_Pos);
+
+}
+
+
+
+// ----------------------------------------------------------------------------
+
+__STATIC_INLINE ErrorStatus stop_bus(StripDevice_TypeDev* dev) {
+  uint32_t tmout = 10000;
+  ErrorStatus status = SUCCESS;
+  TIM_TypeDef* TIMx = dev->Timer;
+
+  while(!(PREG_CHECK(DMA1->ISR, DMA_ISR_TCIF2_Pos))) {
+    if (!(--tmout)) { status = ERROR; }
+  }
+
+  PREG_SET(TIMx->CR1, TIM_CR1_CEN_Pos);
+  PREG_SET(TIMx->BDTR, TIM_BDTR_MOE_Pos);
+  PREG_SET(TIMx->CCER, TIM_CCER_CC1E_Pos);
+  PREG_SET(DMA1_Channel2->CCR, DMA_CCR_EN_Pos);
+  return (status);
 }
 
 

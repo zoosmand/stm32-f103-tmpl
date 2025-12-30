@@ -108,6 +108,8 @@ void Cron_Handler(void) {
   __NVIC_SetPriorityGrouping(NVIC_PRIORITYGROUP_4);
   SET_BIT(CoreDebug->DEMCR, CoreDebug_DEMCR_TRCENA_Msk);
 
+  srand(time(NULL));
+
   /* Initialize GPIOs and buses */
   if (!GPIO_Heartbeat_Init())   FLAG_SET(&_ASREG_, GPIO_HB_RF);
   if (!GPIO_TM163x_Init())      FLAG_SET(&_ASREG_, GPIO_TM_RF);

@@ -432,7 +432,7 @@ typedef struct {
   FunctionalState       Lock;
   TIM_TypeDef*          Timer;
   uint16_t              Count;
-  uint16_t*             BufPtr;
+  uint8_t*              BufPtr;
   ErrorStatus           (*Callback)(uint32_t*);
 } StripDevice_TypeDev;
 
