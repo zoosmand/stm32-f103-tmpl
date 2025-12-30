@@ -34,13 +34,17 @@ static task_scheduler_t stripScheduler = {
   .entranceFlag   = 31,
 };
 
-
-static uint32_t stripDeviceBuf_2812_01[5];
+#define STEPS 40
+static uint16_t stripDeviceBuf_2812_01[STEPS + 10] = {
+    0, 5, 10, 15, 20, 25, 30, 35, 40, 45,
+    50, 55, 60, 65, 70, 75, 80, 85, 90, 95,
+    90, 85, 80, 75, 70, 65, 60, 55, 50, 45,
+    40, 35, 30, 25, 20, 15, 10, 5
+  };
 static StripDevice_TypeDev stripDevice_2812_01 = {
-  .PortData       = STRIP_DATA_Port,
-  .PinData        = STRIP_DATA_Pin,
+  .Timer          = TIM1,
   .BufPtr         = stripDeviceBuf_2812_01,
-  .Count          = 5,
+  .Count          = STEPS,
   .Lock           = DISABLE,
 };
 
@@ -72,7 +76,7 @@ void Strip_CronHandler(void) {
     dev->BufPtr[2] = 0x00000055;
     dev->BufPtr[3] = 0x00555500;
     dev->BufPtr[4] = 0x00005555;
-    RunStrip(dev);
+    // RunStrip(dev);
 
     // Clear the dedicated registry
     *stripScheduler.counterReg = 0;

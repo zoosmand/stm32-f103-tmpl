@@ -33,7 +33,7 @@
 #define HEARTBEAT_LED_Pin     GPIO_PIN_13
 #define HEARTBEAT_LED_Port    GPIOC
 
-/* GPIO definitions for TM1803 3-channel LED controller */
+/* GPIO definitions for 3-channel LED Strip controller */
 #define STRIP_DATA_Pin        GPIO_PIN_8
 #define STRIP_DATA_Port       GPIOA
 

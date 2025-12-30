@@ -430,10 +430,9 @@ typedef struct {
  */
 typedef struct {
   FunctionalState       Lock;
-  GPIO_TypeDef*         PortData;
-  uint16_t              PinData;
+  TIM_TypeDef*          Timer;
   uint16_t              Count;
-  uint32_t*             BufPtr;
+  uint16_t*             BufPtr;
   ErrorStatus           (*Callback)(uint32_t*);
 } StripDevice_TypeDev;
 

@@ -379,7 +379,10 @@ ErrorStatus W25qxx_Init(W25qxx_TypeDef* dev) {
   int ret = SUCCESS;
 
 
-  if (spi_transfer(dev, W25Qxx_Read_JedecID, -1, 4, RX, 0, buf)) return (ERROR);
+  if (spi_transfer(dev, W25Qxx_Read_JedecID, -1, 4, RX, 0, buf)) {
+    spi_dma_unconfigure(dev);
+    return (ERROR);
+  }
   dev->ManID = buf[0];
   dev->Type = buf[1];
   dev->BlockCount = w25q[((buf[2] - 1) & 0x0f)];  

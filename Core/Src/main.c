@@ -137,8 +137,8 @@ void Cron_Handler(void) {
 
   /* Initialize SPI1 bus devices */
   if (FLAG_CHECK(&_ASREG_, SPI1_RF)) {
-    if (!W25qxx_Init(Get_EepromDevice()))             FLAG_SET(&_ASREG_, EEPROM_RF);
-    if (!MAX72xx_Init(Get_MaxDiplayDevice()))         FLAG_SET(&_ASREG_, MAX_DSPL_RF);
+    // if (!W25qxx_Init(Get_EepromDevice()))             FLAG_SET(&_ASREG_, EEPROM_RF);
+    // if (!MAX72xx_Init(Get_MaxDiplayDevice()))         FLAG_SET(&_ASREG_, MAX_DSPL_RF);
   }
   
   /* Initialize I2C1 bus devices */
