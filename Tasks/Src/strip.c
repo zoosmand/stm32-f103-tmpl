@@ -29,77 +29,29 @@ __attribute__((section(".cron"))) static uint32_t stripRegister      = 0;
 static task_scheduler_t stripScheduler = {
   .counter        = &stripCounter,
   .counterSrc     = &sysCnt,
-  .period         = 331,
+  .period         = 157,
   .counterReg     = &stripRegister,
   .entranceFlag   = 31,
 };
 
-#define STEPS ((8 * 24) + 50)
+#define LEDS  12
+#define STEPS ((LEDS * 24) + 50)
 static uint8_t stripDeviceBuf_2812_01[STEPS];
 static StripDevice_TypeDev stripDevice_2812_01 = {
   .Timer          = TIM1,
   .BufPtr         = stripDeviceBuf_2812_01,
   .Count          = STEPS,
+  .LedCount       = LEDS,
   .Lock           = DISABLE,
 };
 
-uint32_t index = 0;
+static uint32_t index = 0;
+
 
 
 
 ////////////////////////////////////////////////////////////////////////////////
 
-
-// ----------------------------------------------------------------------------
-
-__STATIC_INLINE void start_bus(StripDevice_TypeDev* dev) {
-
-  TIM_TypeDef* TIMx = dev->Timer;
-
-  PREG_CLR(DMA1_Channel2->CCR, DMA_CCR_EN_Pos);
-  DMA1->IFCR = DMA_IFCR_CGIF2;        // clear all flags for CH2
-
-  DMA1_Channel2->CMAR = (uint32_t)dev->BufPtr;
-  DMA1_Channel2->CPAR = (uint32_t)&TIM1->CCR1;
-  DMA1_Channel2->CNDTR = dev->Count;
-
-
-  PREG_SET(TIMx->DIER, TIM_DIER_CC1DE_Pos);
-  PREG_SET(TIMx->DIER, TIM_DIER_UDE_Pos);
-  PREG_SET(TIMx->EGR, TIM_EGR_UG_Pos);
-  PREG_SET(DMA1_Channel2->CCR, DMA_CCR_EN_Pos);
-  PREG_SET(TIMx->CCER, TIM_CCER_CC1E_Pos);
-  PREG_SET(TIMx->BDTR, TIM_BDTR_MOE_Pos);
-  PREG_SET(TIMx->CR1, TIM_CR1_CEN_Pos);
-
-}
-
-
-
-// ----------------------------------------------------------------------------
-
-__STATIC_INLINE ErrorStatus stop_bus(StripDevice_TypeDev* dev) {
-  uint32_t tmout = 10000;
-  ErrorStatus status = SUCCESS;
-  TIM_TypeDef* TIMx = dev->Timer;
-
-  while(!(PREG_CHECK(DMA1->ISR, DMA_ISR_TCIF2_Pos))) {
-    if (!(--tmout)) { status = ERROR; }
-  }
-
-  PREG_CLR(TIMx->CR1, TIM_CR1_CEN_Pos);
-  PREG_CLR(TIMx->BDTR, TIM_BDTR_MOE_Pos);
-  PREG_CLR(TIMx->CCER, TIM_CCER_CC1E_Pos);
-  PREG_CLR(DMA1_Channel2->CCR, DMA_CCR_EN_Pos);
-
-  PREG_CLR(TIMx->DIER, TIM_DIER_CC1DE_Pos);
-  PREG_CLR(TIMx->DIER, TIM_DIER_UDE_Pos);
-  PREG_CLR(TIMx->EGR, TIM_EGR_UG_Pos);
-
-  DMA1->IFCR = DMA_IFCR_CGIF2;
-
-  return (status);
-}
 
 
 
@@ -118,32 +70,20 @@ void Strip_CronHandler(void) {
 
   if (FLAG_CHECK(stripScheduler.counterReg, stripScheduler.entranceFlag)) {
 
-
+    dev->Lock = ENABLE;
     uint32_t color = 0;
 
-
-    for (uint8_t i = 0; i < 8; i++) {
-
+    for (uint16_t k = 0; k < dev->LedCount; k++) {
       color = rand();
-
       for (int8_t i = 23; i >= 0; i--) {
         dev->BufPtr[index++] = (color & (1 << i)) ? 60 : 30;
       }
-
     }
 
-    for (uint8_t i = 0; i < 50; i++) {
-      dev->BufPtr[index++] = 0;
-    }
-
-    start_bus(dev);
-    stop_bus(dev);
+    LedStrip_RunBus(dev);
 
     index = 0;
-
-
-
-
+    dev->Lock = DISABLE;
 
     // Clear the dedicated registry
     *stripScheduler.counterReg = 0;
@@ -162,6 +102,10 @@ StripDevice_TypeDev* Get_StripDevice(uint16_t model) {
   switch (model) {
   case 2812:
     dev = &stripDevice_2812_01;
+    uint16_t start = dev->Count - 50;
+    for (uint16_t i = start; i < dev->Count; i++) {
+      dev->BufPtr[i] = 0;
+    }
     break;
   
   default:

@@ -433,6 +433,7 @@ typedef struct {
   TIM_TypeDef*          Timer;
   uint16_t              Count;
   uint8_t*              BufPtr;
+  uint16_t              LedCount;
   ErrorStatus           (*Callback)(uint32_t*);
 } StripDevice_TypeDev;
 

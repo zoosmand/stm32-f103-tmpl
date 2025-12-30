@@ -47,8 +47,9 @@
  */
 ErrorStatus WS281x_Init(StripDevice_TypeDev*);
 
-
 ErrorStatus RunStrip(StripDevice_TypeDev*);
+
+ErrorStatus LedStrip_RunBus(StripDevice_TypeDev*);
 
 
 

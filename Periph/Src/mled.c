@@ -34,10 +34,6 @@ __STATIC_INLINE void send_color(StripDevice_TypeDev*, uint32_t);
 
 __STATIC_INLINE void send_bit(StripDevice_TypeDev*, uint8_t);
 
-__STATIC_INLINE void start_bus(StripDevice_TypeDev*);
-
-__STATIC_INLINE ErrorStatus stop_bus(StripDevice_TypeDev*);
-
 
 
 
@@ -112,9 +108,7 @@ ErrorStatus WS281x_Init(StripDevice_TypeDev* dev) {
 
     TIMx->CCR1 = 0;
 
-
     PREG_CLR(TIMx->SMCR, TIM_SMCR_MSM_Pos);  // Disable Master/Slave mode
-
 
     MODIFY_REG(TIMx->BDTR, (TIM_BDTR_MOE | TIM_BDTR_DTG | TIM_BDTR_LOCK | TIM_BDTR_OSSI | TIM_BDTR_OSSR | TIM_BDTR_BKE | TIM_BDTR_BKP | TIM_BDTR_AOE), (
         (0 << TIM_BDTR_MOE_Pos)           // Not now
@@ -132,10 +126,7 @@ ErrorStatus WS281x_Init(StripDevice_TypeDev* dev) {
   PREG_CLR(DMA1_Channel2->CCR, DMA_CCR_EN_Pos);
   DMA1->IFCR = DMA_IFCR_CGIF2;        // clear all flags for CH2
 
-  // DMA1_Channel2->CMAR = (uint32_t)buf;
-  // DMA1_Channel2->CPAR = (uint32_t)&TIM1->CCR1;
-  // DMA1_Channel2->CNDTR = dev->Count;
-
+  DMA1_Channel2->CPAR = (uint32_t)&TIM1->CCR1;
 
   MODIFY_REG(DMA1_Channel2->CCR, (
         DMA_CCR_MEM2MEM_Msk
@@ -157,18 +148,10 @@ ErrorStatus WS281x_Init(StripDevice_TypeDev* dev) {
       | (1 << DMA_CCR_DIR_Pos)        // Direction from memory to peropheral
     )
   );
-
   
-  // PREG_SET(TIMx->DIER, TIM_DIER_CC1DE_Pos);
-  // PREG_SET(TIMx->DIER, TIM_DIER_UDE_Pos);
-  // PREG_SET(TIMx->EGR, TIM_EGR_UG_Pos);
-  // PREG_SET(DMA1_Channel2->CCR, DMA_CCR_EN_Pos);
-  // PREG_SET(TIMx->CCER, TIM_CCER_CC1E_Pos);
-  // PREG_SET(TIMx->BDTR, TIM_BDTR_MOE_Pos);
-  // PREG_SET(TIMx->CR1, TIM_CR1_CEN_Pos);
-
-
-
+  PREG_SET(TIMx->DIER, TIM_DIER_CC1DE_Pos);
+  PREG_SET(TIMx->DIER, TIM_DIER_UDE_Pos);
+  PREG_SET(TIMx->EGR, TIM_EGR_UG_Pos);
 
   dev->Lock = DISABLE;
   return (SUCCESS);
@@ -183,37 +166,33 @@ ErrorStatus WS281x_Init(StripDevice_TypeDev* dev) {
 
 // ----------------------------------------------------------------------------
 
-__STATIC_INLINE void start_bus(StripDevice_TypeDev* dev) {
-
+ErrorStatus LedStrip_RunBus(StripDevice_TypeDev* dev) {
+  uint32_t tmout = 10000;
+  ErrorStatus status = SUCCESS;
   TIM_TypeDef* TIMx = dev->Timer;
 
-  // PREG_SET(TIMx->DIER, TIM_DIER_CC1DE_Pos);
-  // PREG_SET(TIMx->DIER, TIM_DIER_UDE_Pos);
-  // PREG_SET(TIMx->EGR, TIM_EGR_UG_Pos);
+  PREG_CLR(DMA1_Channel2->CCR, DMA_CCR_EN_Pos);
+  DMA1->IFCR = DMA_IFCR_CGIF2;        // clear all flags for CH2
+
+  DMA1_Channel2->CMAR = (uint32_t)dev->BufPtr;
+  DMA1_Channel2->CNDTR = dev->Count;
+
   PREG_SET(DMA1_Channel2->CCR, DMA_CCR_EN_Pos);
   PREG_SET(TIMx->CCER, TIM_CCER_CC1E_Pos);
   PREG_SET(TIMx->BDTR, TIM_BDTR_MOE_Pos);
   PREG_SET(TIMx->CR1, TIM_CR1_CEN_Pos);
-
-}
-
-
-
-// ----------------------------------------------------------------------------
-
-__STATIC_INLINE ErrorStatus stop_bus(StripDevice_TypeDev* dev) {
-  uint32_t tmout = 10000;
-  ErrorStatus status = SUCCESS;
-  TIM_TypeDef* TIMx = dev->Timer;
 
   while(!(PREG_CHECK(DMA1->ISR, DMA_ISR_TCIF2_Pos))) {
     if (!(--tmout)) { status = ERROR; }
   }
 
-  PREG_SET(TIMx->CR1, TIM_CR1_CEN_Pos);
-  PREG_SET(TIMx->BDTR, TIM_BDTR_MOE_Pos);
-  PREG_SET(TIMx->CCER, TIM_CCER_CC1E_Pos);
-  PREG_SET(DMA1_Channel2->CCR, DMA_CCR_EN_Pos);
+  PREG_CLR(TIMx->CR1, TIM_CR1_CEN_Pos);
+  PREG_CLR(TIMx->BDTR, TIM_BDTR_MOE_Pos);
+  PREG_CLR(TIMx->CCER, TIM_CCER_CC1E_Pos);
+  PREG_CLR(DMA1_Channel2->CCR, DMA_CCR_EN_Pos);
+
+  DMA1->IFCR = DMA_IFCR_CGIF2;
+
   return (status);
 }
 
