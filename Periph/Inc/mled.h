@@ -45,10 +45,10 @@
  * @param   dev pointer to the TM163x device struct
  * @retval  status of operation
  */
-ErrorStatus TM1803_Init(StripDevice_TypeDev*);
+ErrorStatus WS281x_Init(StripDevice_TypeDev*);
 
 
-ErrorStatus TM1803_RunStrip(StripDevice_TypeDev*);
+ErrorStatus RunStrip(StripDevice_TypeDev*);
 
 
 

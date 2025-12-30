@@ -18,7 +18,7 @@
 
 
 /* Includes ------------------------------------------------------------------*/
-#include "tm1803.h"
+#include "mled.h"
 
 /* Private variables ---------------------------------------------------------*/
 
@@ -45,7 +45,7 @@ __STATIC_INLINE void send_bit(StripDevice_TypeDev*, uint8_t);
 
 // ----------------------------------------------------------------------------
 
-ErrorStatus TM1803_Init(StripDevice_TypeDev* dev) {
+ErrorStatus WS281x_Init(StripDevice_TypeDev* dev) {
   
   if (dev->Lock == DISABLE) dev->Lock = ENABLE; else return (ERROR);
   
@@ -134,7 +134,7 @@ __STATIC_INLINE void send_color(StripDevice_TypeDev* dev, uint32_t color) {
 
 // ----------------------------------------------------------------------------
 
-ErrorStatus TM1803_RunStrip(StripDevice_TypeDev* dev) {
+ErrorStatus RunStrip(StripDevice_TypeDev* dev) {
 
   __disable_irq();
   for (uint16_t i = 0; i < dev->Count; i++) {

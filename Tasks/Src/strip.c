@@ -35,11 +35,11 @@ static task_scheduler_t stripScheduler = {
 };
 
 
-static uint32_t stripDeviceBuf_01[5];
-static StripDevice_TypeDev stripDevice_01 = {
+static uint32_t stripDeviceBuf_2812_01[5];
+static StripDevice_TypeDev stripDevice_2812_01 = {
   .PortData       = STRIP_DATA_Port,
   .PinData        = STRIP_DATA_Pin,
-  .BufPtr         = stripDeviceBuf_01,
+  .BufPtr         = stripDeviceBuf_2812_01,
   .Count          = 5,
   .Lock           = DISABLE,
 };
@@ -56,7 +56,9 @@ static StripDevice_TypeDev stripDevice_01 = {
 
 void Strip_CronHandler(void) {
 
-  if (stripDevice_01.Lock == ENABLE) {
+  StripDevice_TypeDev* dev = Get_StripDevice(2812);
+
+  if (dev->Lock == ENABLE) {
     /* TODO Reinitialize heartbeat device */
     return;
   }
@@ -65,12 +67,12 @@ void Strip_CronHandler(void) {
 
   if (FLAG_CHECK(stripScheduler.counterReg, stripScheduler.entranceFlag)) {
 
-    stripDeviceBuf_01[0] = 0x00550000;
-    stripDeviceBuf_01[1] = 0x00005500;
-    stripDeviceBuf_01[2] = 0x00000055;
-    stripDeviceBuf_01[3] = 0x00555500;
-    stripDeviceBuf_01[4] = 0x00005555;
-    TM1803_RunStrip(&stripDevice_01);
+    dev->BufPtr[0] = 0x00550000;
+    dev->BufPtr[1] = 0x00005500;
+    dev->BufPtr[2] = 0x00000055;
+    dev->BufPtr[3] = 0x00555500;
+    dev->BufPtr[4] = 0x00005555;
+    RunStrip(dev);
 
     // Clear the dedicated registry
     *stripScheduler.counterReg = 0;
@@ -82,8 +84,20 @@ void Strip_CronHandler(void) {
 
 // ----------------------------------------------------------------------------
 
-StripDevice_TypeDev* Get_StripDevice(void) {
-  return &stripDevice_01;
+StripDevice_TypeDev* Get_StripDevice(uint16_t model) {
+
+  StripDevice_TypeDev* dev;
+
+  switch (model) {
+  case 2812:
+    dev = &stripDevice_2812_01;
+    break;
+  
+  default:
+    dev = NULL;
+    break;
+  }
+  return dev;
 }
 
 

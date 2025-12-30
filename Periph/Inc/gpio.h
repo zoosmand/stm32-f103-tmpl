@@ -35,7 +35,7 @@
 
 /* GPIO definitions for TM1803 3-channel LED controller */
 #define STRIP_DATA_Pin        GPIO_PIN_8
-#define STRIP_DATA_Port       GPIOB
+#define STRIP_DATA_Port       GPIOA
 
 /* GPIO definitions for TM display */
 #define TM_DIO_Pin            GPIO_PIN_12

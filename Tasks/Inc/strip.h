@@ -42,9 +42,11 @@ void Strip_CronHandler(void);
 
 /**
  * @brief   Returns the heartbeat device struct pointer.
- * @return  the heartbeat devices struct pointer
+ * @param   model: the model of the managed LED chip 
+ * @return  the managed LED devices struct pointer
  */
-StripDevice_TypeDev* Get_StripDevice(void);
+StripDevice_TypeDev* Get_StripDevice(uint16_t);
+
 
 
 #ifdef __cplusplus

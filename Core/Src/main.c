@@ -132,7 +132,7 @@ void Cron_Handler(void) {
   }
 
   if (FLAG_CHECK(&_ASREG_, GPIO_STRIP_RF)) {
-    if (!TM1803_Init(Get_StripDevice()))               FLAG_SET(&_ASREG_,  STRIP_RF);
+    if (!WS281x_Init(Get_StripDevice(2812)))         FLAG_SET(&_ASREG_,  STRIP_RF);
   }
 
   /* Initialize SPI1 bus devices */
