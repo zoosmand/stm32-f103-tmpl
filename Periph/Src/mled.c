@@ -175,13 +175,15 @@ ErrorStatus LedStrip_RunBus(StripDevice_TypeDev* dev) {
   DMA1->IFCR = DMA_IFCR_CGIF2;        // clear all flags for CH2
 
   DMA1_Channel2->CMAR = (uint32_t)dev->BufPtr;
-  DMA1_Channel2->CNDTR = dev->Count;
+  DMA1_Channel2->CNDTR = dev->BufSize;
 
   PREG_SET(DMA1_Channel2->CCR, DMA_CCR_EN_Pos);
   PREG_SET(TIMx->CCER, TIM_CCER_CC1E_Pos);
   PREG_SET(TIMx->BDTR, TIM_BDTR_MOE_Pos);
   PREG_SET(TIMx->CR1, TIM_CR1_CEN_Pos);
 
+
+/* TODO Use IRQ to stop DMA */
   while(!(PREG_CHECK(DMA1->ISR, DMA_ISR_TCIF2_Pos))) {
     if (!(--tmout)) { status = ERROR; }
   }
@@ -243,24 +245,18 @@ __STATIC_INLINE void send_bit(StripDevice_TypeDev* dev, uint8_t bit) {
 
 
 
-// ----------------------------------------------------------------------------
-
-__STATIC_INLINE void send_color(StripDevice_TypeDev* dev, uint32_t color) {
-  
-  for (int8_t i = 23; i >= 0; i--) {
-    send_bit(dev, (uint8_t)((color >> i) & 1));
-  }
-}
-
-
 
 // ----------------------------------------------------------------------------
 
 ErrorStatus RunStrip(StripDevice_TypeDev* dev) {
 
   __disable_irq();
-  for (uint16_t i = 0; i < dev->Count; i++) {
-    send_color(dev, dev->BufPtr[i]);
+  uint32_t color;
+  for (uint16_t i = 0; i < dev->BufSize; i++) {
+    color = dev->BufPtr[i];
+    for (int8_t i = 23; i >= 0; i--) {
+      send_bit(dev, (uint8_t)((color >> i) & 1));
+    }
   }
   _delay_us(500);
   __enable_irq();
