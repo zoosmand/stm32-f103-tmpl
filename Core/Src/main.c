@@ -114,8 +114,9 @@ void Cron_Handler(void) {
   if (!GPIO_Heartbeat_Init())   FLAG_SET(&_ASREG_, GPIO_HB_RF);
   if (!GPIO_TM163x_Init())      FLAG_SET(&_ASREG_, GPIO_TM_RF);
   if (!GPIO_OneWire_Init())     FLAG_SET(&_ASREG_, GPIO_OW_RF);
-  if (!GPIO_Strip_Init())        FLAG_SET(&_ASREG_, GPIO_STRIP_RF);
-  if (!SPI_Init(SPI1))          FLAG_SET(&_ASREG_, SPI1_RF);
+  if (!GPIO_Strip_Init())       FLAG_SET(&_ASREG_, GPIO_STRIP_RF);
+  // if (!SPI_Init(SPI1))          FLAG_SET(&_ASREG_, SPI1_RF);
+  if (!SPI_Init(SPI2))          FLAG_SET(&_ASREG_, SPI2_RF);
   if (!I2C_Init(I2C1))          FLAG_SET(&_ASREG_, I2C1_RF);
   
 
@@ -133,16 +134,22 @@ void Cron_Handler(void) {
     if (!TM163x_Init(Get_TmDiplayDevice()))           FLAG_SET(&_ASREG_, TM_DSPL_RF);
   }
 
-  if (FLAG_CHECK(&_ASREG_, GPIO_STRIP_RF)) {
-    if (!WS281x_Init(Get_StripDevice(2812)))         FLAG_SET(&_ASREG_,  STRIP_RF);
-  }
-
   /* Initialize SPI1 bus devices */
   if (FLAG_CHECK(&_ASREG_, SPI1_RF)) {
     // if (!W25qxx_Init(Get_EepromDevice()))             FLAG_SET(&_ASREG_, EEPROM_RF);
     // if (!MAX72xx_Init(Get_MaxDiplayDevice()))         FLAG_SET(&_ASREG_, MAX_DSPL_RF);
   }
   
+  /* Initialize SPI1 bus devices */
+  if (FLAG_CHECK(&_ASREG_, SPI2_RF)) {
+    if (!W25qxx_Init(Get_EepromDevice()))             FLAG_SET(&_ASREG_, EEPROM_RF);
+    // if (!MAX72xx_Init(Get_MaxDiplayDevice()))         FLAG_SET(&_ASREG_, MAX_DSPL_RF);
+  }
+  
+  if (FLAG_CHECK(&_ASREG_, GPIO_STRIP_RF)) {
+    if (!WS281x_Init(Get_StripDevice(2812)))         FLAG_SET(&_ASREG_,  STRIP_RF);
+  }
+
   /* Initialize I2C1 bus devices */
   if (FLAG_CHECK(&_ASREG_, I2C1_RF)) {
     if (!BMx680_Init(Get_BoschDevice(BMX680_MODEL)))        FLAG_SET(&_ASREG_, BMX680_RF);

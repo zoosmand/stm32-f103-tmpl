@@ -35,18 +35,38 @@ ErrorStatus SPI_Init(SPI_TypeDef* SPIx) {
       | ((GPIO_AF_PP | GPIO_IOS_50) << (SPI1_MISO_Pin * 4U))
       | ((GPIO_AF_PP | GPIO_IOS_50) << (SPI1_MOSI_Pin * 4U))
     ));
+    /* Enbale SPI master mode */
+    SET_BIT(SPIx->CR1, SPI_CR1_MSTR);
   }
 
-  /* Enbale SPI master mode */
-  SET_BIT(SPIx->CR1, SPI_CR1_MSTR);
+  if (SPIx == SPI2) {
+    MODIFY_REG(SPI2_Port->CRH,
+      ((0xf << ((SPI2_SCK_Pin - 8) * 4U)) | (0xf << ((SPI2_MISO_Pin - 8) * 4U)) | (0xf << ((SPI2_MOSI_Pin - 8) * 4U))), (
+        ((GPIO_AF_PP | GPIO_IOS_50) << ((SPI2_SCK_Pin - 8) * 4U))
+      | ((GPIO_AF_PP | GPIO_IOS_50) << ((SPI2_MISO_Pin - 8) * 4U))
+      | ((GPIO_AF_PP | GPIO_IOS_50) << ((SPI2_MOSI_Pin - 8) * 4U))
+    ));
+    /* Enbale SPI master mode */
+    SET_BIT(SPIx->CR1, SPI_CR1_MSTR);
+  }
 
-  if (SPIx == SPI1) {
+  switch ((uint32_t)SPIx) {
+  case (uint32_t)SPI1:
     // NVIC_SetPriority(SPI1_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 15, 0));
     // NVIC_EnableIRQ(SPI1_IRQn);
-    return (SUCCESS);
+    break;
+
+    case (uint32_t)SPI2:
+    // NVIC_SetPriority(SPI2_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(), 15, 0));
+    // NVIC_EnableIRQ(SPI2_IRQn);
+    break;
+  
+  default:
+    return (ERROR);
+    break;
   }
 
-  return (ERROR);
+  return (SUCCESS);
 }
 
 

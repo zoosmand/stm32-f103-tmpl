@@ -34,12 +34,12 @@ static task_scheduler_t eepromScheduler = {
 };
 
 static W25qxx_TypeDef eeprom_0 = {
-  .SPIx       = SPI1,
-  .SPINssPort = SPI1_Port,
-  .SPINssPin  = SPI1_NSS_0_Pin,
+  .SPIx       = SPI2,
+  .SPINssPort = SPI2_Port,
+  .SPINssPin  = SPI2_NSS_0_Pin,
   .DMAx       = DMA1,
-  .DMAxTx     = DMA1_Channel3,
-  .DMAxRx     = DMA1_Channel2,
+  .DMAxTx     = DMA1_Channel5,
+  .DMAxRx     = DMA1_Channel4,
   .Lock       = DISABLE,
 };
 

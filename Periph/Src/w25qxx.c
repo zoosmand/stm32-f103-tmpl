@@ -144,12 +144,12 @@ __STATIC_INLINE ErrorStatus spi_dma_unconfigure(W25qxx_TypeDef* dev) {
 
   /* Clear correspondents DMA flags */
   dev->DMAx->IFCR |= (
-      DMA_IFCR_CGIF2_Msk
-    | DMA_IFCR_CGIF3_Msk
-    | DMA_IFCR_CHTIF2_Msk
-    | DMA_IFCR_CHTIF3_Msk
-    | DMA_IFCR_CTCIF2_Msk
-    | DMA_IFCR_CTCIF3_Msk
+      DMA_IFCR_CGIF4_Msk
+    | DMA_IFCR_CGIF5_Msk
+    | DMA_IFCR_CHTIF4_Msk
+    | DMA_IFCR_CHTIF5_Msk
+    | DMA_IFCR_CTCIF4_Msk
+    | DMA_IFCR_CTCIF5_Msk
   );
   
   /* Disable from memory to peripheral DMA transfer */
@@ -230,7 +230,7 @@ __STATIC_INLINE ErrorStatus spi_transfer_dma(W25qxx_TypeDef* dev, const uint16_t
 
   /* Wait for transfer is compete */
   tmout = SPI_BUS_TMOUT;
-  while(!(PREG_CHECK(dev->DMAx->ISR, DMA_ISR_TCIF3_Pos))) {
+  while(!(PREG_CHECK(dev->DMAx->ISR, DMA_ISR_TCIF5_Pos))) {
      if (!(--tmout)) { return spi_dma_unconfigure(dev); }
    }
 
@@ -364,7 +364,7 @@ ErrorStatus W25qxx_Init(W25qxx_TypeDef* dev) {
   /* Initialize NSS Pin */
   if (dev->SPIx != NULL) {
     if (dev->SPINssPin > 7) {
-      MODIFY_REG(dev->SPINssPort->CRL, (0xf << ((dev->SPINssPin - 8) * 4)), ((GPIO_GPO_PP | GPIO_IOS_2) << ((dev->SPINssPin -8) * 4)));
+      MODIFY_REG(dev->SPINssPort->CRH, (0xf << ((dev->SPINssPin - 8) * 4)), ((GPIO_GPO_PP | GPIO_IOS_2) << ((dev->SPINssPin -8) * 4)));
     } else {
       MODIFY_REG(dev->SPINssPort->CRL, (0xf << (dev->SPINssPin * 4)), ((GPIO_GPO_PP | GPIO_IOS_2) << (dev->SPINssPin * 4)));
     }

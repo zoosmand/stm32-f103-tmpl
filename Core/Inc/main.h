@@ -93,17 +93,18 @@ extern uint32_t secCnt;
 #define GPIO_OW_RF        2
 #define GPIO_STRIP_RF     3
 #define SPI1_RF           16
-#define I2C1_RF           17
-#define OW_BUS_RF         18
-#define SSD_DSPL_RF       19
-#define WH_DSPL_RF        20
-#define MAX_DSPL_RF       21
-#define TM_DSPL_RF        22
-#define EEPROM_RF         23
-#define BMX280_RF         24
-#define BMX680_RF         25
-#define HEARTBEAT_RF      26
-#define STRIP_RF          27
+#define SPI2_RF           17
+#define I2C1_RF           18
+#define OW_BUS_RF         19
+#define SSD_DSPL_RF       20
+#define WH_DSPL_RF        21
+#define MAX_DSPL_RF       22
+#define TM_DSPL_RF        23
+#define EEPROM_RF         24
+#define BMX280_RF         25
+#define BMX680_RF         26
+#define HEARTBEAT_RF      27
+#define STRIP_RF          28
 
 
 /* Exported defines -----------------------------------------------------------*/

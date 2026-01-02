@@ -124,7 +124,7 @@ ErrorStatus WS281x_Init(StripDevice_TypeDev* dev) {
   }
 
   PREG_CLR(DMA1_Channel2->CCR, DMA_CCR_EN_Pos);
-  DMA1->IFCR = DMA_IFCR_CGIF2;        // clear all flags for CH2
+  DMA1->IFCR |= (DMA_IFCR_CTCIF2 | DMA_IFCR_CGIF2 | DMA_IFCR_CHTIF2);        // clear all flags for CH2
 
   DMA1_Channel2->CPAR = (uint32_t)&TIM1->CCR1;
 
@@ -145,7 +145,7 @@ ErrorStatus WS281x_Init(StripDevice_TypeDev* dev) {
       | (1 << DMA_CCR_MINC_Pos)       // Memory increment mode ON
       | (0 << DMA_CCR_PINC_Pos)       // Peripheral increment mode OFF
       | (0 << DMA_CCR_CIRC_Pos)       // Circular mode OFF
-      | (1 << DMA_CCR_DIR_Pos)        // Direction from memory to peropheral
+      | (1 << DMA_CCR_DIR_Pos)        // Direction from memory to peripheral
     )
   );
   
@@ -172,7 +172,7 @@ ErrorStatus LedStrip_RunBus(StripDevice_TypeDev* dev) {
   TIM_TypeDef* TIMx = dev->Timer;
 
   PREG_CLR(DMA1_Channel2->CCR, DMA_CCR_EN_Pos);
-  DMA1->IFCR = DMA_IFCR_CGIF2;        // clear all flags for CH2
+  DMA1->IFCR = (DMA_IFCR_CTCIF2 | DMA_IFCR_CGIF2 | DMA_IFCR_CHTIF2);        // clear all flags for CH2
 
   DMA1_Channel2->CMAR = (uint32_t)dev->BufPtr;
   DMA1_Channel2->CNDTR = dev->BufSize;
@@ -193,7 +193,7 @@ ErrorStatus LedStrip_RunBus(StripDevice_TypeDev* dev) {
   PREG_CLR(TIMx->CCER, TIM_CCER_CC1E_Pos);
   PREG_CLR(DMA1_Channel2->CCR, DMA_CCR_EN_Pos);
 
-  DMA1->IFCR = DMA_IFCR_CGIF2;
+  DMA1->IFCR |= (DMA_IFCR_CTCIF2 | DMA_IFCR_CGIF2 | DMA_IFCR_CHTIF2);
 
   return (status);
 }
