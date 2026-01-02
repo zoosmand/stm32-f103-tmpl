@@ -29,7 +29,7 @@
         // "command": "st-flash write ${workspaceRoot}/build/vsarm_firmware.bin 0x08000000"
       },
       "linux": {
-        // "command": "JLinkExe -speed 6000 -if swd -device STM32F103C8 ./flash.jlink"
+        // "command": "JLinkExe -speed 6000 -if swd -device STM32F103C8 ./flash.jlink" // use with J-Link debugger
         "command": "st-flash write ${workspaceRoot}/build/vsarm_firmware.bin 0x08000000"
       },
       "options": {
