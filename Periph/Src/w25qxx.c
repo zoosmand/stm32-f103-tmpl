@@ -100,9 +100,9 @@ __STATIC_INLINE ErrorStatus w25qxx_busy(W25qxx_TypeDef*);
 // ----------------------------------------------------------------------------
 
 __STATIC_INLINE void spi_dma_configure(W25qxx_TypeDef* dev) {
-  /* adjust frequency divider, 0b001 = 4, (PCLK)72/4 = 18MHz */
+  /* adjust frequency divider, 0b000 = 2, (APB1 Periph clock)36/2 = 18MHz */
   /* set 8-bit data buffer length */ 
-  MODIFY_REG(dev->SPIx->CR1, (SPI_CR1_BR_Msk | SPI_CR1_DFF_Msk), SPI_CR1_BR_0);
+  MODIFY_REG(dev->SPIx->CR1, (SPI_CR1_BR_Msk | SPI_CR1_DFF_Msk), 0);
   PREG_SET(dev->SPIx->CR2, SPI_CR2_SSOE_Pos);
 
 
