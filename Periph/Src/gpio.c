@@ -58,8 +58,8 @@ ErrorStatus GPIO_Heartbeat_Init(void) {
 ErrorStatus GPIO_TM163x_Init(void) {
 
   /* Check if pins are not locked */
-  if (PREG_CHECK(TM_SCK_Port->LCKR, TM_DIO_Pin_Pos)) return (ERROR);
-  if (PREG_CHECK(TM_DIO_Port->LCKR, TM_DIO_Pin_Pos)) return (ERROR);
+  if (PREG_CHECK(TM_SCK_Port->LCKR, TM_DIO_Pin)) return (ERROR);
+  if (PREG_CHECK(TM_DIO_Port->LCKR, TM_DIO_Pin)) return (ERROR);
 
   return (SUCCESS);
 }
@@ -73,6 +73,18 @@ ErrorStatus GPIO_OneWire_Init(void) {
 
   /* Check if pins are not locked */
   if (PREG_CHECK(OneWire_PORT->LCKR, OneWire_PIN)) return (ERROR);
+
+  return (SUCCESS);
+}
+
+
+
+// ----------------------------------------------------------------------------
+
+ErrorStatus GPIO_Strip_Init(void) {
+
+  /* Check if pins are not locked */
+  if (PREG_CHECK(STRIP_DATA_Port->LCKR, STRIP_DATA_Pin)) return (ERROR);
 
   return (SUCCESS);
 }

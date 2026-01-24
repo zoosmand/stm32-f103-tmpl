@@ -349,6 +349,7 @@ typedef struct {
   GPIO_TypeDef*         PortDio;
   uint16_t              PinSck;
   uint16_t              PinDio;
+  bool                  UseDot;
   uint8_t               Dig0;
   uint8_t               Dig1;
   uint8_t               Dig2;
@@ -359,6 +360,7 @@ typedef struct {
   uint8_t               Dig7;
   ErrorStatus           (*Callback)(uint32_t*);
 } TM163x_TypeDef;
+
 
 
 // ----------------------------------------------------------------------------
@@ -419,6 +421,21 @@ typedef struct {
   uint8_t               Count;
   ErrorStatus           (*Callback)(uint32_t*);
 } OneWireBus_TypeDef;
+
+
+
+// ----------------------------------------------------------------------------
+/**
+ * @brief   Strip LED type definition struct.
+ */
+typedef struct {
+  FunctionalState       Lock;
+  TIM_TypeDef*          Timer;
+  uint8_t*              BufPtr;
+  uint16_t              BufSize;
+  uint16_t              LedCount;
+  ErrorStatus           (*Callback)(uint32_t*);
+} StripDevice_TypeDev;
 
 
 

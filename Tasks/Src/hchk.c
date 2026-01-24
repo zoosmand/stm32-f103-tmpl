@@ -59,7 +59,7 @@ static HearbeatDevice_TypeDev hearbeatLedDevice = {
 
 void Heartbeat_CronHandler(void) {
 
-  if (hearbeatLedDevice.Lock == DISABLE) {
+  if (hearbeatLedDevice.Lock == ENABLE) {
     /* TODO Reinitialize heartbeat device */
     return;
   }

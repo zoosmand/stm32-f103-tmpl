@@ -33,15 +33,15 @@
 #define HEARTBEAT_LED_Pin     GPIO_PIN_13
 #define HEARTBEAT_LED_Port    GPIOC
 
+/* GPIO definitions for 3-channel LED Strip controller */
+#define STRIP_DATA_Pin        GPIO_PIN_8
+#define STRIP_DATA_Port       GPIOA
+
 /* GPIO definitions for TM display */
 #define TM_DIO_Pin            GPIO_PIN_12
-#define TM_DIO_Pin_Pos        GPIO_PIN_12_Pos
-#define TM_DIO_Pin_Mask       GPIO_PIN_12_Mask
 #define TM_DIO_Port           GPIOA
 
 #define TM_SCK_Pin            GPIO_PIN_11
-#define TM_SCK_Pin_Pos        GPIO_PIN_11_Pos
-#define TM_SCK_Pin_Mask       GPIO_PIN_11_Mask
 #define TM_SCK_Port           GPIOA
 
 
@@ -69,6 +69,14 @@
 #define SPI1_MOSI_Pin         GPIO_PIN_7
 #define SPI1_Port             GPIOA
 
+#define SPI2_NSS_0_Port       GPIOB
+#define SPI2_NSS_0_Pin        GPIO_PIN_12
+
+#define SPI2_SCK_Pin          GPIO_PIN_13
+#define SPI2_MISO_Pin         GPIO_PIN_14
+#define SPI2_MOSI_Pin         GPIO_PIN_15
+#define SPI2_Port             GPIOB
+
 
 
 
@@ -89,11 +97,18 @@ ErrorStatus GPIO_Heartbeat_Init(void);
 ErrorStatus GPIO_TM163x_Init(void);
 
 /**
- * @brief   Initialized GPIO pins for OnwWire bus.
+ * @brief   Initialized GPIO pins for the OnwWire bus.
  * @param   none
  * @return  status of operation
  */
 ErrorStatus GPIO_OneWire_Init(void);
+
+/**
+ * @brief   Initialized GPIO pins for the Strip bus.
+ * @param   none
+ * @return  status of operation
+ */
+ErrorStatus GPIO_Strip_Init(void);
 
 
 #ifdef __cplusplus

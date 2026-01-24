@@ -57,6 +57,8 @@ extern "C" {
 #include "tm163x.h"
 #include "ow.h"
 #include "ds18b20.h"
+#include "mled.h"
+#include "strip.h"
 
 
 #if defined(USE_FULL_ASSERT)
@@ -89,17 +91,20 @@ extern uint32_t secCnt;
 #define GPIO_HB_RF        0
 #define GPIO_TM_RF        1
 #define GPIO_OW_RF        2
-#define SPI1_RF           3
-#define I2C1_RF           4
-#define OW_BUS_RF         5
-#define SSD_DSPL_RF       6
-#define WH_DSPL_RF        7
-#define MAX_DSPL_RF       8
-#define TM_DSPL_RF        9
-#define EEPROM_RF         10
-#define BMX280_RF         11
-#define BMX680_RF         12
-#define HEARTBEAT_RF      13
+#define GPIO_STRIP_RF     3
+#define SPI1_RF           16
+#define SPI2_RF           17
+#define I2C1_RF           18
+#define OW_BUS_RF         19
+#define SSD_DSPL_RF       20
+#define WH_DSPL_RF        21
+#define MAX_DSPL_RF       22
+#define TM_DSPL_RF        23
+#define EEPROM_RF         24
+#define BMX280_RF         25
+#define BMX680_RF         26
+#define HEARTBEAT_RF      27
+#define STRIP_RF          28
 
 
 /* Exported defines -----------------------------------------------------------*/
