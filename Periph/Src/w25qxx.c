@@ -100,9 +100,9 @@ __STATIC_INLINE ErrorStatus w25qxx_busy(W25qxx_TypeDef*);
 // ----------------------------------------------------------------------------
 
 __STATIC_INLINE void spi_dma_configure(W25qxx_TypeDef* dev) {
-  /* adjust frequency divider, 0b001 = 4, (PCLK)72/4 = 18MHz */
+  /* adjust frequency divider, 0b000 = 2, (APB1 Periph clock)36/2 = 18MHz */
   /* set 8-bit data buffer length */ 
-  MODIFY_REG(dev->SPIx->CR1, (SPI_CR1_BR_Msk | SPI_CR1_DFF_Msk), SPI_CR1_BR_0);
+  MODIFY_REG(dev->SPIx->CR1, (SPI_CR1_BR_Msk | SPI_CR1_DFF_Msk), 0);
   PREG_SET(dev->SPIx->CR2, SPI_CR2_SSOE_Pos);
 
 
@@ -144,12 +144,12 @@ __STATIC_INLINE ErrorStatus spi_dma_unconfigure(W25qxx_TypeDef* dev) {
 
   /* Clear correspondents DMA flags */
   dev->DMAx->IFCR |= (
-      DMA_IFCR_CGIF2_Msk
-    | DMA_IFCR_CGIF3_Msk
-    | DMA_IFCR_CHTIF2_Msk
-    | DMA_IFCR_CHTIF3_Msk
-    | DMA_IFCR_CTCIF2_Msk
-    | DMA_IFCR_CTCIF3_Msk
+      DMA_IFCR_CGIF4_Msk
+    | DMA_IFCR_CGIF5_Msk
+    | DMA_IFCR_CHTIF4_Msk
+    | DMA_IFCR_CHTIF5_Msk
+    | DMA_IFCR_CTCIF4_Msk
+    | DMA_IFCR_CTCIF5_Msk
   );
   
   /* Disable from memory to peripheral DMA transfer */
@@ -230,7 +230,7 @@ __STATIC_INLINE ErrorStatus spi_transfer_dma(W25qxx_TypeDef* dev, const uint16_t
 
   /* Wait for transfer is compete */
   tmout = SPI_BUS_TMOUT;
-  while(!(PREG_CHECK(dev->DMAx->ISR, DMA_ISR_TCIF3_Pos))) {
+  while(!(PREG_CHECK(dev->DMAx->ISR, DMA_ISR_TCIF5_Pos))) {
      if (!(--tmout)) { return spi_dma_unconfigure(dev); }
    }
 
@@ -364,7 +364,7 @@ ErrorStatus W25qxx_Init(W25qxx_TypeDef* dev) {
   /* Initialize NSS Pin */
   if (dev->SPIx != NULL) {
     if (dev->SPINssPin > 7) {
-      MODIFY_REG(dev->SPINssPort->CRL, (0xf << ((dev->SPINssPin - 8) * 4)), ((GPIO_GPO_PP | GPIO_IOS_2) << ((dev->SPINssPin -8) * 4)));
+      MODIFY_REG(dev->SPINssPort->CRH, (0xf << ((dev->SPINssPin - 8) * 4)), ((GPIO_GPO_PP | GPIO_IOS_2) << ((dev->SPINssPin -8) * 4)));
     } else {
       MODIFY_REG(dev->SPINssPort->CRL, (0xf << (dev->SPINssPin * 4)), ((GPIO_GPO_PP | GPIO_IOS_2) << (dev->SPINssPin * 4)));
     }

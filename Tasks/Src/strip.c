@@ -34,7 +34,7 @@ static task_scheduler_t stripScheduler = {
   .entranceFlag   = 31,
 };
 
-#define LEDS  22
+#define LEDS  4
 #define STEPS ((LEDS * 24) + 50)
 static uint8_t stripDeviceBuf_2812_01[STEPS];
 static StripDevice_TypeDev stripDevice_2812_01 = {
@@ -102,6 +102,17 @@ void stripRainbow(StripDevice_TypeDev* dev) {
 
 
 
+__STATIC_INLINE void stripRandomColors(StripDevice_TypeDev* dev) {
+  uint32_t color = 0;
+  for (uint16_t k = 0; k < dev->LedCount; k++) {
+    color = rand();
+    setPixelColor(dev, 0, (uint8_t)(color >> 16), (uint8_t)(color >> 8), (uint8_t)color);
+  }
+}
+
+
+
+
 
 // ----------------------------------------------------------------------------
 
@@ -120,19 +131,8 @@ void Strip_CronHandler(void) {
 
     dev->Lock = ENABLE;
 
-    // Random colors
-    // uint32_t color = 0;
-    // for (uint16_t k = 0; k < dev->LedCount; k++) {
-    //   color = rand();
-    //   setPixelColor(dev, 0, (uint8_t)(color >> 16), (uint8_t)(color >> 8), (uint8_t)color);
-    // }
-
-
-
-
-
-    stripRainbow(dev);
-
+    stripRandomColors(dev);
+    // stripRainbow(dev);
 
     LedStrip_RunBus(dev);
 

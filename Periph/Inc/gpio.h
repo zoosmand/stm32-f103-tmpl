@@ -69,6 +69,14 @@
 #define SPI1_MOSI_Pin         GPIO_PIN_7
 #define SPI1_Port             GPIOA
 
+#define SPI2_NSS_0_Port       GPIOB
+#define SPI2_NSS_0_Pin        GPIO_PIN_12
+
+#define SPI2_SCK_Pin          GPIO_PIN_13
+#define SPI2_MISO_Pin         GPIO_PIN_14
+#define SPI2_MOSI_Pin         GPIO_PIN_15
+#define SPI2_Port             GPIOB
+
 
 
 
