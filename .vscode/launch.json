@@ -16,7 +16,7 @@
       // "ipAddress": null,
       // "serialNumber": null,
       "v1": false,
-      "svdFile": "${workspaceRoot}/STM32F103xx.svd",
+      "svdFile": "${workspaceRoot}/stm32f103.svd",
       "armToolchainPath": "${env:VSARM}/arm-gcc/bin",
       "swoConfig": {
         "enabled": true,
@@ -43,7 +43,7 @@
       "name": "Debug (OpenOCD no SWO)",
       "device": "STM32F103C8T6",
       "v1": false,
-      "svdFile": "${workspaceRoot}/STM32F103xx.svd",
+      "svdFile": "${workspaceRoot}/stm32f103.svd",
       "armToolchainPath": "${env:VSARM}/arm-gcc/bin",
       "configFiles": [
         "${env:SHARE}/openocd/scripts/interface/stlink.cfg",
@@ -60,7 +60,7 @@
       "name": "Debug (ST-Util)",
       "device": "STM32F103C8T6",
       "v1": false,
-      "svdFile": "${workspaceRoot}/STM32F103xx.svd",
+      "svdFile": "${workspaceRoot}/stm32f103.svd",
       "armToolchainPath": "${env:VSARM}/arm-gcc/bin"
     }
   ]

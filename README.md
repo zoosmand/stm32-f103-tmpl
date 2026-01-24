@@ -17,6 +17,7 @@ sudo udevadm control --reload-rules
 
 * <http://thomasloven.com/blog/2012/06/C-Headers-In-Asm/>
 * <https://sourceware.org/binutils/docs/as/Pseudo-Ops.html>
+* <https://github.com/tinygo-org/stm32-svd/blob/main/svd/stm32f103.svd>
 
 ---
 
