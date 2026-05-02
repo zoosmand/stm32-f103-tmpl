@@ -219,6 +219,7 @@ void DsMeasurment_CronHandler(void) {
     FLAG_CLR(dsScheduler.counterReg, dsScheduler.entranceFlag);
 
     /* TODO realize heath check */
+    __NOP();
     
     OneWireDevice_t* owDev = Get_OneWireDevice(0);
 
